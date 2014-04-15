@@ -33,8 +33,7 @@ public class ServerList {
                 serverAddress = InetAddress.getByName(host);
             } catch(UnknownHostException e) {}
             if(serverAddress != null) {
-                GameServerInterface gameServer = this.getOrCreateServer(serverAddress);
-                gameServer.incomingHeartBeatBroadcast(sender, serverAddress, data);
+                this.incomingHeartBeat(serverAddress, data);
             }
         } else {
             Logger.logStatic("Got a heartbeatbroadcast, that is missing the host key");
@@ -42,8 +41,8 @@ public class ServerList {
     }
 
     public void incomingQueryAnswer(InetAddress sender, MessageData data) {
-        // TODO Auto-generated method stub
-
+        GameServerInterface server = this.getOrCreateServer(sender);
+        server.processNewMessage(data);
     }
 
     private GameServerInterface getOrCreateServer(InetAddress server) {

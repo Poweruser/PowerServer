@@ -9,5 +9,5 @@ public interface GameServerInterface {
 
     public void incomingHeartbeat(InetAddress server, MessageData message);
 
-    public void incomingHeartBeatBroadcast(InetAddress sender, InetAddress server, MessageData data);
+    public int getQueryPort();
 }
