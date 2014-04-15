@@ -3,6 +3,7 @@ package de.poweruser.powerserver.main;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -132,17 +133,17 @@ public class PowerServer extends Observable {
             GameBase game = data.getGame();
             if(game != null) {
                 ServerList list = this.serverLists.get(game);
-                InetAddress sender = message.getSender();
+                InetSocketAddress sender = message.getSender();
                 if(data.isHeartBeat()) {
                     list.incomingHeartBeat(sender, data);
                 } else if(data.isHeartBeatBroadcast()) {
-                    if(!this.masterServers.contains(sender)) {
+                    if(!this.masterServers.contains(sender.getAddress())) {
                         if(this.isLastMasterServerLookupDue(60000L * 5L)) {
                             this.lookUpAndGetMasterServerList();
                         }
                     }
-                    if(this.masterServers.contains(sender)) {
-                        list.incomingHeartBeatBroadcast(sender, data);
+                    if(this.masterServers.contains(sender.getAddress())) {
+                        list.incomingHeartBeatBroadcast(sender.getAddress(), data);
                     } else {
                         this.logger.log("Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
                     }

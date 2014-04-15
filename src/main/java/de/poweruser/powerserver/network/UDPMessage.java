@@ -1,22 +1,22 @@
 package de.poweruser.powerserver.network;
 
 import java.net.DatagramPacket;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
 public class UDPMessage {
 
     private final byte[] data;
-    private final InetAddress sender;
+    private final InetSocketAddress sender;
 
     public UDPMessage(DatagramPacket packet) {
         int length = packet.getLength();
         this.data = new byte[length];
         System.arraycopy(packet.getData(), 0, this.data, 0, length);
-        this.sender = packet.getAddress();
+        this.sender = new InetSocketAddress(packet.getAddress(), packet.getPort());
     }
 
-    public final InetAddress getSender() {
+    public final InetSocketAddress getSender() {
         return this.sender;
     }
 
