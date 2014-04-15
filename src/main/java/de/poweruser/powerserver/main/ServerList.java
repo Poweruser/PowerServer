@@ -22,7 +22,8 @@ public class ServerList {
 
     public void incomingHeartBeat(InetSocketAddress sender, MessageData data) {
         if(sender != null) {
-            GameServerInterface server = this.getOrCreateServer(sender);
+            InetSocketAddress queryAddress = data.constructQuerySocketAddress(sender.getAddress());
+            GameServerInterface server = this.getOrCreateServer(queryAddress);
             server.incomingHeartbeat(sender, data);
         }
     }
