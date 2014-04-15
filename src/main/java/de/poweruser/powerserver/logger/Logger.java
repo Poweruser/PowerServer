@@ -13,8 +13,10 @@ public class Logger {
 
     private File logFile;
     private SimpleDateFormat dateFormat;
+    private static Logger instance;
 
     public Logger(File logFile) throws IOException {
+        this.instance = this;
         this.logFile = logFile;
         if(!this.logFile.exists()) {
             this.logFile.mkdirs();
@@ -39,7 +41,11 @@ public class Logger {
         this.writeToFile(message);
     }
 
-    private void writeToFile(String message) {
+    public static void logStatic(String message) {
+        instance.writeToFile(message);
+    }
+
+    private synchronized void writeToFile(String message) {
         BufferedWriter bw = null;
         try {
             bw = new BufferedWriter(new FileWriter(this.logFile, true));

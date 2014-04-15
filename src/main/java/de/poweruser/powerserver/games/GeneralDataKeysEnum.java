@@ -1,5 +1,6 @@
 package de.poweruser.powerserver.games;
 
+import de.poweruser.powerserver.main.parser.dataverification.IPAddressVerify;
 import de.poweruser.powerserver.main.parser.dataverification.IntVerify;
 import de.poweruser.powerserver.main.parser.dataverification.QueryIdFormatVerify;
 import de.poweruser.powerserver.main.parser.dataverification.StringVerify;
@@ -10,6 +11,7 @@ public enum GeneralDataKeysEnum implements DataKeysInterface {
     GAMENAME("gamename"),
     HEARTBEAT("heartbeat", new IntVerify(1024, 65535)),
     HEARTBEATBROADCAST("heartbeatbroadcast", new IntVerify(1024, 65535)),
+    HOST("host", new IPAddressVerify()),
     QUERYID("queryid", new QueryIdFormatVerify());
 
     private String key;

@@ -109,7 +109,7 @@ public class PowerServer extends Observable {
                         this.waitObject.wait(5000);
                     } catch(InterruptedException e) {}
                 }
-                if((System.currentTimeMillis() - this.lastMasterServerLookup) > (60000L * 60L)) {
+                if(this.isLastMasterServerLookupDue(60000L + 60L)) {
                     this.lookUpAndGetMasterServerList();
                 }
             } else {
@@ -126,21 +126,31 @@ public class PowerServer extends Observable {
         try {
             data = this.gsp1Parser.parse(null, message);
         } catch(ParserException e) {
-            this.logger.log(e.getErrorMessage() + "\nReceived data: " + new String(message.getData()));
+            this.logger.log(e.getErrorMessage() + "\nReceived data: " + message.toString());
         }
         if(data != null) {
             GameBase game = data.getGame();
             if(game != null) {
                 ServerList list = this.serverLists.get(game);
+                InetAddress sender = message.getSender();
                 if(data.isHeartBeat()) {
-                    list.incomingHeartBeat(message.getSender(), data);
+                    list.incomingHeartBeat(sender, data);
                 } else if(data.isHeartBeatBroadcast()) {
-                    list.incomingHeartBeatBroadcast(message.getSender(), data);
+                    if(!this.masterServers.contains(sender)) {
+                        if(this.isLastMasterServerLookupDue(60000L * 5L)) {
+                            this.lookUpAndGetMasterServerList();
+                        }
+                    }
+                    if(this.masterServers.contains(sender)) {
+                        list.incomingHeartBeatBroadcast(sender, data);
+                    } else {
+                        this.logger.log("Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
+                    }
                 } else {
-                    list.incomingQueryAnswer(message.getSender(), data);
+                    list.incomingQueryAnswer(sender, data);
                 }
             } else {
-                this.logger.log("Couldnt find corresponding game for message: " + new String(message.getData()));
+                this.logger.log("Couldnt find corresponding game for message: " + message.toString());
             }
         }
     }
@@ -149,4 +159,7 @@ public class PowerServer extends Observable {
         this.running = false;
     }
 
+    private boolean isLastMasterServerLookupDue(long timeDiff) {
+        return (System.currentTimeMillis() - this.lastMasterServerLookup) > timeDiff;
+    }
 }

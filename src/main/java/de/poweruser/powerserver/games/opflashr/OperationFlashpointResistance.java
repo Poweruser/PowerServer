@@ -2,6 +2,7 @@ package de.poweruser.powerserver.games.opflashr;
 
 import de.poweruser.powerserver.games.DataKeysInterface;
 import de.poweruser.powerserver.games.GameBase;
+import de.poweruser.powerserver.games.GameServerInterface;
 import de.poweruser.powerserver.main.parser.DataParserInterface;
 
 public class OperationFlashpointResistance extends GameBase {
@@ -37,5 +38,10 @@ public class OperationFlashpointResistance extends GameBase {
     @Override
     public DataKeysInterface getHeartBeatBroadcastDataKey() {
         return DataKeyEnum.HEARTBEATBROADCAST;
+    }
+
+    @Override
+    public GameServerInterface createNewServer() {
+        return new OFPServer();
     }
 }

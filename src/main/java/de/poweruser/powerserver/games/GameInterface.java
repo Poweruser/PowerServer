@@ -14,4 +14,6 @@ public interface GameInterface {
     public DataKeysInterface getHeartBeatDataKey();
 
     public DataKeysInterface getHeartBeatBroadcastDataKey();
+
+    public GameServerInterface createNewServer();
 }
