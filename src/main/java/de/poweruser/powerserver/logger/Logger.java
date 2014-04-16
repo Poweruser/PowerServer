@@ -1,9 +1,11 @@
 package de.poweruser.powerserver.logger;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -35,6 +37,15 @@ public class Logger {
         sb.append("\" with received data:\n");
         sb.append(exception.getUDPMessage().toString());
         this.writeToFile(sb.toString());
+    }
+
+    public static void logStackTraceStatic(String message, Exception e) {
+        ByteArrayOutputStream ba = new ByteArrayOutputStream();
+        PrintWriter pw = new PrintWriter(ba);
+        pw.println(message);
+        e.printStackTrace(pw);
+        pw.close();
+        logStatic(ba.toString());
     }
 
     public void log(String message) {
