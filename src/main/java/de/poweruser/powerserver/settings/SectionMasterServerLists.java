@@ -16,7 +16,7 @@ public class SectionMasterServerLists extends SettingsReader {
             URL url = new URL(line.trim().toLowerCase());
             this.settings.addMasterServerList(url);
         } catch(MalformedURLException e) {
-            Logger.logStatic("The url [ " + line + " ] of the master server list is malformed: " + e.getMessage());
+            Logger.logStatic("The url [ " + line + " ] of the master server list is malformed: " + e.toString());
         }
     }
 }

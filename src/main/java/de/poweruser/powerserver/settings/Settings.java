@@ -11,6 +11,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.poweruser.powerserver.logger.Logger;
+
 public class Settings {
 
     private File settingsFile;
@@ -109,7 +111,9 @@ public class Settings {
                             this.masterServers.add(inputLine);
                         }
                     }
-                } catch(IOException e) {}
+                } catch(IOException e) {
+                    Logger.logStatic("Could not read the master server list at " + list.toString() + " - Reason: " + e.toString());
+                }
                 if(input != null) {
                     try {
                         input.close();

@@ -24,7 +24,7 @@ public class UDPSender {
             try {
                 this.udpSocket.send(packet);
             } catch(IOException e) {
-                Logger.logStatic("Failed to send a heartbeatbroadcast to a masterserver at " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ". Content: " + new String(packet.getData()));
+                Logger.logStatic(e.toString() + "\nFailed to send a heartbeatbroadcast to a masterserver at " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ". Content: " + new String(packet.getData()));
             }
         }
     }

@@ -7,6 +7,8 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Observable;
 
+import de.poweruser.powerserver.logger.Logger;
+
 public class UDPReceiverThread extends Observable implements Runnable {
 
     private boolean running;
@@ -33,8 +35,7 @@ public class UDPReceiverThread extends Observable implements Runnable {
                 // ignore
             } catch(IOException e) {
                 if(this.running) {
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                    Logger.logStackTraceStatic("An error occured in the UDPReceiverThread while listening for incoming packets", e);
                 }
             }
             if(received && this.running) {
