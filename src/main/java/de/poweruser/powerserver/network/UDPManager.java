@@ -26,6 +26,10 @@ public class UDPManager implements Observer {
         this.socket.close();
     }
 
+    public boolean isShutdown() {
+        return this.socket.isClosed();
+    }
+
     @Override
     public void update(Observable observable, Object obj) {
         if(observable.equals(this.receiver)) {
@@ -45,5 +49,9 @@ public class UDPManager implements Observer {
 
     public int getPort() {
         return this.socket.getLocalPort();
+    }
+
+    public UDPSender getUDPSender() {
+        return this.sender;
     }
 }

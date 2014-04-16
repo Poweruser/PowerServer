@@ -1,5 +1,7 @@
 package de.poweruser.powerserver.games;
 
+import java.net.DatagramPacket;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,5 +62,23 @@ public abstract class GameBase implements GameInterface {
     @Override
     public boolean equals(Object o) {
         return (o != null && o instanceof GameBase && ((GameBase) o).getGameName().equalsIgnoreCase(this.gamename));
+    }
+
+    public DatagramPacket createHeartbeatBroadcast(InetSocketAddress server) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("\\");
+        builder.append(GeneralDataKeysEnum.HEARTBEATBROADCAST.getKeyString());
+        builder.append("\\");
+        builder.append(server.getPort());
+        builder.append("\\");
+        builder.append(GeneralDataKeysEnum.HOST.getKeyString());
+        builder.append("\\");
+        builder.append(server.getAddress().getHostAddress());
+        builder.append("\\");
+        builder.append(GeneralDataKeysEnum.GAMENAME.getKeyString());
+        builder.append("\\");
+        builder.append(this.gamename);
+        byte[] message = builder.toString().getBytes();
+        return new DatagramPacket(message, message.length);
     }
 }

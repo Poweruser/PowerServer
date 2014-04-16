@@ -18,6 +18,7 @@ import de.poweruser.powerserver.main.parser.GamespyProtocol1Parser;
 import de.poweruser.powerserver.main.parser.ParserException;
 import de.poweruser.powerserver.network.UDPManager;
 import de.poweruser.powerserver.network.UDPMessage;
+import de.poweruser.powerserver.network.UDPSender;
 import de.poweruser.powerserver.settings.Settings;
 
 public class PowerServer extends Observable {
@@ -31,6 +32,8 @@ public class PowerServer extends Observable {
     private Settings settings;
     private List<InetAddress> masterServers;
     private long lastMasterServerLookup;
+
+    public static final int MASTERSERVER_UDP_PORT = 27900;
 
     public PowerServer() throws IOException {
         this.logger = new Logger(new File("server.log"));
@@ -49,25 +52,8 @@ public class PowerServer extends Observable {
     }
 
     private void setupUDPSocket() throws SocketException {
-        int udpport = this.settings.getUDPPort();
-        if(udpport >= 1024 && udpport <= 65535) {
-            if(this.udpManager != null && this.udpManager.getPort() != udpport) {
-                UDPManager newUDPManager = null;
-                try {
-                    newUDPManager = new UDPManager(udpport);
-                } catch(SocketException e) {
-                    this.logger.log("Could establish the UDPManager on port " + udpport + ". " + e.getMessage());
-                }
-                if(newUDPManager != null) {
-                    this.udpManager.shutdown();
-                    this.udpManager = newUDPManager;
-                }
-            }
-            if(this.udpManager == null) {
-                this.udpManager = new UDPManager(udpport);
-            }
-        } else {
-            throw new IllegalArgumentException("The UDP port number must be an integer between 1024 and 65535");
+        if(this.udpManager == null || this.udpManager.isShutdown()) {
+            this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT);
         }
     }
 
@@ -134,21 +120,26 @@ public class PowerServer extends Observable {
             if(game != null) {
                 ServerList list = this.serverLists.get(game);
                 InetSocketAddress sender = message.getSender();
-                if(data.isHeartBeat()) {
-                    list.incomingHeartBeat(sender, data);
-                } else if(data.isHeartBeatBroadcast()) {
-                    if(!this.masterServers.contains(sender.getAddress())) {
-                        if(this.isLastMasterServerLookupDue(60000L * 5L)) {
-                            this.lookUpAndGetMasterServerList();
+                InetSocketAddress server = data.constructQuerySocketAddress(sender.getAddress());
+                if(server != null) {
+                    UDPSender udpSender = this.udpManager.getUDPSender();
+                    if(data.isHeartBeat()) {
+                        list.incomingHeartBeat(server, data);
+                        udpSender.broadcastHeartBeat(masterServers, game.createHeartbeatBroadcast(server));
+                    } else if(data.isHeartBeatBroadcast()) {
+                        if(!this.masterServers.contains(sender.getAddress())) {
+                            if(this.isLastMasterServerLookupDue(60000L * 5L)) {
+                                this.lookUpAndGetMasterServerList();
+                            }
                         }
-                    }
-                    if(this.masterServers.contains(sender.getAddress())) {
-                        list.incomingHeartBeatBroadcast(sender.getAddress(), data);
+                        if(this.masterServers.contains(sender.getAddress())) {
+                            list.incomingHeartBeatBroadcast(server, data);
+                        } else {
+                            this.logger.log("Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
+                        }
                     } else {
-                        this.logger.log("Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
+                        list.incomingQueryAnswer(sender, data);
                     }
-                } else {
-                    list.incomingQueryAnswer(sender, data);
                 }
             } else {
                 this.logger.log("Couldnt find corresponding game for message: " + message.toString());

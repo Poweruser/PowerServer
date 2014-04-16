@@ -1,6 +1,5 @@
 package de.poweruser.powerserver.main;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,19 +19,17 @@ public class ServerList {
         this.servers = new HashMap<InetSocketAddress, GameServerInterface>();
     }
 
-    public void incomingHeartBeat(InetSocketAddress sender, MessageData data) {
-        if(sender != null) {
-            InetSocketAddress queryAddress = data.constructQuerySocketAddress(sender.getAddress());
-            GameServerInterface server = this.getOrCreateServer(queryAddress);
-            server.incomingHeartbeat(sender, data);
+    public void incomingHeartBeat(InetSocketAddress serverAddress, MessageData data) {
+        if(serverAddress != null) {
+            GameServerInterface server = this.getOrCreateServer(serverAddress);
+            server.incomingHeartbeat(serverAddress, data);
         }
     }
 
-    public void incomingHeartBeatBroadcast(InetAddress sender, MessageData data) {
+    public void incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) {
         if(data.containsKey(GeneralDataKeysEnum.HEARTBEATBROADCAST) && data.containsKey(GeneralDataKeysEnum.HOST)) {
-            InetSocketAddress serverAddress = data.constructQuerySocketAddress(sender);
             GameServerInterface server = this.getOrCreateServer(serverAddress);
-            server.incomingHeartBeatBroadcast(sender, serverAddress, data);
+            server.incomingHeartBeatBroadcast(serverAddress, data);
         } else {
             Logger.logStatic("Got a heartbeatbroadcast, that is missing the host key");
         }

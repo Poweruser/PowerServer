@@ -1,6 +1,5 @@
 package de.poweruser.powerserver.games;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import de.poweruser.powerserver.main.MessageData;
@@ -12,7 +11,7 @@ public abstract class GameServerBase implements GameServerInterface {
     private long lastHeartbeat;
 
     @Override
-    public void incomingHeartbeat(InetSocketAddress sender, MessageData data) {
+    public void incomingHeartbeat(InetSocketAddress serverAddress, MessageData data) {
         if(data.isHeartBeat()) {
             this.lastHeartbeat = System.currentTimeMillis();
             this.setQueryPort(data);
@@ -20,7 +19,7 @@ public abstract class GameServerBase implements GameServerInterface {
     }
 
     @Override
-    public void incomingHeartBeatBroadcast(InetAddress sender, InetSocketAddress server, MessageData data) {
+    public void incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) {
         if(data.isHeartBeatBroadcast()) {
             this.lastHeartbeat = System.currentTimeMillis();
             this.setQueryPort(data);
