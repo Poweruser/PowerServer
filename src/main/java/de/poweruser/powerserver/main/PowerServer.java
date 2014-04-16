@@ -46,7 +46,7 @@ public class PowerServer extends Observable {
 
     private void reloadSettingsFile() throws SocketException {
         this.settings.load();
-        this.lookUpAndGetMasterServerList();
+        this.lookUpAndGetMasterServerList(true);
         this.updateSupportedGames();
         this.setupUDPSocket();
     }
@@ -82,8 +82,8 @@ public class PowerServer extends Observable {
         }
     }
 
-    private void lookUpAndGetMasterServerList() {
-        this.masterServers = this.settings.getMasterServerList();
+    private void lookUpAndGetMasterServerList(boolean forceDownload) {
+        this.masterServers = this.settings.getMasterServerList(forceDownload);
         this.lastMasterServerLookup = System.currentTimeMillis();
     }
 
@@ -97,7 +97,7 @@ public class PowerServer extends Observable {
                     } catch(InterruptedException e) {}
                 }
                 if(this.isLastMasterServerLookupDue(60000L + 60L)) {
-                    this.lookUpAndGetMasterServerList();
+                    this.lookUpAndGetMasterServerList(true);
                 }
             } else {
                 while(this.udpManager.hasMessages()) {
@@ -129,7 +129,7 @@ public class PowerServer extends Observable {
                     } else if(data.isHeartBeatBroadcast()) {
                         if(!this.masterServers.contains(sender.getAddress())) {
                             if(this.isLastMasterServerLookupDue(60000L * 5L)) {
-                                this.lookUpAndGetMasterServerList();
+                                this.lookUpAndGetMasterServerList(false);
                             }
                         }
                         if(this.masterServers.contains(sender.getAddress())) {

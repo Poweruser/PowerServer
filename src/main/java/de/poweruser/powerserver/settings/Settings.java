@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,19 +15,21 @@ public class Settings {
 
     private File settingsFile;
     private static Settings instance;
+    private List<URL> masterServerLists;
     private List<String> masterServers;
     private List<String> supportedGames;
     private int udpPort;
 
     public Settings(File settingsFile) {
         this.instance = this;
+        this.masterServerLists = new ArrayList<URL>();
         this.masterServers = new ArrayList<String>();
         this.supportedGames = new ArrayList<String>();
         this.settingsFile = settingsFile;
     }
 
     public void load() {
-        this.masterServers.clear();
+        this.masterServerLists.clear();
         this.supportedGames.clear();
         BufferedReader br = null;
         try {
@@ -80,9 +84,9 @@ public class Settings {
         }
     }
 
-    protected void addMasterServer(String domain) {
-        if(!this.masterServers.contains(domain)) {
-            this.masterServers.add(domain);
+    protected void addMasterServerList(URL url) {
+        if(!this.masterServerLists.contains(url)) {
+            this.masterServerLists.add(url);
         }
     }
 
@@ -92,7 +96,27 @@ public class Settings {
         }
     }
 
-    public List<InetAddress> getMasterServerList() {
+    public List<InetAddress> getMasterServerList(boolean forceDownload) {
+        if(forceDownload) {
+            for(URL list: this.masterServerLists) {
+                BufferedReader input = null;
+                try {
+                    input = new BufferedReader(new InputStreamReader(list.openStream()));
+                    String inputLine = null;
+                    while((inputLine = input.readLine()) != null) {
+                        inputLine = inputLine.trim().toLowerCase();
+                        if(!inputLine.startsWith("#") && !this.masterServers.contains(inputLine)) {
+                            this.masterServers.add(inputLine);
+                        }
+                    }
+                } catch(IOException e) {}
+                if(input != null) {
+                    try {
+                        input.close();
+                    } catch(IOException e) {}
+                }
+            }
+        }
         ArrayList<InetAddress> list = new ArrayList<InetAddress>();
         for(String s: this.masterServers) {
             try {
