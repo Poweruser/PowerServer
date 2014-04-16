@@ -24,6 +24,7 @@ public class Logger {
             this.logFile.mkdirs();
             this.logFile.createNewFile();
         }
+        if(!this.logFile.canWrite()) { throw new IOException("Unable to write to the log file " + this.logFile.getAbsolutePath()); }
         this.dateFormat = new SimpleDateFormat("[dd.MM.yy-HH:mm:ss]");
     }
 
