@@ -126,6 +126,7 @@ public class PowerServer extends Observable {
                     if(data.isHeartBeat()) {
                         list.incomingHeartBeat(server, data);
                         udpSender.broadcastHeartBeat(masterServers, game.createHeartbeatBroadcast(server));
+                        udpSender.sendQuery(server, game.createStatusQuery(false));
                     } else if(data.isHeartBeatBroadcast()) {
                         if(!this.masterServers.contains(sender.getAddress())) {
                             if(this.isLastMasterServerLookupDue(60000L * 5L)) {
@@ -134,6 +135,7 @@ public class PowerServer extends Observable {
                         }
                         if(this.masterServers.contains(sender.getAddress())) {
                             list.incomingHeartBeatBroadcast(server, data);
+                            udpSender.sendQuery(server, game.createStatusQuery(false));
                         } else {
                             this.logger.log("Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
                         }

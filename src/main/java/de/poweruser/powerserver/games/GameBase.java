@@ -81,4 +81,17 @@ public abstract class GameBase implements GameInterface {
         byte[] message = builder.toString().getBytes();
         return new DatagramPacket(message, message.length);
     }
+
+    public DatagramPacket createStatusQuery(boolean queryPlayers) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("\\");
+        if(queryPlayers) {
+            builder.append("info\\rules\\players");
+        } else {
+            builder.append("status");
+        }
+        builder.append("\\");
+        byte[] message = builder.toString().getBytes();
+        return new DatagramPacket(message, message.length);
+    }
 }
