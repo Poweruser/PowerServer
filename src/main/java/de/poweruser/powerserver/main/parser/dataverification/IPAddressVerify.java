@@ -9,6 +9,7 @@ public class IPAddressVerify implements VerificationInterface {
 
     @Override
     public boolean verify(String data) {
+        this.verifiedAddress = null;
         try {
             // TODO is this already sufficient enough?
             this.verifiedAddress = InetAddress.getByName(data);

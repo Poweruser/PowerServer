@@ -1,14 +1,22 @@
 package de.poweruser.powerserver.games;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 import de.poweruser.powerserver.main.MessageData;
+import de.poweruser.powerserver.main.QueryInfo;
 import de.poweruser.powerserver.main.parser.dataverification.IntVerify;
 
 public abstract class GameServerBase implements GameServerInterface {
 
     private int queryPort;
     private long lastHeartbeat;
+    private QueryBuffer queryBuffer;
+
+    public GameServerBase() {
+        this.queryBuffer = new QueryBuffer();
+    }
 
     @Override
     public void incomingHeartbeat(InetSocketAddress serverAddress, MessageData data) {
@@ -23,6 +31,16 @@ public abstract class GameServerBase implements GameServerInterface {
         if(data.isHeartBeatBroadcast()) {
             this.lastHeartbeat = System.currentTimeMillis();
             this.setQueryPort(data);
+        }
+    }
+
+    @Override
+    public void incomingQueryAnswer(InetSocketAddress serverAddress, MessageData data) {
+        if(this.queryBuffer.put(data)) {
+            MessageData completeQuery = this.queryBuffer.getQueryIfComplete();
+            if(completeQuery != null) {
+                this.processNewMessage(completeQuery);
+            }
         }
     }
 
@@ -45,6 +63,64 @@ public abstract class GameServerBase implements GameServerInterface {
         IntVerify verifier = new IntVerify(1024, 65535);
         if(verifier.verify(queryPort)) {
             this.queryPort = verifier.getVerifiedValue();
+        }
+    }
+
+    private class QueryBuffer {
+        private Map<Integer, MessageData> queries;
+        private Map<Integer, QueryInfo> infos;
+        private int lastId;
+
+        public QueryBuffer() {
+            this.queries = new HashMap<Integer, MessageData>();
+            this.infos = new HashMap<Integer, QueryInfo>();
+            this.lastId = 0;
+        }
+
+        public boolean put(MessageData query) {
+            if(query.isQueryAnswer()) {
+                QueryInfo info = query.getQueryInfo();
+                if(info.getId() >= this.lastId) {
+                    this.lastId = info.getId();
+                    int part = info.getPart();
+                    if(part >= 1) {
+                        this.queries.put(part, query);
+                        this.infos.put(part, info);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public MessageData getQueryIfComplete() {
+            boolean ok = true;
+            int lastPart = -1;
+            int i = 1;
+            while(ok) {
+                QueryInfo info = this.infos.get(i);
+                if(ok = (info != null && info.getId() == this.lastId && info.getPart() == i)) {
+                    if(info.isFinal()) {
+                        lastPart = info.getPart();
+                        break;
+                    }
+                }
+                i++;
+            }
+            MessageData out = null;
+            if(ok && lastPart >= 1) {
+                out = this.queries.get(1);
+                for(int j = 2; j <= lastPart; j++) {
+                    out = out.combine(this.queries.get(j));
+                }
+                this.clear();
+            }
+            return out;
+        }
+
+        private void clear() {
+            this.queries.clear();
+            this.infos.clear();
         }
     }
 }

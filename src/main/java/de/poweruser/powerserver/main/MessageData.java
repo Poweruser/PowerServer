@@ -9,10 +9,15 @@ import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GeneralDataKeysEnum;
 import de.poweruser.powerserver.main.parser.dataverification.IPAddressVerify;
 import de.poweruser.powerserver.main.parser.dataverification.IntVerify;
+import de.poweruser.powerserver.main.parser.dataverification.QueryIdFormatVerify;
 
-public class MessageData {
+public class MessageData implements CombineableInterface<MessageData> {
 
     private HashMap<String, String> map;
+
+    public MessageData() {
+        this.map = new HashMap<String, String>();
+    }
 
     public MessageData(HashMap<String, String> map) {
         this.map = map;
@@ -32,6 +37,10 @@ public class MessageData {
 
     public boolean isHeartBeatBroadcast() {
         return this.containsKey(GeneralDataKeysEnum.HEARTBEATBROADCAST) && this.containsKey(GeneralDataKeysEnum.HOST);
+    }
+
+    public boolean isQueryAnswer() {
+        return this.containsKey(GeneralDataKeysEnum.QUERYID);
     }
 
     public InetSocketAddress constructQuerySocketAddress(InetAddress sender) {
@@ -58,5 +67,28 @@ public class MessageData {
 
     public GameBase getGame() {
         return GameBase.getGameForGameName(this.getData(GeneralDataKeysEnum.GAMENAME));
+    }
+
+    @Override
+    public MessageData combine(MessageData combineable) {
+        MessageData combination = new MessageData();
+        combination.map.putAll(combineable.map);
+        combination.map.putAll(this.map);
+        return combination;
+    }
+
+    public QueryInfo getQueryInfo() {
+        if(this.isQueryAnswer()) {
+            QueryIdFormatVerify verifier = new QueryIdFormatVerify();
+            QueryInfo info = null;
+            if(verifier.verify(this.getData(GeneralDataKeysEnum.QUERYID))) {
+                info = verifier.getVerifiedQueryInfo();
+                if(this.containsKey(GeneralDataKeysEnum.FINAL)) {
+                    info.setFinal();
+                }
+                return info;
+            }
+        }
+        return null;
     }
 }
