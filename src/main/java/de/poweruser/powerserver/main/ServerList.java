@@ -69,4 +69,14 @@ public class ServerList {
         }
         return list;
     }
+
+    public void clearOutDatedServers() {
+        Iterator<Entry<InetSocketAddress, GameServerInterface>> iter = this.servers.entrySet().iterator();
+        while(iter.hasNext()) {
+            Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
+            if(!entry.getValue().checkLastHeartbeat(allowedServerTimeout)) {
+                iter.remove();
+            }
+        }
+    }
 }
