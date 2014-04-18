@@ -125,8 +125,11 @@ public class PowerServer extends Observable {
                     UDPSender udpSender = this.udpManager.getUDPSender();
                     if(data.isHeartBeat()) {
                         list.incomingHeartBeat(server, data);
-                        udpSender.broadcastHeartBeat(masterServers, game.createHeartbeatBroadcast(server));
-                        udpSender.sendQuery(server, game.createStatusQuery(false));
+                        boolean stateChanged = data.hasStateChanged();
+                        udpSender.broadcastHeartBeat(masterServers, game.createHeartbeatBroadcast(server, data));
+                        if(stateChanged) {
+                            udpSender.sendQuery(server, game.createStatusQuery(false));
+                        }
                     } else if(data.isHeartBeatBroadcast()) {
                         if(!this.masterServers.contains(sender.getAddress())) {
                             if(this.isLastMasterServerLookupDue(60000L * 5L)) {

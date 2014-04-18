@@ -12,7 +12,8 @@ public enum GeneralDataKeysEnum implements DataKeysInterface {
     HEARTBEAT("heartbeat", new IntVerify(1024, 65535)),
     HEARTBEATBROADCAST("heartbeatbroadcast", new IntVerify(1024, 65535)),
     HOST("host", new IPAddressVerify()),
-    QUERYID("queryid", new QueryIdFormatVerify());
+    QUERYID("queryid", new QueryIdFormatVerify()),
+    STATECHANGED("statechanged", new IntVerify(0, 1));
 
     private String key;
     private VerificationInterface verifier;

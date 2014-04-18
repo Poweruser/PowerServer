@@ -39,6 +39,16 @@ public class MessageData implements CombineableInterface<MessageData> {
         return this.containsKey(GeneralDataKeysEnum.HEARTBEATBROADCAST) && this.containsKey(GeneralDataKeysEnum.HOST);
     }
 
+    public boolean hasStateChanged() {
+        GeneralDataKeysEnum key = GeneralDataKeysEnum.STATECHANGED;
+        if(this.containsKey(key)) {
+            String data = this.getData(key);
+            IntVerify verifier = new IntVerify(1, 1);
+            return verifier.verify(data);
+        }
+        return false;
+    }
+
     public boolean isQueryAnswer() {
         return this.containsKey(GeneralDataKeysEnum.QUERYID);
     }

@@ -64,22 +64,29 @@ public abstract class GameBase implements GameInterface {
         return (o != null && o instanceof GameBase && ((GameBase) o).getGameName().equalsIgnoreCase(this.gamename));
     }
 
-    public DatagramPacket createHeartbeatBroadcast(InetSocketAddress server) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("\\");
-        builder.append(GeneralDataKeysEnum.HEARTBEATBROADCAST.getKeyString());
-        builder.append("\\");
-        builder.append(server.getPort());
-        builder.append("\\");
-        builder.append(GeneralDataKeysEnum.HOST.getKeyString());
-        builder.append("\\");
-        builder.append(server.getAddress().getHostAddress());
-        builder.append("\\");
-        builder.append(GeneralDataKeysEnum.GAMENAME.getKeyString());
-        builder.append("\\");
-        builder.append(this.gamename);
-        byte[] message = builder.toString().getBytes();
-        return new DatagramPacket(message, message.length);
+    public DatagramPacket createHeartbeatBroadcast(InetSocketAddress server, MessageData data) {
+        if(data.containsKey(GeneralDataKeysEnum.HEARTBEAT)) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("\\");
+            builder.append(GeneralDataKeysEnum.HEARTBEATBROADCAST.getKeyString());
+            builder.append("\\");
+            builder.append(data.getData(GeneralDataKeysEnum.HEARTBEAT));
+            builder.append("\\");
+            builder.append(GeneralDataKeysEnum.HOST.getKeyString());
+            builder.append("\\");
+            builder.append(server.getAddress().getHostAddress());
+            builder.append("\\");
+            builder.append(this.gamename);
+            if(data.containsKey(GeneralDataKeysEnum.STATECHANGED)) {
+                builder.append("\\");
+                builder.append(GeneralDataKeysEnum.STATECHANGED.getKeyString());
+                builder.append("\\");
+                builder.append(data.getData(GeneralDataKeysEnum.STATECHANGED));
+            }
+            byte[] message = builder.toString().getBytes();
+            return new DatagramPacket(message, message.length);
+        }
+        return null;
     }
 
     public DatagramPacket createStatusQuery(boolean queryPlayers) {
