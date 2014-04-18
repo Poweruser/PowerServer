@@ -31,9 +31,11 @@ public class PowerServer extends Observable {
     private Logger logger;
     private Settings settings;
     private List<InetAddress> masterServers;
-    private long lastMasterServerLookup;
+    private long lastMasterServerRefresh;
+    private long lastMasterServerDownload;
 
     public static final int MASTERSERVER_UDP_PORT = 27900;
+    private static final long MASTERSERVDER_DOWNLOAD_INTERVAL = 60000L * 60L;
 
     public PowerServer() throws IOException {
         this.logger = new Logger(new File("server.log"));
@@ -84,7 +86,10 @@ public class PowerServer extends Observable {
 
     private void lookUpAndGetMasterServerList(boolean forceDownload) {
         this.masterServers = this.settings.getMasterServerList(forceDownload);
-        this.lastMasterServerLookup = System.currentTimeMillis();
+        if(forceDownload) {
+            this.lastMasterServerDownload = System.currentTimeMillis();
+        }
+        this.lastMasterServerRefresh = System.currentTimeMillis();
     }
 
     private void mainloop() {
@@ -96,7 +101,7 @@ public class PowerServer extends Observable {
                         this.waitObject.wait(5000);
                     } catch(InterruptedException e) {}
                 }
-                if(this.isLastMasterServerLookupDue(60000L + 60L)) {
+                if(this.isLastMasterServerLookupDue(true, MASTERSERVDER_DOWNLOAD_INTERVAL)) {
                     this.lookUpAndGetMasterServerList(true);
                 }
             } else {
@@ -132,7 +137,7 @@ public class PowerServer extends Observable {
                         }
                     } else if(data.isHeartBeatBroadcast()) {
                         if(!this.masterServers.contains(sender.getAddress())) {
-                            if(this.isLastMasterServerLookupDue(60000L * 5L)) {
+                            if(this.isLastMasterServerLookupDue(false, 60000L * 5L)) {
                                 this.lookUpAndGetMasterServerList(false);
                             }
                         }
@@ -156,7 +161,13 @@ public class PowerServer extends Observable {
         this.running = false;
     }
 
-    private boolean isLastMasterServerLookupDue(long timeDiff) {
-        return (System.currentTimeMillis() - this.lastMasterServerLookup) > timeDiff;
+    private boolean isLastMasterServerLookupDue(boolean download, long timeDiff) {
+        long time;
+        if(download) {
+            time = this.lastMasterServerDownload;
+        } else {
+            time = this.lastMasterServerRefresh;
+        }
+        return (System.currentTimeMillis() - time) > timeDiff;
     }
 }
