@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.logger.Logger;
@@ -35,7 +36,6 @@ public class PowerServer extends Observable {
     private long lastMasterServerDownload;
 
     public static final int MASTERSERVER_UDP_PORT = 27900;
-    private static final long MASTERSERVDER_DOWNLOAD_INTERVAL = 60000L * 60L;
 
     public PowerServer() throws IOException {
         this.logger = new Logger(new File("server.log"));
@@ -101,7 +101,7 @@ public class PowerServer extends Observable {
                         this.waitObject.wait(5000);
                     } catch(InterruptedException e) {}
                 }
-                if(this.isLastMasterServerLookupDue(true, MASTERSERVDER_DOWNLOAD_INTERVAL)) {
+                if(this.isLastMasterServerLookupDue(true, this.settings.getListsDownloadInterval(TimeUnit.HOURS), TimeUnit.HOURS)) {
                     this.lookUpAndGetMasterServerList(true);
                 }
             } else {
@@ -137,7 +137,7 @@ public class PowerServer extends Observable {
                         }
                     } else if(data.isHeartBeatBroadcast()) {
                         if(!this.masterServers.contains(sender.getAddress())) {
-                            if(this.isLastMasterServerLookupDue(false, 60000L * 5L)) {
+                            if(this.isLastMasterServerLookupDue(false, 5L, TimeUnit.MINUTES)) {
                                 this.lookUpAndGetMasterServerList(false);
                             }
                         }
@@ -161,13 +161,13 @@ public class PowerServer extends Observable {
         this.running = false;
     }
 
-    private boolean isLastMasterServerLookupDue(boolean download, long timeDiff) {
+    private boolean isLastMasterServerLookupDue(boolean download, long timeDiff, TimeUnit inputUnit) {
         long time;
         if(download) {
             time = this.lastMasterServerDownload;
         } else {
             time = this.lastMasterServerRefresh;
         }
-        return (System.currentTimeMillis() - time) > timeDiff;
+        return (System.currentTimeMillis() - time) > TimeUnit.MILLISECONDS.convert(timeDiff, inputUnit);
     }
 }

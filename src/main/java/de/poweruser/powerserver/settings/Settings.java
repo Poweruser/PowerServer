@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.logger.Logger;
 
@@ -20,10 +21,13 @@ public class Settings {
     private List<URL> masterServerLists;
     private List<String> masterServers;
     private List<String> supportedGames;
-    private int udpPort;
+    private int downloadInterval;
+    private boolean publicMode;
 
     public Settings(File settingsFile) {
         this.instance = this;
+        this.downloadInterval = 24;
+        this.publicMode = true;
         this.masterServerLists = new ArrayList<URL>();
         this.masterServers = new ArrayList<String>();
         this.supportedGames = new ArrayList<String>();
@@ -98,6 +102,20 @@ public class Settings {
         }
     }
 
+    protected void setListsDownloadInterval(int hours) {
+        if(hours >= 1) {
+            this.downloadInterval = hours;
+        }
+    }
+
+    public long getListsDownloadInterval(TimeUnit outputUnit) {
+        return outputUnit.convert((long) this.downloadInterval, TimeUnit.HOURS);
+    }
+
+    protected void setPublicMode(boolean active) {
+        this.publicMode = active;
+    }
+
     public List<InetAddress> getMasterServerList(boolean forceDownload) {
         if(forceDownload) {
             for(URL list: this.masterServerLists) {
@@ -135,14 +153,5 @@ public class Settings {
         ArrayList<String> list = new ArrayList<String>();
         list.addAll(this.supportedGames);
         return list;
-    }
-
-    public int getUDPPort() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    protected void setUDPPort(int port) {
-
     }
 }
