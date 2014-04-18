@@ -49,6 +49,7 @@ public abstract class GameServerBase implements GameServerInterface {
         return this.queryPort;
     }
 
+    @Override
     public boolean checkLastHeartbeat(long timeDiff) {
         return (System.currentTimeMillis() - this.lastHeartbeat) > timeDiff;
     }

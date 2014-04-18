@@ -14,4 +14,6 @@ public interface GameServerInterface {
     public void incomingQueryAnswer(InetSocketAddress serverAddress, MessageData data);
 
     public int getQueryPort();
+
+    public boolean checkLastHeartbeat(long timeDiff);
 }

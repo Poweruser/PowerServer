@@ -1,8 +1,12 @@
 package de.poweruser.powerserver.main;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GameServerInterface;
@@ -13,6 +17,8 @@ public class ServerList {
 
     private GameBase game;
     private Map<InetSocketAddress, GameServerInterface> servers;
+
+    private static final long allowedServerTimeout = 3600L * 1000L; // one hour
 
     public ServerList(GameBase game) {
         this.game = game;
@@ -49,5 +55,18 @@ public class ServerList {
             gameServer = this.servers.get(server);
         }
         return gameServer;
+    }
+
+    public List<InetSocketAddress> getActiveServers() {
+        List<InetSocketAddress> list = new ArrayList<InetSocketAddress>();
+        Iterator<Entry<InetSocketAddress, GameServerInterface>> iter = this.servers.entrySet().iterator();
+        while(iter.hasNext()) {
+            Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
+            if(entry.getValue().checkLastHeartbeat(allowedServerTimeout)) {
+                InetSocketAddress key = entry.getKey();
+                list.add(InetSocketAddress.createUnresolved(key.getAddress().getHostAddress(), key.getPort()));
+            }
+        }
+        return list;
     }
 }
