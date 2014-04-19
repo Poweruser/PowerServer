@@ -4,7 +4,7 @@ import de.poweruser.powerserver.games.opflashr.OperationFlashpointResistance;
 import de.poweruser.powerserver.main.parser.GamespyProtocol1Parser;
 
 public enum GamesEnum {
-    OPERATIONFLASHPOINT_RESISTANCE(new OperationFlashpointResistance("opflashr", new GamespyProtocol1Parser()));
+    OPERATIONFLASHPOINT_RESISTANCE(new OperationFlashpointResistance("opflashr", "Y3k7x1", new GamespyProtocol1Parser()));
 
     private GameBase game;
 

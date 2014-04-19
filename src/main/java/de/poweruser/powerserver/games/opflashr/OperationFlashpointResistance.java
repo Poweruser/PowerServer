@@ -7,8 +7,8 @@ import de.poweruser.powerserver.main.parser.DataParserInterface;
 
 public class OperationFlashpointResistance extends GameBase {
 
-    public OperationFlashpointResistance(String gamename, DataParserInterface parser) {
-        super(gamename, parser, DataKeyEnum.values());
+    public OperationFlashpointResistance(String gamename, String gamespyKey, DataParserInterface parser) {
+        super(gamename, gamespyKey, parser, DataKeyEnum.values());
         this.adjustPlayerInfoDataKeys();
     }
 

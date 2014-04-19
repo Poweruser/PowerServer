@@ -15,12 +15,14 @@ public abstract class GameBase implements GameInterface {
     private static Map<String, GameBase> gameNameMap = new HashMap<String, GameBase>();
     protected Map<String, DataKeysInterface> keyMap;
     protected String gamename;
+    protected String gamespyKey;
     protected DataParserInterface parser;
 
-    protected GameBase(String gamename, DataParserInterface parser, DataKeysInterface[] dataKeys) {
+    protected GameBase(String gamename, String gamespyKey, DataParserInterface parser, DataKeysInterface[] dataKeys) {
         if(gameNameMap.containsKey(this.getGameName())) {
             gameNameMap.put(this.getGameName(), this);
         }
+        this.gamespyKey = gamespyKey;
         this.parser = parser;
         this.keyMap = new HashMap<String, DataKeysInterface>();
         for(DataKeysInterface d: dataKeys) {
@@ -32,6 +34,10 @@ public abstract class GameBase implements GameInterface {
     @Override
     public String getGameName() {
         return this.gamename;
+    }
+
+    public String getGamespyKey() {
+        return this.gamespyKey;
     }
 
     public static GameBase getGameForGameName(String gamename) {
