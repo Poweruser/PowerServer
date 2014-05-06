@@ -23,4 +23,8 @@ public class IPAddressVerify implements VerificationInterface {
         return this.verifiedAddress;
     }
 
+    @Override
+    public IPAddressVerify createCopy() {
+        return new IPAddressVerify();
+    }
 }

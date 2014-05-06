@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,6 +16,7 @@ import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.parser.GamespyProtocol1Parser;
 import de.poweruser.powerserver.main.parser.ParserException;
+import de.poweruser.powerserver.network.TCPManager;
 import de.poweruser.powerserver.network.UDPManager;
 import de.poweruser.powerserver.network.UDPMessage;
 import de.poweruser.powerserver.network.UDPSender;
@@ -27,6 +27,7 @@ public class PowerServer extends Observable {
     private Map<GameBase, ServerList> serverLists;
     private GamespyProtocol1Parser gsp1Parser;
     private UDPManager udpManager;
+    private TCPManager tcpManager;
     private Object waitObject = new Object();
     private boolean running;
     private Logger logger;
@@ -36,26 +37,30 @@ public class PowerServer extends Observable {
     private long lastMasterServerDownload;
 
     public static final int MASTERSERVER_UDP_PORT = 27900;
+    public static final int MASTERSERVER_TCP_PORT = 28000;
 
     public PowerServer() throws IOException {
+        this.running = false;
         this.logger = new Logger(new File("server.log"));
         this.settings = new Settings(new File("settings.cfg"));
         this.reloadSettingsFile();
         this.gsp1Parser = new GamespyProtocol1Parser();
         this.serverLists = new HashMap<GameBase, ServerList>();
-        this.mainloop();
     }
 
-    private void reloadSettingsFile() throws SocketException {
+    private void reloadSettingsFile() throws IOException {
         this.settings.load();
         this.lookUpAndGetMasterServerList(true);
         this.updateSupportedGames();
-        this.setupUDPSocket();
+        this.setupNetwork();
     }
 
-    private void setupUDPSocket() throws SocketException {
+    private void setupNetwork() throws IOException {
         if(this.udpManager == null || this.udpManager.isShutdown()) {
             this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT);
+        }
+        if(this.tcpManager == null || this.tcpManager.isShutdown()) {
+            this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT);
         }
     }
 
@@ -92,7 +97,8 @@ public class PowerServer extends Observable {
         this.lastMasterServerRefresh = System.currentTimeMillis();
     }
 
-    private void mainloop() {
+    public void mainloop() {
+        if(this.running) { return; }
         this.running = true;
         while(this.running) {
             if(this.udpManager == null || !this.udpManager.hasMessages()) {

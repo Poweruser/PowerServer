@@ -19,4 +19,9 @@ public class StringVerify implements VerificationInterface {
         }
         return false;
     }
+
+    @Override
+    public StringVerify createCopy() {
+        return new StringVerify(this.options, this.caseSensitive);
+    }
 }

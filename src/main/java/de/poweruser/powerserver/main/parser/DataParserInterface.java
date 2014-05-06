@@ -6,4 +6,6 @@ import de.poweruser.powerserver.network.UDPMessage;
 
 public interface DataParserInterface {
     public MessageData parse(GameBase game, UDPMessage msg) throws ParserException;
+
+    public MessageData parse(GameBase game, String message) throws ParserException;
 }

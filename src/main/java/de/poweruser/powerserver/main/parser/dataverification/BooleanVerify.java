@@ -14,4 +14,8 @@ public class BooleanVerify implements VerificationInterface {
         return false;
     }
 
+    @Override
+    public BooleanVerify createCopy() {
+        return new BooleanVerify();
+    }
 }

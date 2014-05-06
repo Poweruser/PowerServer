@@ -33,4 +33,9 @@ public class QueryIdFormatVerify implements VerificationInterface {
     public QueryInfo getVerifiedQueryInfo() {
         return this.verifiedQueryInfo;
     }
+
+    @Override
+    public QueryIdFormatVerify createCopy() {
+        return new QueryIdFormatVerify();
+    }
 }

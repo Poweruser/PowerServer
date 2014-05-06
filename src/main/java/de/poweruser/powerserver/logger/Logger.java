@@ -36,7 +36,7 @@ public class Logger {
         sb.append(" For Game \"");
         sb.append(exception.getGame().getGameName());
         sb.append("\" with received data:\n");
-        sb.append(exception.getUDPMessage().toString());
+        sb.append(exception.getData());
         this.writeToFile(sb.toString());
     }
 

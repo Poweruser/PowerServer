@@ -29,4 +29,9 @@ public class IntVerify implements VerificationInterface {
     public int getVerifiedValue() {
         return this.verifiedValue;
     }
+
+    @Override
+    public IntVerify createCopy() {
+        return new IntVerify(this.min, this.max);
+    }
 }
