@@ -34,7 +34,7 @@ public class GamespyValidation {
     }
 
     public GamespyValidation() {
-        this.securekey = this.createChallengeString();
+        this.securekey = createChallengeString().getBytes();
         this.validateString = null;
         this.type = null;
         this.gamekey = null;
@@ -152,7 +152,7 @@ public class GamespyValidation {
         return out;
     }
 
-    private byte[] createChallengeString() {
+    public static String createChallengeString() {
         byte[] out = new byte[6];
         long rnd = System.nanoTime();
         for(int i = 0; i < 6; i++) {
@@ -161,7 +161,7 @@ public class GamespyValidation {
             } while((rnd < 0x21) || (rnd >= 0x7F));
             out[i] = (byte) rnd;
         }
-        return out;
+        return new String(out);
     }
 
     public String getChallengeString() {

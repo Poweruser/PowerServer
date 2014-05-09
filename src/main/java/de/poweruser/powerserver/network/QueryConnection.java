@@ -12,6 +12,7 @@ import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GeneralDataKeysEnum;
 import de.poweruser.powerserver.gamespy.EncType;
 import de.poweruser.powerserver.gamespy.GamespyValidation;
+import de.poweruser.powerserver.gamespy.encoders.EncoderInterface;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.MessageData;
 import de.poweruser.powerserver.main.parser.GamespyProtocol1Parser;
@@ -26,6 +27,7 @@ public class QueryConnection {
         CHALLENGE_VALID,
         CHALLENGE_INVALID,
         QUERY_RECEIVED,
+        QUERY_INVALID,
         LIST_SENT,
         DONE;
     }
@@ -37,6 +39,8 @@ public class QueryConnection {
     private GamespyValidation validation;
     private byte[] receiveBuffer;
     private int receivePos;
+    private GameBase requestedGame;
+    private EncType encType;
 
     public QueryConnection(Socket client) throws IOException {
         this.client = client;
@@ -45,6 +49,8 @@ public class QueryConnection {
         this.out = new DataOutputStream(new BufferedOutputStream(this.client.getOutputStream()));
         this.receiveBuffer = new byte[512];
         this.receivePos = 0;
+        this.requestedGame = null;
+        this.encType = null;
     }
 
     public void close() {
@@ -82,13 +88,17 @@ public class QueryConnection {
             case CHALLENGE_VALID:
                 this.readInput();
                 Boolean query = this.checkListQuery();
-                if(query != null && query.booleanValue()) {
-                    this.state = State.QUERY_RECEIVED;
+                if(query != null) {
+                    if(query.booleanValue()) {
+                        this.state = State.QUERY_RECEIVED;
+                    } else {
+                        this.state = State.QUERY_INVALID;
+                    }
                 }
                 break;
             case QUERY_RECEIVED:
                 this.sendServerList();
-                break;
+            case QUERY_INVALID:
             case CHALLENGE_INVALID:
                 this.close();
                 this.state = State.DONE;
@@ -102,13 +112,42 @@ public class QueryConnection {
     }
 
     private void sendServerList() {
-        // TODO Auto-generated method stub
-
+        if(this.requestedGame != null && this.encType != null) {
+            EncoderInterface encoder = this.encType.getEncoder();
+            byte[] data = null;
+            try {
+                data = encoder.encode(this.requestedGame.getActiveServers());
+            } catch(IOException e) {
+                Logger.logStackTraceStatic("Error while encoding a serverlist with Encoder " + encoder.getClass().getSimpleName() + " for EncType " + this.encType.toString() + ": " + e.toString(), e);
+            }
+            if(data != null) {
+                this.sendData(data);
+            }
+        }
     }
 
     private Boolean checkListQuery() {
-        // TODO Auto-generated method stub
-        return null;
+        Boolean out = null;
+        String str = new String(this.receiveBuffer, 0, this.receivePos);
+        GamespyProtocol1Parser parser = new GamespyProtocol1Parser();
+        MessageData data = null;
+        try {
+            data = parser.parse(null, str);
+        } catch(ParserException e) {
+            Logger.logStackTraceStatic("Error while checking challenge response:" + e.toString(), e);
+        }
+        if(data != null) {
+            if(data.containsKey(GeneralDataKeysEnum.GAMENAME) && data.containsKey(GeneralDataKeysEnum.LIST) && data.containsKey(GeneralDataKeysEnum.FINAL)) {
+                GameBase game = GameBase.getGameForGameName(data.getData(GeneralDataKeysEnum.GAMENAME));
+                if(game != null) {
+                    this.requestedGame = game;
+                    out = new Boolean(true);
+                } else {
+                    out = new Boolean(false);
+                }
+            }
+        }
+        return out;
     }
 
     private void readInput() {
@@ -149,9 +188,10 @@ public class QueryConnection {
                 GameBase game = GameBase.getGameForGameName(gamename);
                 if(game != null && enctype != null) {
                     if(this.validation.verifyChallengeResponse(game, enctype, response)) {
-                        this.state = State.CHALLENGE_VALID;
+                        this.encType = enctype;
+                        out = new Boolean(true);
                     } else {
-                        this.state = State.CHALLENGE_INVALID;
+                        out = new Boolean(false);
                     }
                 } else {
                     Logger.logStatic("Error while checking a challengeResponse:");
@@ -161,7 +201,7 @@ public class QueryConnection {
                     if(enctype == null) {
                         Logger.logStatic("No EncType found for id: " + v.getVerifiedValue());
                     }
-                    this.state = State.CHALLENGE_INVALID;
+                    out = new Boolean(false);
                 }
             }
         }

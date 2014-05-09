@@ -1,15 +1,20 @@
 package de.poweruser.powerserver.gamespy;
 
+import de.poweruser.powerserver.gamespy.encoders.EncoderInterface;
+import de.poweruser.powerserver.gamespy.encoders.OFPMonitorEncoder;
+
 public enum EncType {
-    BASIC(0),
-    ADVANCED1(1),
-    ADVANCED2(2),
-    NONE(3);
+    BASIC(0, null),
+    ADVANCED1(1, null),
+    ADVANCED2(2, null),
+    NONE(3, new OFPMonitorEncoder());
 
     private int type;
+    private EncoderInterface encoder;
 
-    private EncType(int type) {
+    private EncType(int type, EncoderInterface encoder) {
         this.type = type;
+        this.encoder = encoder;
     }
 
     public int getTypeValue() {
@@ -29,5 +34,9 @@ public enum EncType {
             default:
         }
         return null;
+    }
+
+    public EncoderInterface getEncoder() {
+        return this.encoder;
     }
 }

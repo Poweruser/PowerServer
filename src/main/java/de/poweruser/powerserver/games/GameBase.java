@@ -3,9 +3,11 @@ package de.poweruser.powerserver.games;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.poweruser.powerserver.main.MessageData;
+import de.poweruser.powerserver.main.ServerList;
 import de.poweruser.powerserver.main.parser.DataParserInterface;
 import de.poweruser.powerserver.main.parser.ParserException;
 import de.poweruser.powerserver.network.UDPMessage;
@@ -17,6 +19,7 @@ public abstract class GameBase implements GameInterface {
     protected String gamename;
     protected String gamespyKey;
     protected DataParserInterface parser;
+    private ServerList serverList;
 
     protected GameBase(String gamename, String gamespyKey, DataParserInterface parser, DataKeysInterface[] dataKeys) {
         if(gameNameMap.containsKey(this.getGameName())) {
@@ -29,6 +32,7 @@ public abstract class GameBase implements GameInterface {
             this.keyMap.put(d.getKeyString(), d);
         }
         this.gamename = gamename;
+        this.serverList = new ServerList(this);
     }
 
     @Override
@@ -106,5 +110,13 @@ public abstract class GameBase implements GameInterface {
         builder.append("\\");
         byte[] message = builder.toString().getBytes();
         return new DatagramPacket(message, message.length);
+    }
+
+    public List<InetSocketAddress> getActiveServers() {
+        return this.serverList.getActiveServers();
+    }
+
+    public ServerList getServerList() {
+        return this.serverList;
     }
 }

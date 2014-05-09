@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Observable;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.games.GameBase;
@@ -24,7 +23,6 @@ import de.poweruser.powerserver.settings.Settings;
 
 public class PowerServer extends Observable {
 
-    private Map<GameBase, ServerList> serverLists;
     private GamespyProtocol1Parser gsp1Parser;
     private UDPManager udpManager;
     private TCPManager tcpManager;
@@ -35,6 +33,7 @@ public class PowerServer extends Observable {
     private List<InetAddress> masterServers;
     private long lastMasterServerRefresh;
     private long lastMasterServerDownload;
+    private Set<GameBase> supportedGames;
 
     public static final int MASTERSERVER_UDP_PORT = 27900;
     public static final int MASTERSERVER_TCP_PORT = 28000;
@@ -45,7 +44,7 @@ public class PowerServer extends Observable {
         this.settings = new Settings(new File("settings.cfg"));
         this.reloadSettingsFile();
         this.gsp1Parser = new GamespyProtocol1Parser();
-        this.serverLists = new HashMap<GameBase, ServerList>();
+        this.supportedGames = new HashSet<GameBase>();
     }
 
     private void reloadSettingsFile() throws IOException {
@@ -64,6 +63,10 @@ public class PowerServer extends Observable {
         }
     }
 
+    private boolean isGameSupported(GameBase game) {
+        return this.supportedGames.contains(game);
+    }
+
     private void updateSupportedGames() {
         List<String> configGames = this.settings.getSupportedGamesList();
         List<GameBase> gameList = new ArrayList<GameBase>();
@@ -75,18 +78,8 @@ public class PowerServer extends Observable {
                 this.logger.log("Game \"" + gamename + "\" from settings file not recognized");
             }
         }
-        Iterator<GameBase> iter = this.serverLists.keySet().iterator();
-        while(iter.hasNext()) {
-            GameBase game = iter.next();
-            if(!gameList.contains(game)) {
-                iter.remove();
-            } else {
-                gameList.remove(game);
-            }
-        }
-        for(GameBase game: gameList) {
-            this.serverLists.put(game, new ServerList(game));
-        }
+        this.supportedGames.retainAll(gameList);
+        this.supportedGames.addAll(gameList);
     }
 
     private void lookUpAndGetMasterServerList(boolean forceDownload) {
@@ -128,8 +121,12 @@ public class PowerServer extends Observable {
         }
         if(data != null) {
             GameBase game = data.getGame();
-            if(game != null) {
-                ServerList list = this.serverLists.get(game);
+            if(game == null) {
+                this.logger.log("Couldnt find corresponding game for message: " + message.toString());
+            } else if(!this.isGameSupported(game)) {
+                this.logger.log("Got an incoming message for an unsupported game: " + message.toString());
+            } else {
+                ServerList list = game.getServerList();
                 InetSocketAddress sender = message.getSender();
                 InetSocketAddress server = data.constructQuerySocketAddress(sender.getAddress());
                 if(server != null) {
@@ -157,8 +154,6 @@ public class PowerServer extends Observable {
                         list.incomingQueryAnswer(sender, data);
                     }
                 }
-            } else {
-                this.logger.log("Couldnt find corresponding game for message: " + message.toString());
             }
         }
     }
