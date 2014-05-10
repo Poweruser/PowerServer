@@ -5,6 +5,7 @@ import java.net.SocketException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class UDPManager implements Observer {
 
@@ -18,6 +19,7 @@ public class UDPManager implements Observer {
         this.socket.setSoTimeout(10000);
         this.receiver = new UDPReceiverThread(socket);
         this.sender = new UDPSender(socket);
+        this.messageQueue = new ConcurrentLinkedQueue<UDPMessage>();
     }
 
     public void shutdown() {
