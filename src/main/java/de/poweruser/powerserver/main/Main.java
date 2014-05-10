@@ -1,14 +1,16 @@
 package de.poweruser.powerserver.main;
 
+import java.io.File;
 import java.io.IOException;
 
 import de.poweruser.powerserver.logger.Logger;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         PowerServer server = null;
-        Logger.logStatic("Starting the master server ...");
+        Logger logger = new Logger(new File("server.log"));
+        logger.log("Starting the master server ...");
         try {
             server = new PowerServer();
         } catch(IOException e) {
@@ -17,7 +19,7 @@ public class Main {
         if(server != null) {
             try {
                 server.mainloop();
-                Logger.logStatic("Shutting down the master server ...");
+                logger.log("Shutting down the master server ...");
             } catch(Exception e) {
                 Logger.logStackTraceStatic("The server quit unexpectedly with an exception of type: " + e.toString(), e);
             }

@@ -40,11 +40,10 @@ public class PowerServer extends Observable {
 
     public PowerServer() throws IOException {
         this.running = false;
-        this.logger = new Logger(new File("server.log"));
         this.settings = new Settings(new File("settings.cfg"));
+        this.supportedGames = new HashSet<GameBase>();
         this.reloadSettingsFile();
         this.gsp1Parser = new GamespyProtocol1Parser();
-        this.supportedGames = new HashSet<GameBase>();
     }
 
     private void reloadSettingsFile() throws IOException {
