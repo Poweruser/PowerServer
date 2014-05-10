@@ -18,6 +18,7 @@ public class UDPManager implements Observer {
         this.socket = new DatagramSocket(port);
         this.socket.setSoTimeout(10000);
         this.receiver = new UDPReceiverThread(socket);
+        this.receiver.addObserver(this);
         this.sender = new UDPSender(socket);
         this.messageQueue = new ConcurrentLinkedQueue<UDPMessage>();
     }

@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.games.GameBase;
+import de.poweruser.powerserver.games.GamesEnum;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.parser.GamespyProtocol1Parser;
 import de.poweruser.powerserver.main.parser.ParserException;
@@ -28,7 +29,6 @@ public class PowerServer extends Observable {
     private TCPManager tcpManager;
     private Object waitObject = new Object();
     private boolean running;
-    private Logger logger;
     private Settings settings;
     private List<InetAddress> masterServers;
     private long lastMasterServerRefresh;
@@ -39,6 +39,7 @@ public class PowerServer extends Observable {
     public static final int MASTERSERVER_TCP_PORT = 28000;
 
     public PowerServer() throws IOException {
+        for(GamesEnum g: GamesEnum.values()) {}
         this.running = false;
         this.settings = new Settings(new File("settings.cfg"));
         this.supportedGames = new HashSet<GameBase>();
@@ -74,7 +75,7 @@ public class PowerServer extends Observable {
             if(game != null) {
                 gameList.add(game);
             } else {
-                this.logger.log("Game \"" + gamename + "\" from settings file not recognized");
+                Logger.logStatic("Game \"" + gamename + "\" from settings file not recognized");
             }
         }
         this.supportedGames.retainAll(gameList);
@@ -116,14 +117,14 @@ public class PowerServer extends Observable {
         try {
             data = this.gsp1Parser.parse(null, message);
         } catch(ParserException e) {
-            this.logger.log(e.getErrorMessage() + "\nReceived data: " + message.toString());
+            Logger.logStatic(e.getErrorMessage() + "\nReceived data: " + message.toString());
         }
         if(data != null) {
             GameBase game = data.getGame();
             if(game == null) {
-                this.logger.log("Couldnt find corresponding game for message: " + message.toString());
+                Logger.logStatic("Couldnt find corresponding game for message: " + message.toString());
             } else if(!this.isGameSupported(game)) {
-                this.logger.log("Got an incoming message for an unsupported game: " + message.toString());
+                Logger.logStatic("Got an incoming message for an unsupported game: " + message.toString());
             } else {
                 ServerList list = game.getServerList();
                 InetSocketAddress sender = message.getSender();
@@ -147,7 +148,7 @@ public class PowerServer extends Observable {
                             list.incomingHeartBeatBroadcast(server, data);
                             udpSender.sendQuery(server, game.createStatusQuery(false));
                         } else {
-                            this.logger.log("Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
+                            Logger.logStatic("Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
                         }
                     } else {
                         list.incomingQueryAnswer(sender, data);

@@ -22,7 +22,8 @@ public abstract class GameBase implements GameInterface {
     private ServerList serverList;
 
     protected GameBase(String gamename, String gamespyKey, DataParserInterface parser, DataKeysInterface[] dataKeys) {
-        if(gameNameMap.containsKey(this.getGameName())) {
+        this.gamename = gamename;
+        if(!gameNameMap.containsKey(this.getGameName())) {
             gameNameMap.put(this.getGameName(), this);
         }
         this.gamespyKey = gamespyKey;
@@ -31,7 +32,6 @@ public abstract class GameBase implements GameInterface {
         for(DataKeysInterface d: dataKeys) {
             this.keyMap.put(d.getKeyString(), d);
         }
-        this.gamename = gamename;
         this.serverList = new ServerList(this);
     }
 
