@@ -21,7 +21,6 @@ public class Logger {
         this.instance = this;
         this.logFile = logFile;
         if(!this.logFile.exists()) {
-            this.logFile.mkdirs();
             this.logFile.createNewFile();
         }
         if(!this.logFile.canWrite()) { throw new IOException("Unable to write to the log file " + this.logFile.getAbsolutePath()); }
