@@ -23,6 +23,7 @@ public class Main {
             } catch(Exception e) {
                 Logger.logStackTraceStatic("The server quit unexpectedly with an exception of type: " + e.toString(), e);
             }
+            server.shutdown();
         }
     }
 }

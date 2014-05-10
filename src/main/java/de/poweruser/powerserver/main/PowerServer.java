@@ -159,6 +159,8 @@ public class PowerServer extends Observable {
 
     public void shutdown() {
         this.running = false;
+        this.udpManager.shutdown();
+        this.tcpManager.shutdown();
     }
 
     private boolean isLastMasterServerLookupDue(boolean download, long timeDiff, TimeUnit inputUnit) {
