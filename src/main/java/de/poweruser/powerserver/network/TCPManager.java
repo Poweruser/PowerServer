@@ -24,11 +24,13 @@ public class TCPManager implements Runnable {
     private ConnectionGuard guard;
 
     public TCPManager(int port) throws IOException {
+        this.running = true;
         this.serverSocket = new ServerSocket(port);
         this.guard = new ConnectionGuard();
         this.connections = new ConcurrentLinkedQueue<QueryConnection>();
         this.thread = new Thread(this);
         this.thread.setName("PowerServer - TCPServer");
+        this.thread.start();
     }
 
     @Override

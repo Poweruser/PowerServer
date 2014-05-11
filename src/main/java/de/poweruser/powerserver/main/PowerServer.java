@@ -108,6 +108,9 @@ public class PowerServer extends Observable {
                     this.handleIncomingMessage(this.udpManager.takeFirstMessage());
                 }
             }
+            if(this.tcpManager != null) {
+                this.tcpManager.processConnections();
+            }
         }
     }
 
