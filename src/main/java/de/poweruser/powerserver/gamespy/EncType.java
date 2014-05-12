@@ -7,7 +7,7 @@ public enum EncType {
     BASIC(0, null),
     ADVANCED1(1, null),
     ADVANCED2(2, null),
-    NONE(3, new OFPMonitorEncoder());
+    OFPMONITOR(3, new OFPMonitorEncoder());
 
     private int type;
     private EncoderInterface encoder;
@@ -30,7 +30,7 @@ public enum EncType {
             case 2:
                 return ADVANCED2;
             case 3:
-                return NONE;
+                return OFPMONITOR;
             default:
         }
         return null;

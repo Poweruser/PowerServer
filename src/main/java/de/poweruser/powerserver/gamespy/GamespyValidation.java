@@ -102,6 +102,7 @@ public class GamespyValidation {
                     key[i] = enctype1_data[key[i]];
                 }
                 break;
+            case OFPMONITOR:
             case ADVANCED2:
                 for(short i = 0; i < this.securekey.length; i++) {
                     key[i] ^= this.gamekey[i % this.gamekey.length];
