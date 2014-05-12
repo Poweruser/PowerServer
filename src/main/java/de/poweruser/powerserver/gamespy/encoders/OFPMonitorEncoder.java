@@ -62,7 +62,7 @@ public class OFPMonitorEncoder implements EncoderInterface {
     private void writeAddress(DataOutputStream stream, InetSocketAddress address) throws IOException {
         stream.write(address.getAddress().getAddress());
         int port = address.getPort();
-        stream.writeByte((port >> 2) & 0xFF);
+        stream.writeByte((port >> 8) & 0xFF);
         stream.writeByte(port & 0xFF);
     }
 }
