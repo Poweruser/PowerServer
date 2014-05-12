@@ -97,7 +97,7 @@ public class PowerServer extends Observable {
             if(this.udpManager == null || !this.udpManager.hasMessages()) {
                 synchronized(this.waitObject) {
                     try {
-                        this.waitObject.wait(5000);
+                        this.waitObject.wait(100);
                     } catch(InterruptedException e) {}
                 }
                 if(this.isLastMasterServerLookupDue(true, this.settings.getListsDownloadInterval(TimeUnit.HOURS), TimeUnit.HOURS)) {
