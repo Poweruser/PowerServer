@@ -27,16 +27,16 @@ public class Logger {
         this.dateFormat = new SimpleDateFormat("[dd.MM.yy-HH:mm:ss]");
     }
 
-    public void log(ParserException exception) {
+    public static void log(ParserException exception) {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.currentTimeString());
+        sb.append(instance.currentTimeString());
         sb.append(" ");
         sb.append(exception.getErrorMessage());
         sb.append(" For Game \"");
-        sb.append(exception.getGame().getGameName());
+        sb.append(exception.getGameName());
         sb.append("\" with received data:\n");
         sb.append(exception.getData());
-        this.writeToFile(sb.toString());
+        logStatic(sb.toString());
     }
 
     public static void logStackTraceStatic(String message, Exception e) {

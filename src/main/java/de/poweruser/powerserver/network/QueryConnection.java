@@ -134,13 +134,17 @@ public class QueryConnection {
         try {
             data = parser.parse(null, str);
         } catch(ParserException e) {
-            Logger.logStackTraceStatic("Error while checking challenge response:" + e.toString(), e);
+            Logger.logStatic("Error while checking list query:");
+            Logger.log(e);
         }
         if(data != null) {
             if(data.containsKey(GeneralDataKeysEnum.GAMENAME) && data.containsKey(GeneralDataKeysEnum.LIST) && data.containsKey(GeneralDataKeysEnum.FINAL)) {
                 GameBase game = GameBase.getGameForGameName(data.getData(GeneralDataKeysEnum.GAMENAME));
                 if(game != null) {
                     this.requestedGame = game;
+                    if(game == null) {
+                        Logger.logStatic("Received a list query for an unknown game: " + game);
+                    }
                     out = new Boolean(true);
                 } else {
                     out = new Boolean(false);
@@ -175,7 +179,8 @@ public class QueryConnection {
         try {
             data = parser.parse(null, str);
         } catch(ParserException e) {
-            Logger.logStackTraceStatic("Error while checking challenge response:" + e.toString(), e);
+            Logger.logStatic("Error while checking challenge response:");
+            Logger.log(e);
         }
         if(data != null) {
             if(data.containsKey(GeneralDataKeysEnum.GAMENAME) && data.containsKey(GeneralDataKeysEnum.FINAL) && data.containsKey(GeneralDataKeysEnum.ENCTYPE) && data.containsKey(GeneralDataKeysEnum.VALIDATE)) {

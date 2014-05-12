@@ -120,7 +120,8 @@ public class PowerServer extends Observable {
         try {
             data = this.gsp1Parser.parse(null, message);
         } catch(ParserException e) {
-            Logger.logStatic(e.getErrorMessage() + "\nReceived data: " + message.toString());
+            Logger.logStatic("Error while parsing an incoming udpmessage:");
+            Logger.log(e);
         }
         if(data != null) {
             GameBase game = data.getGame();

@@ -23,8 +23,9 @@ public class ParserException extends Exception {
         return this.message;
     }
 
-    public GameBase getGame() {
-        return this.game;
+    public String getGameName() {
+        if(this.game == null) { return "None specified"; }
+        return this.game.getGameName();
     }
 
     public String getErrorMessage() {

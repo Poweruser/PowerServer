@@ -29,7 +29,7 @@ public class TCPManager implements Runnable {
         this.guard = new ConnectionGuard();
         this.connections = new ConcurrentLinkedQueue<QueryConnection>();
         this.thread = new Thread(this);
-        this.thread.setName("PowerServer - TCPServer");
+        this.thread.setName("PowerServer - TCPManager");
         this.thread.start();
     }
 
