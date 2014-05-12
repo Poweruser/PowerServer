@@ -63,8 +63,7 @@ public class ServerList {
         while(iter.hasNext()) {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
             if(entry.getValue().checkLastHeartbeat(allowedServerTimeout)) {
-                InetSocketAddress key = entry.getKey();
-                list.add(InetSocketAddress.createUnresolved(key.getAddress().getHostAddress(), key.getPort()));
+                list.add(entry.getKey());
             }
         }
         return list;
