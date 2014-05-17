@@ -37,7 +37,7 @@ public class PowerServer extends Observable {
     private Set<GameBase> supportedGames;
 
     public static final int MASTERSERVER_UDP_PORT = 27900;
-    public static final int MASTERSERVER_TCP_PORT = 28000;
+    public static final int MASTERSERVER_TCP_PORT = 28900;
 
     public PowerServer() throws IOException {
         for(GamesEnum g: GamesEnum.values()) {}
