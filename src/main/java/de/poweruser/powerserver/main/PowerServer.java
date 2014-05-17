@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GamesEnum;
+import de.poweruser.powerserver.gamespy.EncType;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.parser.GamespyProtocol1Parser;
 import de.poweruser.powerserver.main.parser.ParserException;
@@ -40,6 +41,7 @@ public class PowerServer extends Observable {
 
     public PowerServer() throws IOException {
         for(GamesEnum g: GamesEnum.values()) {}
+        for(EncType enc: EncType.values()) {}
         this.running = false;
         this.settings = new Settings(new File("settings.cfg"));
         this.supportedGames = new HashSet<GameBase>();

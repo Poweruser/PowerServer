@@ -114,6 +114,7 @@ public class QueryConnection {
     private void sendServerList() {
         if(this.requestedGame != null && this.encType != null) {
             EncoderInterface encoder = this.encType.getEncoder();
+            if(encoder == null) { return; }
             byte[] data = null;
             try {
                 data = encoder.encode(this.requestedGame.getActiveServers());
@@ -142,9 +143,6 @@ public class QueryConnection {
                 GameBase game = GameBase.getGameForGameName(data.getData(GeneralDataKeysEnum.GAMENAME));
                 if(game != null) {
                     this.requestedGame = game;
-                    if(game == null) {
-                        Logger.logStatic("Received a list query for an unknown game: " + game);
-                    }
                     out = new Boolean(true);
                 } else {
                     out = new Boolean(false);
@@ -174,6 +172,7 @@ public class QueryConnection {
     private Boolean checkChallengeResponse() {
         Boolean out = null;
         String str = new String(this.receiveBuffer, 0, this.receivePos);
+        if(str.isEmpty()) { return out; }
         GamespyProtocol1Parser parser = new GamespyProtocol1Parser();
         MessageData data = null;
         try {
