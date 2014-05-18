@@ -1,8 +1,10 @@
 package de.poweruser.powerserver.main.parser;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import de.poweruser.powerserver.games.GameBase;
+import de.poweruser.powerserver.games.GeneralDataKeysEnum;
 import de.poweruser.powerserver.main.MessageData;
 import de.poweruser.powerserver.network.UDPMessage;
 
@@ -20,19 +22,30 @@ public class GamespyProtocol1Parser implements DataParserInterface {
         message = message.substring(start + 1);
         String[] split = message.split("\\\\");
         HashMap<String, String> map = new HashMap<String, String>();
-        for(int i = 0; i < split.length - 1; i = i + 2) {
+        int i = 0;
+        for(i = 0; i < split.length - 1; i = i + 2) {
             String key = split[i];
             if(key.trim().isEmpty()) {
                 i--;
                 continue;
             }
             String value = split[i + 1];
-            if(game == null || game.verifyDataKeyAndValue(key, value)) {
-                map.put(key, value);
-            } else {
-                throw new ParserException("Found invalid data key \"" + key + "\" and value \"" + value + "\".", message, game);
+            this.processPair(map, game, key, value, message);
+        }
+        if(i < split.length) {
+            String key = split[i];
+            if(key.equalsIgnoreCase(GeneralDataKeysEnum.FINAL.toString())) {
+                this.processPair(map, game, key, "", message);
             }
         }
         return new MessageData(map);
+    }
+
+    private void processPair(Map<String, String> map, GameBase game, String key, String value, String message) throws ParserException {
+        if(game == null || game.verifyDataKeyAndValue(key, value)) {
+            map.put(key, value);
+        } else {
+            throw new ParserException("Found invalid data key \"" + key + "\" and value \"" + value + "\".", message, game);
+        }
     }
 }
