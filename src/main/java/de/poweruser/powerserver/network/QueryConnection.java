@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GeneralDataKeysEnum;
@@ -30,11 +31,13 @@ public class QueryConnection {
         QUERY_INVALID,
         LIST_SENT,
         TOOMUCHDATA,
+        TIMEOUT,
         DONE;
     }
 
     private Socket client;
     private State state;
+    private long lastStateChange;
     private DataInputStream in;
     private DataOutputStream out;
     private GamespyValidation validation;
@@ -45,7 +48,7 @@ public class QueryConnection {
 
     public QueryConnection(Socket client) throws IOException {
         this.client = client;
-        this.state = State.NEW;
+        this.changeState(State.NEW);
         this.in = new DataInputStream(new BufferedInputStream(this.client.getInputStream()));
         this.out = new DataOutputStream(new BufferedOutputStream(this.client.getOutputStream()));
         this.receiveBuffer = new byte[512];
@@ -64,25 +67,28 @@ public class QueryConnection {
         try {
             this.client.close();
         } catch(IOException e) {}
-        this.state = State.DONE;
+        this.changeState(State.DONE);
     }
 
     public boolean check() {
+        if(this.checkLastStateChange(TimeUnit.MINUTES, 1)) {
+            this.changeState(State.TIMEOUT);
+        }
         switch(this.state) {
             case NEW:
                 this.validation = new GamespyValidation();
                 String challenge = this.validation.getChallengeString();
                 this.sendData("\\basic\\\\secure\\" + challenge);
-                this.state = State.CHALLENGE_SENT;
+                this.changeState(State.CHALLENGE_SENT);
                 break;
             case CHALLENGE_SENT:
                 this.readInput();
                 Boolean response = this.checkChallengeResponse();
                 if(response != null) {
                     if(response.booleanValue()) {
-                        this.state = State.CHALLENGE_VALID;
+                        this.changeState(State.CHALLENGE_VALID);
                     } else {
-                        this.state = State.CHALLENGE_INVALID;
+                        this.changeState(State.CHALLENGE_INVALID);
                     }
                 }
                 break;
@@ -91,9 +97,9 @@ public class QueryConnection {
                 Boolean query = this.checkListQuery();
                 if(query != null) {
                     if(query.booleanValue()) {
-                        this.state = State.QUERY_RECEIVED;
+                        this.changeState(State.QUERY_RECEIVED);
                     } else {
-                        this.state = State.QUERY_INVALID;
+                        this.changeState(State.QUERY_INVALID);
                     }
                 }
                 break;
@@ -102,8 +108,9 @@ public class QueryConnection {
             case QUERY_INVALID:
             case CHALLENGE_INVALID:
             case TOOMUCHDATA:
+            case TIMEOUT:
                 this.close();
-                this.state = State.DONE;
+                this.changeState(State.DONE);
                 break;
             case DONE:
                 return true;
@@ -166,7 +173,7 @@ public class QueryConnection {
                 int newSize = this.receivePos + len;
                 if(newSize > this.receiveBuffer.length) {
                     if(newSize > 1024) {
-                        this.state = State.TOOMUCHDATA;
+                        this.changeState(State.TOOMUCHDATA);
                         return;
                     }
                     byte[] newBuffer = new byte[newSize];
@@ -249,5 +256,14 @@ public class QueryConnection {
         int newLength = this.receivePos - newStart;
         System.arraycopy(this.receiveBuffer, newStart, this.receiveBuffer, 0, newLength);
         this.receivePos = newLength;
+    }
+
+    private void changeState(State state) {
+        this.lastStateChange = System.currentTimeMillis();
+        this.state = state;
+    }
+
+    private boolean checkLastStateChange(TimeUnit unit, int value) {
+        return (System.currentTimeMillis() - this.lastStateChange) < TimeUnit.MILLISECONDS.convert(value, unit);
     }
 }
