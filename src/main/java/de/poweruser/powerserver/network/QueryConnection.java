@@ -29,6 +29,7 @@ public class QueryConnection {
         QUERY_RECEIVED,
         QUERY_INVALID,
         LIST_SENT,
+        TOOMUCHDATA,
         DONE;
     }
 
@@ -100,6 +101,7 @@ public class QueryConnection {
                 this.sendServerList();
             case QUERY_INVALID:
             case CHALLENGE_INVALID:
+            case TOOMUCHDATA:
                 this.close();
                 this.state = State.DONE;
                 break;
@@ -161,8 +163,13 @@ public class QueryConnection {
         try {
             int len = this.in.available();
             if(len > 0) {
-                if(this.receivePos + len > this.receiveBuffer.length) {
-                    byte[] newBuffer = new byte[this.receivePos + len];
+                int newSize = this.receivePos + len;
+                if(newSize > this.receiveBuffer.length) {
+                    if(newSize > 1024) {
+                        this.state = State.TOOMUCHDATA;
+                        return;
+                    }
+                    byte[] newBuffer = new byte[newSize];
                     System.arraycopy(this.receiveBuffer, 0, newBuffer, 0, this.receivePos);
                     this.receiveBuffer = newBuffer;
                 }
