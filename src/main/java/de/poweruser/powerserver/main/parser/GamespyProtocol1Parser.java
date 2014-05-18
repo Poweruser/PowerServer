@@ -31,10 +31,13 @@ public class GamespyProtocol1Parser implements DataParserInterface {
             }
             String value = split[i + 1];
             this.processPair(map, game, key, value, message);
+            if(this.isKeyFinalKey(key)) {
+                break;
+            }
         }
-        if(i < split.length) {
+        if(i == split.length - 1) {
             String key = split[i];
-            if(key.equalsIgnoreCase(GeneralDataKeysEnum.FINAL.toString())) {
+            if(this.isKeyFinalKey(key)) {
                 this.processPair(map, game, key, "", message);
             }
         }
@@ -47,5 +50,9 @@ public class GamespyProtocol1Parser implements DataParserInterface {
         } else {
             throw new ParserException("Found invalid data key \"" + key + "\" and value \"" + value + "\".", message, game);
         }
+    }
+
+    private boolean isKeyFinalKey(String key) {
+        return GeneralDataKeysEnum.FINAL.toString().equalsIgnoreCase(key);
     }
 }
