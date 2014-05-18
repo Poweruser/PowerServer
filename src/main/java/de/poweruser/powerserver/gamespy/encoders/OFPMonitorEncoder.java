@@ -45,6 +45,9 @@ public class OFPMonitorEncoder implements EncoderInterface {
         }
         int ipv4Len = ipv4.size() * 6;
         int ipv6Len = ipv6.size() * 18;
+        for(int i = 0; i < 4; i++) {
+            stream.writeByte(0xFF);
+        }
         stream.writeInt(ipv4Len);
         stream.writeInt(ipv6Len);
         for(InetSocketAddress i: ipv4) {
