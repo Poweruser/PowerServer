@@ -151,6 +151,7 @@ public class QueryConnection {
                 } else {
                     out = new Boolean(false);
                 }
+                this.clearBufferUpToKey(GeneralDataKeysEnum.FINAL);
             }
         }
         return out;
@@ -201,6 +202,7 @@ public class QueryConnection {
                 } else {
                     out = new Boolean(false);
                 }
+                this.clearBufferUpToKey(GeneralDataKeysEnum.FINAL);
             }
         }
         return out;
@@ -230,5 +232,15 @@ public class QueryConnection {
             if(v.verify(data.getData(enc))) { return EncType.getTypeFromValue(v.getVerifiedValue()); }
         }
         return null;
+    }
+
+    private void clearBufferUpToKey(GeneralDataKeysEnum key) {
+        String content = new String(this.receiveBuffer, 0, this.receivePos);
+        String str = "\\" + key.toString();
+        int index = content.indexOf(str);
+        int newStart = index + str.length();
+        int newLength = this.receivePos - newStart;
+        System.arraycopy(this.receiveBuffer, newStart, this.receiveBuffer, 0, newLength);
+        this.receivePos = newLength;
     }
 }
