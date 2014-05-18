@@ -199,13 +199,6 @@ public class QueryConnection {
                         out = new Boolean(false);
                     }
                 } else {
-                    Logger.logStatic("Error while checking a challengeResponse:");
-                    if(game == null) {
-                        Logger.logStatic("No game found for gamename: " + gamename);
-                    }
-                    if(enctype == null) {
-                        Logger.logStatic("No EncType found for id: " + v.getVerifiedValue());
-                    }
                     out = new Boolean(false);
                 }
             }
