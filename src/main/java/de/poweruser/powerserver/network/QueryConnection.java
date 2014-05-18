@@ -67,11 +67,10 @@ public class QueryConnection {
         try {
             this.client.close();
         } catch(IOException e) {}
-        this.changeState(State.DONE);
     }
 
     public boolean check() {
-        if(this.checkLastStateChange(TimeUnit.MINUTES, 1)) {
+        if(!this.checkLastStateChange(TimeUnit.SECONDS, 10)) {
             this.changeState(State.TIMEOUT);
         }
         switch(this.state) {
@@ -105,6 +104,8 @@ public class QueryConnection {
                 break;
             case QUERY_RECEIVED:
                 this.sendServerList();
+            case LIST_SENT:
+                break;
             case QUERY_INVALID:
             case CHALLENGE_INVALID:
             case TOOMUCHDATA:
@@ -132,6 +133,7 @@ public class QueryConnection {
             }
             if(data != null) {
                 this.sendData(data);
+                this.changeState(State.LIST_SENT);
             }
         }
     }
