@@ -143,6 +143,10 @@ public class QueryConnection {
                 GameBase game = GameBase.getGameForGameName(data.getData(GeneralDataKeysEnum.GAMENAME));
                 if(game != null) {
                     this.requestedGame = game;
+                    EncType enctype = this.getEncTypeFromData(data);
+                    if(enctype != null) {
+                        this.encType = enctype;
+                    }
                     out = new Boolean(true);
                 } else {
                     out = new Boolean(false);
@@ -184,10 +188,7 @@ public class QueryConnection {
         if(data != null) {
             if(data.containsKey(GeneralDataKeysEnum.GAMENAME) && data.containsKey(GeneralDataKeysEnum.FINAL) && data.containsKey(GeneralDataKeysEnum.ENCTYPE) && data.containsKey(GeneralDataKeysEnum.VALIDATE)) {
                 String gamename = data.getData(GeneralDataKeysEnum.GAMENAME);
-                GeneralDataKeysEnum enc = GeneralDataKeysEnum.ENCTYPE;
-                IntVerify v = (IntVerify) enc.getVerifierCopy();
-                v.verify(data.getData(enc));
-                EncType enctype = EncType.getTypeFromValue(v.getVerifiedValue());
+                EncType enctype = this.getEncTypeFromData(data);
                 String response = data.getData(GeneralDataKeysEnum.VALIDATE);
                 GameBase game = GameBase.getGameForGameName(gamename);
                 if(game != null && enctype != null) {
@@ -227,5 +228,14 @@ public class QueryConnection {
         } catch(IOException e) {
             Logger.logStackTraceStatic("Error while sending data to " + this.client.getInetAddress().toString(), e);
         }
+    }
+
+    private EncType getEncTypeFromData(MessageData data) {
+        GeneralDataKeysEnum enc = GeneralDataKeysEnum.ENCTYPE;
+        if(data.containsKey(enc)) {
+            IntVerify v = (IntVerify) enc.getVerifierCopy();
+            if(v.verify(data.getData(enc))) { return EncType.getTypeFromValue(v.getVerifiedValue()); }
+        }
+        return null;
     }
 }
