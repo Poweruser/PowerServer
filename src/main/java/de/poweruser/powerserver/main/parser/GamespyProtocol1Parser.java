@@ -32,6 +32,11 @@ public class GamespyProtocol1Parser implements DataParserInterface {
             String value = split[i + 1];
             this.processPair(map, game, key, value, message);
             if(this.isKeyFinalKey(key)) {
+                if(i + 3 < split.length) {
+                    key = split[i + 2];
+                    value = split[i + 3];
+                    this.processPair(map, game, key, value, message);
+                }
                 break;
             }
         }
@@ -54,5 +59,9 @@ public class GamespyProtocol1Parser implements DataParserInterface {
 
     private boolean isKeyFinalKey(String key) {
         return GeneralDataKeysEnum.FINAL.toString().equalsIgnoreCase(key);
+    }
+
+    private boolean isKeyQueryKey(String key) {
+        return GeneralDataKeysEnum.QUERYID.toString().equalsIgnoreCase(key);
     }
 }

@@ -134,7 +134,7 @@ public class PowerServer extends Observable {
             } else {
                 ServerList list = game.getServerList();
                 InetSocketAddress sender = message.getSender();
-                InetSocketAddress server = data.constructQuerySocketAddress(sender.getAddress());
+                InetSocketAddress server = data.constructQuerySocketAddress(sender);
                 if(server != null) {
                     UDPSender udpSender = this.udpManager.getUDPSender();
                     if(data.isHeartBeat()) {

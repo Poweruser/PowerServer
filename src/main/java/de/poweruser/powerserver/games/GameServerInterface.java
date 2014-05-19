@@ -16,4 +16,6 @@ public interface GameServerInterface {
     public int getQueryPort();
 
     public boolean checkLastHeartbeat(long timeDiff);
+
+    public boolean hasAnsweredToQuery();
 }

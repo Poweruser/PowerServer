@@ -13,8 +13,10 @@ public abstract class GameServerBase implements GameServerInterface {
     private int queryPort;
     private long lastHeartbeat;
     private QueryBuffer queryBuffer;
+    private boolean hasAnswered;
 
     public GameServerBase() {
+        this.hasAnswered = false;
         this.queryBuffer = new QueryBuffer();
     }
 
@@ -65,6 +67,18 @@ public abstract class GameServerBase implements GameServerInterface {
         if(verifier.verify(queryPort)) {
             this.queryPort = verifier.getVerifiedValue();
         }
+    }
+
+    @Override
+    public void processNewMessage(MessageData completeQuery) {
+        if(completeQuery.isQueryAnswer()) {
+            this.hasAnswered = true;
+        }
+    }
+
+    @Override
+    public boolean hasAnsweredToQuery() {
+        return this.hasAnswered;
     }
 
     private class QueryBuffer {

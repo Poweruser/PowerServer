@@ -53,12 +53,12 @@ public class MessageData implements CombineableInterface<MessageData> {
         return this.containsKey(GeneralDataKeysEnum.QUERYID);
     }
 
-    public InetSocketAddress constructQuerySocketAddress(InetAddress sender) {
+    public InetSocketAddress constructQuerySocketAddress(InetSocketAddress sender) {
         InetAddress server = null;
         int queryPort = 0;
         IntVerify intVerifier = new IntVerify(1024, 65535);
         if(this.isHeartBeat()) {
-            server = sender;
+            server = sender.getAddress();
             if(intVerifier.verify(this.getData(GeneralDataKeysEnum.HEARTBEAT))) {
                 queryPort = intVerifier.getVerifiedValue();
             }
@@ -70,7 +70,7 @@ public class MessageData implements CombineableInterface<MessageData> {
             if(intVerifier.verify(this.getData(GeneralDataKeysEnum.HEARTBEATBROADCAST))) {
                 queryPort = intVerifier.getVerifiedValue();
             }
-        }
+        } else if(this.isQueryAnswer()) { return sender; }
         if(server != null && queryPort != 0) { return new InetSocketAddress(server, queryPort); }
         return null;
     }

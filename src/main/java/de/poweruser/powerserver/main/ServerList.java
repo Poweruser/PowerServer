@@ -43,7 +43,7 @@ public class ServerList {
 
     public void incomingQueryAnswer(InetSocketAddress sender, MessageData data) {
         GameServerInterface server = this.getOrCreateServer(sender);
-        server.processNewMessage(data);
+        server.incomingQueryAnswer(sender, data);
     }
 
     private GameServerInterface getOrCreateServer(InetSocketAddress server) {
@@ -62,7 +62,8 @@ public class ServerList {
         Iterator<Entry<InetSocketAddress, GameServerInterface>> iter = this.servers.entrySet().iterator();
         while(iter.hasNext()) {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
-            if(entry.getValue().checkLastHeartbeat(allowedServerTimeout)) {
+            GameServerInterface gsi = entry.getValue();
+            if(gsi.hasAnsweredToQuery() && gsi.checkLastHeartbeat(allowedServerTimeout)) {
                 list.add(entry.getKey());
             }
         }

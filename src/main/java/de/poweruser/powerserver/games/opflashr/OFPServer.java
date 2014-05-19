@@ -7,7 +7,7 @@ public class OFPServer extends GameServerBase {
 
     @Override
     public void processNewMessage(MessageData message) {
-        // TODO Auto-generated method stub
+        super.processNewMessage(message);
     }
 
 }
