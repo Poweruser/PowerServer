@@ -15,21 +15,21 @@ public class Main {
                 gui = true;
             }
         }
-        MainWindow m = null;
-        PowerServer server = null;
         Logger logger = new Logger(new File("server.log"));
+        MainWindow m = null;
+        if(gui) {
+            m = new MainWindow();
+            m.setVisible(true);
+        }
+        PowerServer server = null;
         logger.log("Starting the master server ...");
         try {
             server = new PowerServer();
+            m.setModel(server);
         } catch(IOException e) {
             Logger.logStackTraceStatic("Failed to set up the server: " + e.toString(), e);
         }
         if(server != null) {
-            if(gui) {
-                m = new MainWindow(server);
-                m.setVisible(true);
-                server.addObserver(m);
-            }
             try {
                 server.mainloop();
                 logger.log("Shutting down the master server ...");

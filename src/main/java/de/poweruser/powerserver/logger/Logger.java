@@ -16,8 +16,10 @@ public class Logger {
     private File logFile;
     private SimpleDateFormat dateFormat;
     private static Logger instance;
+    public static boolean guiInUse;
 
     public Logger(File logFile) throws IOException {
+        this.guiInUse = false;
         this.instance = this;
         this.logFile = logFile;
         if(!this.logFile.exists()) {
@@ -57,11 +59,15 @@ public class Logger {
     }
 
     private synchronized void writeToFile(String message) {
+        String output = this.currentTimeString() + " " + message;
+        if(guiInUse) {
+            System.out.println(output);
+        }
         BufferedWriter bw = null;
         try {
             bw = new BufferedWriter(new FileWriter(this.logFile, true));
             bw.newLine();
-            bw.write(this.currentTimeString() + " " + message);
+            bw.write(output);
             bw.flush();
         } catch(IOException e) {}
         if(bw != null) {
