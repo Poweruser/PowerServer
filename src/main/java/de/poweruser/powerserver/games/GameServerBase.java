@@ -1,9 +1,11 @@
 package de.poweruser.powerserver.games;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.MessageData;
 import de.poweruser.powerserver.main.QueryInfo;
 import de.poweruser.powerserver.main.parser.dataverification.IntVerify;
@@ -15,8 +17,11 @@ public abstract class GameServerBase implements GameServerInterface {
     private QueryBuffer queryBuffer;
     private boolean hasAnswered;
     protected MessageData queryInfo;
+    protected GameBase game;
+    protected InetAddress serverAddress;
 
-    public GameServerBase() {
+    public GameServerBase(GameBase game) {
+        this.game = game;
         this.queryInfo = new MessageData();
         this.hasAnswered = false;
         this.queryBuffer = new QueryBuffer();
@@ -26,6 +31,7 @@ public abstract class GameServerBase implements GameServerInterface {
     public void incomingHeartbeat(InetSocketAddress serverAddress, MessageData data) {
         if(data.isHeartBeat()) {
             this.lastHeartbeat = System.currentTimeMillis();
+            this.serverAddress = serverAddress.getAddress();
             this.setQueryPort(data);
         }
     }
@@ -34,6 +40,7 @@ public abstract class GameServerBase implements GameServerInterface {
     public void incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) {
         if(data.isHeartBeatBroadcast()) {
             this.lastHeartbeat = System.currentTimeMillis();
+            this.serverAddress = serverAddress.getAddress();
             this.setQueryPort(data);
         }
     }
@@ -75,6 +82,14 @@ public abstract class GameServerBase implements GameServerInterface {
     public void processNewMessage(MessageData completeQuery) {
         if(completeQuery.isQueryAnswer()) {
             this.queryInfo.update(completeQuery);
+            if(!this.hasAnswered) {
+                String logMessage = "New server for game " + this.game.getGameDisplayName(this) + ": " + this.serverAddress.getHostAddress();
+                String gamePort = this.game.getGamePort(this);
+                if(gamePort != null) {
+                    logMessage += ":" + gamePort;
+                }
+                Logger.logStatic(logMessage);
+            }
             this.hasAnswered = true;
         }
     }
@@ -82,6 +97,10 @@ public abstract class GameServerBase implements GameServerInterface {
     @Override
     public boolean hasAnsweredToQuery() {
         return this.hasAnswered;
+    }
+
+    public MessageData getQueryInfo() {
+        return this.queryInfo;
     }
 
     private class QueryBuffer {

@@ -13,6 +13,7 @@ public enum DataKeyEnum implements DataKeysInterface {
     GAMEMODE("gamemode"),
     GAMENAME("gamename"),
     GAMESTATE("gstate", new IntVerify(0, 14)),
+    GAMEVERSION("gamever"),
     GROUPID("groupid", new IntVerify(261, 261)),
     HEARTBEAT("heartbeat", new IntVerify(1024, 65535)),
     HEARTBEATBROADCAST("heartbeatbroadcast", new IntVerify(1024, 65535)),

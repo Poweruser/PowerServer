@@ -2,10 +2,14 @@ package de.poweruser.powerserver.games.opflashr;
 
 import de.poweruser.powerserver.games.DataKeysInterface;
 import de.poweruser.powerserver.games.GameBase;
+import de.poweruser.powerserver.games.GameServerBase;
 import de.poweruser.powerserver.games.GameServerInterface;
+import de.poweruser.powerserver.main.MessageData;
 import de.poweruser.powerserver.main.parser.DataParserInterface;
 
 public class OperationFlashpointResistance extends GameBase {
+
+    private String displayName = "Operation Flashpoint:Resistance";
 
     public OperationFlashpointResistance(String gamename, String gamespyKey, DataParserInterface parser) {
         super(gamename, gamespyKey, parser, DataKeyEnum.values());
@@ -42,6 +46,32 @@ public class OperationFlashpointResistance extends GameBase {
 
     @Override
     public GameServerInterface createNewServer() {
-        return new OFPServer();
+        return new OFPServer(this);
+    }
+
+    @Override
+    public String getGameDisplayName(GameServerBase gameServer) {
+        MessageData data = gameServer.getQueryInfo();
+        String out = this.displayName;
+        String version = null;
+        if(data.containsKey(DataKeyEnum.GAMEVERSION)) {
+            version = data.getData(DataKeyEnum.GAMEVERSION);
+        } else if(data.containsKey(DataKeyEnum.ACTUALVERSION)) {
+            version = data.getData(DataKeyEnum.ACTUALVERSION);
+        }
+        if(version != null) {
+            out += " (version " + version + ")";
+        }
+        return out;
+    }
+
+    @Override
+    public String getGamePort(GameServerBase gameServer) {
+        MessageData data = gameServer.getQueryInfo();
+        String out = null;
+        if(data.containsKey(DataKeyEnum.HOSTPORT)) {
+            out = data.getData(DataKeyEnum.HOSTPORT);
+        }
+        return out;
     }
 }
