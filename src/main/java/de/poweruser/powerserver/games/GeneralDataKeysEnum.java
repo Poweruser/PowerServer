@@ -1,5 +1,6 @@
 package de.poweruser.powerserver.games;
 
+import de.poweruser.powerserver.main.parser.dataverification.DummyVerify;
 import de.poweruser.powerserver.main.parser.dataverification.IPAddressVerify;
 import de.poweruser.powerserver.main.parser.dataverification.IntVerify;
 import de.poweruser.powerserver.main.parser.dataverification.QueryIdFormatVerify;
@@ -47,6 +48,7 @@ public enum GeneralDataKeysEnum implements DataKeysInterface {
     }
 
     public Object getVerifierCopy() {
+        if(this.verifier == null) { return new DummyVerify(); }
         return this.verifier.createCopy();
     }
 }

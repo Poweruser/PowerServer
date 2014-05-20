@@ -1,6 +1,7 @@
 package de.poweruser.powerserver.games.opflashr;
 
 import de.poweruser.powerserver.games.DataKeysInterface;
+import de.poweruser.powerserver.main.parser.dataverification.DummyVerify;
 import de.poweruser.powerserver.main.parser.dataverification.IntVerify;
 import de.poweruser.powerserver.main.parser.dataverification.QueryIdFormatVerify;
 import de.poweruser.powerserver.main.parser.dataverification.StringVerify;
@@ -64,5 +65,10 @@ public enum DataKeyEnum implements DataKeysInterface {
         } else {
             return false;
         }
+    }
+
+    public Object getVerifierCopy() {
+        if(this.verifier == null) { return new DummyVerify(); }
+        return this.verifier.createCopy();
     }
 }
