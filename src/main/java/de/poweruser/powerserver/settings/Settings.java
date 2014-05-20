@@ -123,10 +123,20 @@ public class Settings {
                 try {
                     input = new BufferedReader(new InputStreamReader(list.openStream()));
                     String inputLine = null;
+                    boolean read = false;
                     while((inputLine = input.readLine()) != null) {
                         inputLine = inputLine.trim().toLowerCase();
-                        if(!inputLine.startsWith("#") && !this.masterServers.contains(inputLine)) {
-                            this.masterServers.add(inputLine);
+                        if(inputLine.startsWith("[\\online]")) {
+                            read = false;
+                            break;
+                        }
+                        if(read) {
+                            if(!this.masterServers.contains(inputLine)) {
+                                this.masterServers.add(inputLine);
+                            }
+                        }
+                        if(inputLine.startsWith("[online]")) {
+                            read = true;
                         }
                     }
                 } catch(IOException e) {
