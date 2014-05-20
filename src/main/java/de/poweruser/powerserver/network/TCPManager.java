@@ -13,6 +13,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import de.poweruser.powerserver.logger.Logger;
+import de.poweruser.powerserver.network.QueryConnection.State;
 
 public class TCPManager implements Runnable {
 
@@ -86,6 +87,15 @@ public class TCPManager implements Runnable {
             if(c.check()) {
                 this.guard.untrackConnection(c);
                 iter.remove();
+                State failed = c.getFailedState();
+                if(failed != null) {
+                    String logMessage = "A server list query failed. State: " + failed.toString();
+                    String failMessage = c.getFailMessage();
+                    if(failMessage != null) {
+                        logMessage += " Reason: " + failMessage;
+                    }
+                    Logger.logStatic(logMessage);
+                }
             }
         }
     }

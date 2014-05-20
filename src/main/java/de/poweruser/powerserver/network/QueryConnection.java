@@ -22,7 +22,7 @@ import de.poweruser.powerserver.main.parser.dataverification.IntVerify;
 
 public class QueryConnection {
 
-    private enum State {
+    public enum State {
         NEW,
         CHALLENGE_SENT,
         CHALLENGE_VALID,
@@ -30,13 +30,17 @@ public class QueryConnection {
         QUERY_RECEIVED,
         QUERY_INVALID,
         LIST_SENT,
+        SENDING_FAILED,
         TOOMUCHDATA,
         TIMEOUT,
+        SUCCESSFUL,
         DONE;
     }
 
     private Socket client;
     private State state;
+    private State failedState;
+    private String failMessage;
     private long lastStateChange;
     private DataInputStream in;
     private DataOutputStream out;
@@ -48,6 +52,8 @@ public class QueryConnection {
 
     public QueryConnection(Socket client) throws IOException {
         this.client = client;
+        this.failedState = null;
+        this.failMessage = null;
         this.changeState(State.NEW);
         this.in = new DataInputStream(new BufferedInputStream(this.client.getInputStream()));
         this.out = new DataOutputStream(new BufferedOutputStream(this.client.getOutputStream()));
@@ -71,7 +77,11 @@ public class QueryConnection {
 
     public boolean check() {
         if(!this.checkLastStateChange(TimeUnit.SECONDS, 10)) {
-            this.changeState(State.TIMEOUT);
+            if(this.state.equals(State.LIST_SENT)) {
+                this.changeState(State.SUCCESSFUL);
+            } else {
+                this.changeStateFail(State.TIMEOUT, "The connection timed out. Last state: " + this.state.toString());
+            }
         }
         switch(this.state) {
             case NEW:
@@ -82,34 +92,41 @@ public class QueryConnection {
                 break;
             case CHALLENGE_SENT:
                 this.readInput();
-                Boolean response = this.checkChallengeResponse();
+                Result response = this.checkChallengeResponse();
                 if(response != null) {
-                    if(response.booleanValue()) {
+                    if(response.getResult()) {
                         this.changeState(State.CHALLENGE_VALID);
                     } else {
-                        this.changeState(State.CHALLENGE_INVALID);
+                        this.changeStateFail(State.CHALLENGE_INVALID, response.getMessage());
                     }
                 }
                 break;
             case CHALLENGE_VALID:
                 this.readInput();
-                Boolean query = this.checkListQuery();
+                Result query = this.checkListQuery();
                 if(query != null) {
-                    if(query.booleanValue()) {
+                    if(query.getResult()) {
                         this.changeState(State.QUERY_RECEIVED);
                     } else {
-                        this.changeState(State.QUERY_INVALID);
+                        this.changeStateFail(State.QUERY_INVALID, query.getMessage());
                     }
                 }
                 break;
             case QUERY_RECEIVED:
-                this.sendServerList();
+                Result sent = this.sendServerList();
+                if(sent.getResult()) {
+                    this.changeState(State.LIST_SENT);
+                } else {
+                    this.changeStateFail(State.SENDING_FAILED, sent.getMessage());
+                }
+                break;
             case LIST_SENT:
                 break;
             case QUERY_INVALID:
             case CHALLENGE_INVALID:
             case TOOMUCHDATA:
             case TIMEOUT:
+            case SUCCESSFUL:
                 this.close();
                 this.changeState(State.DONE);
                 break;
@@ -121,25 +138,33 @@ public class QueryConnection {
         return false;
     }
 
-    private void sendServerList() {
+    private Result sendServerList() {
+        Result out = new Result(true);
         if(this.requestedGame != null && this.encType != null) {
             EncoderInterface encoder = this.encType.getEncoder();
-            if(encoder == null) { return; }
-            byte[] data = null;
-            try {
-                data = encoder.encode(this.requestedGame.getActiveServers());
-            } catch(IOException e) {
-                Logger.logStackTraceStatic("Error while encoding a serverlist with Encoder " + encoder.getClass().getSimpleName() + " for EncType " + this.encType.toString() + ": " + e.toString(), e);
+            if(encoder != null) {
+                byte[] data = null;
+                try {
+                    data = encoder.encode(this.requestedGame.getActiveServers());
+                } catch(IOException e) {
+                    Logger.logStackTraceStatic("Error while encoding a serverlist with Encoder " + encoder.getClass().getSimpleName() + " for EncType " + this.encType.toString() + ": " + e.toString(), e);
+                }
+                if(data != null) {
+                    this.sendData(data);
+                }
+            } else {
+                out = new Result(false, "No encoder available yet for EncType: " + this.encType.toString());
             }
-            if(data != null) {
-                this.sendData(data);
-                this.changeState(State.LIST_SENT);
-            }
+        } else if(this.requestedGame == null) {
+            out = new Result(false, "The query did not mention a game");
+        } else if(this.encType == null) {
+            out = new Result(false, "The query did not mention an EncType");
         }
+        return out;
     }
 
-    private Boolean checkListQuery() {
-        Boolean out = null;
+    private Result checkListQuery() {
+        Result out = null;
         String str = new String(this.receiveBuffer, 0, this.receivePos);
         GamespyProtocol1Parser parser = new GamespyProtocol1Parser();
         MessageData data = null;
@@ -151,16 +176,17 @@ public class QueryConnection {
         }
         if(data != null) {
             if(data.containsKey(GeneralDataKeysEnum.GAMENAME) && data.containsKey(GeneralDataKeysEnum.LIST) && data.containsKey(GeneralDataKeysEnum.FINAL)) {
-                GameBase game = GameBase.getGameForGameName(data.getData(GeneralDataKeysEnum.GAMENAME));
+                String gameString = data.getData(GeneralDataKeysEnum.GAMENAME);
+                GameBase game = GameBase.getGameForGameName(gameString);
                 if(game != null) {
                     this.requestedGame = game;
                     EncType enctype = this.getEncTypeFromData(data);
                     if(enctype != null) {
                         this.encType = enctype;
                     }
-                    out = new Boolean(true);
+                    out = new Result(true);
                 } else {
-                    out = new Boolean(false);
+                    out = new Result(false, "Could not find a matching game for \"" + gameString + "\" in the list query: " + str);
                 }
                 this.clearBufferUpToKey(GeneralDataKeysEnum.FINAL);
             }
@@ -175,6 +201,8 @@ public class QueryConnection {
                 int newSize = this.receivePos + len;
                 if(newSize > this.receiveBuffer.length) {
                     if(newSize > 1024) {
+                        this.failedState = this.state;
+                        this.failMessage = "The client has sent too much data";
                         this.changeState(State.TOOMUCHDATA);
                         return;
                     }
@@ -190,8 +218,8 @@ public class QueryConnection {
         }
     }
 
-    private Boolean checkChallengeResponse() {
-        Boolean out = null;
+    private Result checkChallengeResponse() {
+        Result out = null;
         String str = new String(this.receiveBuffer, 0, this.receivePos);
         if(str.isEmpty()) { return out; }
         GamespyProtocol1Parser parser = new GamespyProtocol1Parser();
@@ -204,19 +232,21 @@ public class QueryConnection {
         }
         if(data != null) {
             if(data.containsKey(GeneralDataKeysEnum.GAMENAME) && data.containsKey(GeneralDataKeysEnum.FINAL) && data.containsKey(GeneralDataKeysEnum.ENCTYPE) && data.containsKey(GeneralDataKeysEnum.VALIDATE)) {
-                String gamename = data.getData(GeneralDataKeysEnum.GAMENAME);
+                String gameString = data.getData(GeneralDataKeysEnum.GAMENAME);
                 EncType enctype = this.getEncTypeFromData(data);
                 String response = data.getData(GeneralDataKeysEnum.VALIDATE);
-                GameBase game = GameBase.getGameForGameName(gamename);
+                GameBase game = GameBase.getGameForGameName(gameString);
                 if(game != null && enctype != null) {
                     if(this.validation.verifyChallengeResponse(game, enctype, response)) {
                         this.encType = enctype;
-                        out = new Boolean(true);
+                        out = new Result(true);
                     } else {
-                        out = new Boolean(false);
+                        out = new Result(false, "Validation failed. EncType: " + enctype.toString() + " Secure: " + this.validation.getChallengeString() + " Received: " + response + " Should have been: " + this.validation.getValidationString());
                     }
-                } else {
-                    out = new Boolean(false);
+                } else if(game == null) {
+                    out = new Result(false, "Could not find a matching game for \"" + gameString + "\" in the challenge response: " + str);
+                } else if(enctype == null) {
+                    out = new Result(false, "Could not recognise the EncType \"" + data.getData(GeneralDataKeysEnum.ENCTYPE) + "\" in the challenge response: " + str);
                 }
                 this.clearBufferUpToKey(GeneralDataKeysEnum.FINAL);
             }
@@ -265,7 +295,43 @@ public class QueryConnection {
         this.state = state;
     }
 
+    private void changeStateFail(State state, String message) {
+        this.changeState(state);
+        this.failedState = state;
+        this.failMessage = message;
+    }
+
     private boolean checkLastStateChange(TimeUnit unit, int value) {
         return (System.currentTimeMillis() - this.lastStateChange) < TimeUnit.MILLISECONDS.convert(value, unit);
+    }
+
+    public State getFailedState() {
+        return this.failedState;
+    }
+
+    public String getFailMessage() {
+        return this.failMessage;
+    }
+
+    private class Result {
+        private String message;
+        private boolean result;
+
+        public Result(boolean result) {
+            this.result = result;
+        }
+
+        public Result(boolean result, String message) {
+            this(result);
+            this.message = message;
+        }
+
+        public boolean getResult() {
+            return this.result;
+        }
+
+        public String getMessage() {
+            return this.message;
+        }
     }
 }
