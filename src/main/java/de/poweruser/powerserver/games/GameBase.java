@@ -86,6 +86,8 @@ public abstract class GameBase implements GameInterface {
             builder.append("\\");
             builder.append(server.getAddress().getHostAddress());
             builder.append("\\");
+            builder.append(GeneralDataKeysEnum.GAMENAME.getKeyString());
+            builder.append("\\");
             builder.append(this.gamename);
             if(data.containsKey(GeneralDataKeysEnum.STATECHANGED)) {
                 builder.append("\\");
