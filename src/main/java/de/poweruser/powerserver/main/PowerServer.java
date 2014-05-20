@@ -110,6 +110,9 @@ public class PowerServer extends Observable {
                     this.handleIncomingMessage(this.udpManager.takeFirstMessage());
                 }
             }
+            for(GameBase gb: this.supportedGames) {
+                gb.getServerList().clearOutDatedServers();
+            }
             if(this.tcpManager != null) {
                 this.tcpManager.processConnections();
             }
