@@ -87,6 +87,11 @@ public class MessageData implements CombineableInterface<MessageData> {
         return combination;
     }
 
+    @Override
+    public void update(MessageData combineable) {
+        this.map.putAll(combineable.map);
+    }
+
     public QueryInfo getQueryInfo() {
         if(this.isQueryAnswer()) {
             QueryIdFormatVerify verifier = new QueryIdFormatVerify();

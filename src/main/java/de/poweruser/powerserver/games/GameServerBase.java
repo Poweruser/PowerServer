@@ -14,8 +14,10 @@ public abstract class GameServerBase implements GameServerInterface {
     private long lastHeartbeat;
     private QueryBuffer queryBuffer;
     private boolean hasAnswered;
+    protected MessageData queryInfo;
 
     public GameServerBase() {
+        this.queryInfo = new MessageData();
         this.hasAnswered = false;
         this.queryBuffer = new QueryBuffer();
     }
@@ -72,6 +74,7 @@ public abstract class GameServerBase implements GameServerInterface {
     @Override
     public void processNewMessage(MessageData completeQuery) {
         if(completeQuery.isQueryAnswer()) {
+            this.queryInfo.update(completeQuery);
             this.hasAnswered = true;
         }
     }

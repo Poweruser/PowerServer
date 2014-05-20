@@ -4,4 +4,6 @@ public interface CombineableInterface<T> {
 
     public T combine(T combineable);
 
+    public void update(T combineable);
+
 }
