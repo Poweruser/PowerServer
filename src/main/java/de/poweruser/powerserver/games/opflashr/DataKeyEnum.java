@@ -9,7 +9,7 @@ import de.poweruser.powerserver.main.parser.dataverification.VerificationInterfa
 
 public enum DataKeyEnum implements DataKeysInterface {
     ACTUALVERSION("actver", new IntVerify(100, Integer.MAX_VALUE)),
-    EQUALMODREQUIRED("equalModReq", new IntVerify(0, 1)),
+    EQUALMODREQUIRED("equalModRequired", new IntVerify(0, 1)),
     FINAL("final", new StringVerify(new String[] { "" }, false)),
     GAMEMODE("gamemode"),
     GAMENAME("gamename"),
