@@ -16,9 +16,11 @@ public enum GeneralDataKeysEnum implements DataKeysInterface {
     HEARTBEATBROADCAST("heartbeatbroadcast", new IntVerify(1024, 65535)),
     HOST("host", new IPAddressVerify()),
     LIST("list", new StringVerify(new String[] { "cmp" }, false)),
+    LOCATION("location", new IntVerify(0, 20)),
     QUERYID("queryid", new QueryIdFormatVerify()),
     STATECHANGED("statechanged", new IntVerify(0, 1)),
-    VALIDATE("validate", new StringLengthVerify(8, 8));
+    VALIDATE("validate", new StringLengthVerify(8, 8)),
+    WHERE("where");
 
     private String key;
     private VerificationInterface verifier;
