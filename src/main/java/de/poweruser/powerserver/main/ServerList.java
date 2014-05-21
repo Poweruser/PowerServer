@@ -63,20 +63,14 @@ public class ServerList {
         while(iter.hasNext()) {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
             GameServerInterface gsi = entry.getValue();
-            if(gsi.hasAnsweredToQuery() && gsi.checkLastHeartbeat(allowedServerTimeout)) {
-                list.add(entry.getKey());
-            }
-        }
-        return list;
-    }
-
-    public void clearOutDatedServers() {
-        Iterator<Entry<InetSocketAddress, GameServerInterface>> iter = this.servers.entrySet().iterator();
-        while(iter.hasNext()) {
-            Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
-            if(!entry.getValue().checkLastHeartbeat(allowedServerTimeout)) {
+            if(gsi.checkLastHeartbeat(allowedServerTimeout)) {
+                if(gsi.hasAnsweredToQuery()) {
+                    list.add(entry.getKey());
+                }
+            } else {
                 iter.remove();
             }
         }
+        return list;
     }
 }
