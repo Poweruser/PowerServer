@@ -282,12 +282,14 @@ public class QueryConnection {
 
     private void clearBufferUpToKey(GeneralDataKeysEnum key) {
         String content = new String(this.receiveBuffer, 0, this.receivePos);
-        String str = "\\" + key.toString();
-        int index = content.indexOf(str);
-        int newStart = index + str.length();
-        int newLength = this.receivePos - newStart;
-        System.arraycopy(this.receiveBuffer, newStart, this.receiveBuffer, 0, newLength);
-        this.receivePos = newLength;
+        String str = "\\" + key.getKeyString();
+        int index = content.toLowerCase().indexOf(str);
+        if(index >= 0) {
+            int newStart = index + str.length();
+            int newLength = this.receivePos - newStart;
+            System.arraycopy(this.receiveBuffer, newStart, this.receiveBuffer, 0, newLength);
+            this.receivePos = newLength;
+        }
     }
 
     private void changeState(State state) {
