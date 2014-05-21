@@ -29,6 +29,9 @@ public abstract class GameBase implements GameInterface {
         this.gamespyKey = gamespyKey;
         this.parser = parser;
         this.keyMap = new HashMap<String, DataKeysInterface>();
+        for(GeneralDataKeysEnum datakey: GeneralDataKeysEnum.values()) {
+            this.keyMap.put(datakey.getKeyString(), datakey);
+        }
         for(DataKeysInterface d: dataKeys) {
             this.keyMap.put(d.getKeyString(), d);
         }
