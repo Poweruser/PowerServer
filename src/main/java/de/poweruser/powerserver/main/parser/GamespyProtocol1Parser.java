@@ -40,8 +40,10 @@ public class GamespyProtocol1Parser implements DataParserInterface {
             if(this.isKeyFinalKey(key)) {
                 if(i + 3 < split.length) {
                     key = split[i + 2];
-                    value = split[i + 3];
-                    this.processPair(map, key, value, message);
+                    if(this.isKeyQueryKey(key)) {
+                        value = split[i + 3];
+                        this.processPair(map, key, value, message);
+                    }
                 }
                 break;
             }
