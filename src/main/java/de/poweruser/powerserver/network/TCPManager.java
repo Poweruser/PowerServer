@@ -149,8 +149,6 @@ public class TCPManager implements Runnable {
                     this.ban(address);
                 }
                 return allowed;
-            } else {
-                this.ban(address);
             }
             return true;
         }
