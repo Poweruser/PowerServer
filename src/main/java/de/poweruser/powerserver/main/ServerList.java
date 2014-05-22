@@ -25,20 +25,22 @@ public class ServerList {
         this.servers = new HashMap<InetSocketAddress, GameServerInterface>();
     }
 
-    public void incomingHeartBeat(InetSocketAddress serverAddress, MessageData data) {
+    public boolean incomingHeartBeat(InetSocketAddress serverAddress, MessageData data) {
         if(serverAddress != null) {
             GameServerInterface server = this.getOrCreateServer(serverAddress);
-            server.incomingHeartbeat(serverAddress, data);
+            return server.incomingHeartbeat(serverAddress, data);
         }
+        return false;
     }
 
-    public void incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) {
+    public boolean incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) {
         if(data.containsKey(GeneralDataKeysEnum.HEARTBEATBROADCAST) && data.containsKey(GeneralDataKeysEnum.HOST)) {
             GameServerInterface server = this.getOrCreateServer(serverAddress);
-            server.incomingHeartBeatBroadcast(serverAddress, data);
+            return server.incomingHeartBeatBroadcast(serverAddress, data);
         } else {
             Logger.logStatic("Got a heartbeatbroadcast, that is missing the host key");
         }
+        return false;
     }
 
     public void incomingQueryAnswer(InetSocketAddress sender, MessageData data) {
