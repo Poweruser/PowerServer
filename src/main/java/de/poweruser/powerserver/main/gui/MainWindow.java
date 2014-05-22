@@ -53,8 +53,9 @@ public class MainWindow extends JFrame implements Observer {
         this.add(pane, BorderLayout.CENTER);
         JTextField textField = new JTextField();
         this.add(textField, BorderLayout.SOUTH);
-        this.setMinimumSize(new Dimension(500, 400));
+        this.setMinimumSize(new Dimension(600, 400));
         this.setResizable(true);
+        this.setLocationRelativeTo(null);
         pack();
         TextAreaOutputStream taos = new TextAreaOutputStream(textArea);
         PrintStream ps = new PrintStream(taos);
