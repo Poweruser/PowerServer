@@ -60,6 +60,9 @@ public class OperationFlashpointResistance extends GameBase {
             version = data.getData(DataKeyEnum.ACTUALVERSION);
         }
         if(version != null) {
+            if(version.equals("1.99")) {
+                out = "Arma:ColdWarAssault";
+            }
             out += " (version " + version + ")";
         }
         return out;
