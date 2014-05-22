@@ -75,6 +75,11 @@ public class QueryConnection {
         } catch(IOException e) {}
     }
 
+    public void forceClose() {
+        this.close();
+        this.changeState(State.DONE);
+    }
+
     public boolean check() {
         if(!this.checkLastStateChange(TimeUnit.SECONDS, 10)) {
             if(this.state.equals(State.LIST_SENT)) {

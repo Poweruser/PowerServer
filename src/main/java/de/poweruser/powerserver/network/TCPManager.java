@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.network.QueryConnection.State;
@@ -21,7 +22,7 @@ public class TCPManager implements Runnable {
     private Queue<QueryConnection> connections;
     private boolean running;
     private Thread thread;
-    private final int CONNECTION_LIMIT = 10;
+    private final int CONNECTION_LIMIT = 5;
     private ConnectionGuard guard;
 
     public TCPManager(int port) throws IOException {
@@ -102,9 +103,14 @@ public class TCPManager implements Runnable {
 
     private class ConnectionGuard {
         private HashMap<InetAddress, List<QueryConnection>> map;
+        private HashMap<InetAddress, Long> banlist;
+
+        private final long BAN_DURATION = 15L;
+        private final TimeUnit BAN_UNIT = TimeUnit.MINUTES;
 
         public ConnectionGuard() {
             this.map = new HashMap<InetAddress, List<QueryConnection>>();
+            this.banlist = new HashMap<InetAddress, Long>();
         }
 
         public void untrackConnection(QueryConnection c) {
@@ -127,12 +133,47 @@ public class TCPManager implements Runnable {
         }
 
         public boolean isAnotherConnectionAllowed(Socket client) {
-            InetAddress a = client.getInetAddress();
-            if(this.map.containsKey(a)) {
-                List<QueryConnection> list = this.map.get(client.getInetAddress());
-                return (list.size() <= CONNECTION_LIMIT);
+            InetAddress address = client.getInetAddress();
+            if(this.isBanned(address)) {
+                if(this.canBanBeLifted(address, 15L, TimeUnit.MINUTES)) {
+                    this.banlist.remove(address);
+                } else {
+                    return false;
+                }
+            }
+
+            if(this.map.containsKey(address)) {
+                List<QueryConnection> list = this.map.get(address);
+                boolean allowed = (list.size() < CONNECTION_LIMIT);
+                if(!allowed) {
+                    this.ban(address);
+                }
+                return allowed;
+            } else {
+                this.ban(address);
             }
             return true;
+        }
+
+        private void ban(InetAddress address) {
+            this.banlist.put(address, System.currentTimeMillis());
+            if(this.map.containsKey(address)) {
+                List<QueryConnection> list = this.map.get(address);
+                for(QueryConnection q: list) {
+                    q.forceClose();
+                }
+            }
+            Logger.logStatic("Temporary ban of " + BAN_DURATION + " " + BAN_UNIT.toString().toLowerCase() + " for " + address + ". Too many open connections");
+        }
+
+        private boolean canBanBeLifted(InetAddress address, long duration, TimeUnit unit) {
+            long time = TimeUnit.MILLISECONDS.convert(duration, unit);
+            if(this.isBanned(address)) { return (System.currentTimeMillis() - time) > this.banlist.get(address); }
+            return true;
+        }
+
+        public boolean isBanned(InetAddress address) {
+            return this.banlist.containsKey(address);
         }
     }
 
