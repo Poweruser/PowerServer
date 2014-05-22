@@ -18,4 +18,6 @@ public interface GameServerInterface {
     public boolean checkLastHeartbeat(long timeDiff);
 
     public boolean hasAnsweredToQuery();
+
+    public boolean isBroadcastedServer();
 }

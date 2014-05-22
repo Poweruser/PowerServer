@@ -48,6 +48,17 @@ public class ServerList {
         server.incomingQueryAnswer(sender, data);
     }
 
+    private GameServerInterface getServer(InetSocketAddress server) {
+        if(this.servers.containsKey(server)) { return this.servers.get(server); }
+        return null;
+    }
+
+    public boolean isBroadcastedServer(InetSocketAddress server) {
+        GameServerInterface gameServer = this.getServer(server);
+        if(gameServer != null) { return gameServer.isBroadcastedServer(); }
+        return false;
+    }
+
     private GameServerInterface getOrCreateServer(InetSocketAddress server) {
         GameServerInterface gameServer;
         if(!this.servers.containsKey(server)) {

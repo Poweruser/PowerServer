@@ -14,6 +14,7 @@ public abstract class GameServerBase implements GameServerInterface {
 
     private int queryPort;
     private long lastHeartbeat;
+    private boolean realHeartbeat;
     private QueryBuffer queryBuffer;
     private boolean hasAnswered;
     protected MessageData queryInfo;
@@ -21,7 +22,8 @@ public abstract class GameServerBase implements GameServerInterface {
     protected InetAddress serverAddress;
 
     public GameServerBase(GameBase game) {
-        this.lastHeartbeat = -1;
+        this.lastHeartbeat = -1L;
+        this.realHeartbeat = false;
         this.game = game;
         this.queryInfo = new MessageData();
         this.hasAnswered = false;
@@ -31,6 +33,7 @@ public abstract class GameServerBase implements GameServerInterface {
     @Override
     public boolean incomingHeartbeat(InetSocketAddress serverAddress, MessageData data) {
         if(data.isHeartBeat()) {
+            this.realHeartbeat = true;
             this.serverAddress = serverAddress.getAddress();
             this.setQueryPort(data);
             return this.newHeartBeat();
@@ -46,8 +49,7 @@ public abstract class GameServerBase implements GameServerInterface {
 
     @Override
     public boolean incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) {
-        if(data.isHeartBeatBroadcast()) {
-            this.lastHeartbeat = System.currentTimeMillis();
+        if(data.isHeartBeatBroadcast() && this.isBroadcastedServer()) {
             this.serverAddress = serverAddress.getAddress();
             this.setQueryPort(data);
             return this.newHeartBeat();
@@ -111,6 +113,11 @@ public abstract class GameServerBase implements GameServerInterface {
 
     public MessageData getQueryInfo() {
         return this.queryInfo;
+    }
+
+    @Override
+    public boolean isBroadcastedServer() {
+        return !this.realHeartbeat;
     }
 
     private class QueryBuffer {
