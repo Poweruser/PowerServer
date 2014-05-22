@@ -9,10 +9,10 @@ import de.poweruser.powerserver.main.gui.MainWindow;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        boolean gui = false;
+        boolean gui = true;
         for(String s: args) {
-            if(s.equalsIgnoreCase("-gui")) {
-                gui = true;
+            if(s.equalsIgnoreCase("-nogui")) {
+                gui = false;
             }
         }
         Logger logger = new Logger(new File("server.log"));
@@ -25,7 +25,9 @@ public class Main {
         logger.log("Starting the master server ...");
         try {
             server = new PowerServer();
-            m.setModel(server);
+            if(m != null) {
+                m.setModel(server);
+            }
         } catch(IOException e) {
             Logger.logStackTraceStatic("Failed to set up the server: " + e.toString(), e);
         }
