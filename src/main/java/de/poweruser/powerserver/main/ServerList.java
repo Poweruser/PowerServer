@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import de.poweruser.powerserver.games.GameBase;
+import de.poweruser.powerserver.games.GameServerBase;
 import de.poweruser.powerserver.games.GameServerInterface;
 import de.poweruser.powerserver.games.GeneralDataKeysEnum;
 import de.poweruser.powerserver.logger.Logger;
@@ -82,6 +83,7 @@ public class ServerList {
                 }
             } else {
                 iter.remove();
+                Logger.logStatic("Removed server " + entry.getKey().toString() + " of game " + this.game.getGameDisplayName((GameServerBase) gsi) + ". Timeout reached.");
             }
         }
         return list;
