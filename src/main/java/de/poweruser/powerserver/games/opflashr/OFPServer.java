@@ -15,4 +15,9 @@ public class OFPServer extends GameServerBase {
         super.processNewMessage(message);
     }
 
+    @Override
+    public String getServerName() {
+        if(this.queryInfo.containsKey(DataKeyEnum.HOSTNAME)) { return this.queryInfo.getData(DataKeyEnum.HOSTNAME); }
+        return null;
+    }
 }

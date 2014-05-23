@@ -20,4 +20,6 @@ public interface GameServerInterface {
     public boolean hasAnsweredToQuery();
 
     public boolean isBroadcastedServer();
+
+    public String getServerName();
 }

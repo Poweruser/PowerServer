@@ -90,7 +90,7 @@ public class TCPManager implements Runnable {
                 iter.remove();
                 State failed = c.getFailedState();
                 if(failed != null) {
-                    String logMessage = "A server list query failed. State: " + failed.toString();
+                    String logMessage = "QUERY Failed. State: " + failed.toString();
                     String failMessage = c.getFailMessage();
                     if(failMessage != null) {
                         logMessage += " Reason: " + failMessage;

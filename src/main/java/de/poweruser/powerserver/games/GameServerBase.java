@@ -100,6 +100,10 @@ public abstract class GameServerBase implements GameServerInterface {
                 if(gamePort != null) {
                     logMessage += ":" + gamePort;
                 }
+                String name = this.getServerName();
+                if(name != null) {
+                    logMessage += " -> " + name;
+                }
                 Logger.logStatic(logMessage);
             }
             this.hasAnswered = true;

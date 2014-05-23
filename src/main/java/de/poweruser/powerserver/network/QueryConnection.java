@@ -155,7 +155,17 @@ public class QueryConnection {
                     Logger.logStackTraceStatic("Error while encoding a serverlist with Encoder " + encoder.getClass().getSimpleName() + " for EncType " + this.encType.toString() + ": " + e.toString(), e);
                 }
                 if(data != null) {
+                    int count = 0;
+                    for(int i = 4; i < 8; i++) {
+                        count <<= 8;
+                        count |= data[i];
+                    }
+                    String logMessage = "QUERY Successful from " + this.client.getInetAddress().toString() + " : Sent " + data.length + " Bytes (" + (count / 6) + " IPV4 Servers with " + count + " Bytes)";
+                    Logger.logStatic(logMessage);
+
                     this.sendData(data);
+                } else {
+                    out = new Result(false, "Encoding of the server list failed");
                 }
             } else {
                 out = new Result(false, "No encoder available yet for EncType: " + this.encType.toString());
