@@ -42,7 +42,7 @@ public class LogLevelCommand extends CommandBase {
     @Override
     public void showCommandHelp() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Command - loglevel:\n\n");
+        sb.append("Command - setloglevel:\n\n");
         sb.append("Syntax:  loglevel <#>\n\n");
         sb.append(" #   The level of logging, that you want to set. Available levels are 0 through 4:\n");
         sb.append("     0  -  Very low: Only the most important events are logged\n");

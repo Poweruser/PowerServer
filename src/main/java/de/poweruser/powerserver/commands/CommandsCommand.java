@@ -19,7 +19,7 @@ public class CommandsCommand extends CommandBase {
     public void showCommandHelp() {
         StringBuilder sb = new StringBuilder();
         sb.append("Overview over all available commands:\n\n");
-        sb.append("loglevel <#>      Sets the level of logging ");
+        sb.append("setloglevel <#>      Sets the level of logging ");
         for(LogLevel l: LogLevel.values()) {
             sb.append(l.getValue());
             sb.append("(");

@@ -51,7 +51,7 @@ public class PowerServer extends Observable {
         for(EncType enc: EncType.values()) {}
         this.commandReg = new CommandRegistry();
         this.commandReg.register(new HelpCommand("help"));
-        this.commandReg.register(new LogLevelCommand("loglevel"));
+        this.commandReg.register(new LogLevelCommand("setloglevel"));
         this.commandReg.register(new CommandsCommand("commands"));
         this.running = false;
         this.settings = new Settings(new File("settings.cfg"));
