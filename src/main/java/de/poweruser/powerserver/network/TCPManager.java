@@ -68,6 +68,10 @@ public class TCPManager implements Runnable {
         }
     }
 
+    public boolean isSocketClosed() {
+        return this.serverSocket.isClosed();
+    }
+
     public void shutdown() {
         this.running = false;
         Iterator<QueryConnection> iter = this.connections.iterator();

@@ -157,7 +157,9 @@ public class Settings {
             try {
                 InetAddress i = InetAddress.getByName(s);
                 list.add(i);
-            } catch(UnknownHostException e) {}
+            } catch(UnknownHostException e) {
+                Logger.logStatic(LogLevel.LOW, "The master server domain '" + s + "' could not be resolved: " + e.toString());
+            }
         }
         return list;
     }

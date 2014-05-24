@@ -29,7 +29,7 @@ public class UDPManager implements Observer {
         this.socket.close();
     }
 
-    public boolean isShutdown() {
+    public boolean isSocketClosed() {
         return this.socket.isClosed();
     }
 

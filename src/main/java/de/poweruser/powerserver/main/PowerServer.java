@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -55,6 +56,8 @@ public class PowerServer extends Observable {
         this.running = false;
         this.settings = new Settings(new File("settings.cfg"));
         this.supportedGames = new HashSet<GameBase>();
+        this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT);
+        this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT);
         this.reloadSettingsFile();
         this.gsp1Parser = new GamespyProtocol1Parser();
     }
@@ -63,16 +66,6 @@ public class PowerServer extends Observable {
         this.settings.load();
         this.lookUpAndGetMasterServerList(true);
         this.updateSupportedGames();
-        this.setupNetwork();
-    }
-
-    private void setupNetwork() throws IOException {
-        if(this.udpManager == null || this.udpManager.isShutdown()) {
-            this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT);
-        }
-        if(this.tcpManager == null || this.tcpManager.isShutdown()) {
-            this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT);
-        }
     }
 
     private boolean isGameSupported(GameBase game) {
@@ -106,34 +99,48 @@ public class PowerServer extends Observable {
         if(this.running) { return; }
         this.running = true;
         while(this.running) {
-            if(this.udpManager == null || !this.udpManager.hasMessages()) {
-                if(this.udpManager != null) {
-                    for(GameBase game: this.supportedGames) {
-                        ServerList list = game.getServerList();
-                        List<InetSocketAddress> toQuery = list.checkForServersToQueryAndOutdatedServers();
-                        if(toQuery != null) {
-                            for(InetSocketAddress i: toQuery) {
-                                list.queryServer(i, this.udpManager.getUDPSender(), false);
-                            }
-                        }
-                    }
-                    this.udpManager.getUDPSender().flush();
-                }
-                synchronized(this.waitObject) {
-                    try {
-                        this.waitObject.wait(100);
-                    } catch(InterruptedException e) {}
-                }
-                if(this.isLastMasterServerLookupDue(true, this.settings.getListsDownloadInterval(TimeUnit.HOURS), TimeUnit.HOURS)) {
-                    this.lookUpAndGetMasterServerList(true);
+            if(this.udpManager.isSocketClosed()) {
+                this.udpManager.shutdown();
+                try {
+                    this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT);
+                } catch(SocketException e) {
+                    Logger.logStackTraceStatic(LogLevel.VERY_LOW, "The Socket of the UDPManager was closed and setting up a new UDPManager raised an exception: " + e.toString(), e);
+                    this.running = false;
                 }
             } else {
                 while(this.udpManager.hasMessages()) {
                     this.handleIncomingMessage(this.udpManager.takeFirstMessage());
                 }
+                for(GameBase game: this.supportedGames) {
+                    ServerList list = game.getServerList();
+                    List<InetSocketAddress> toQuery = list.checkForServersToQueryAndOutdatedServers();
+                    if(toQuery != null) {
+                        for(InetSocketAddress i: toQuery) {
+                            list.queryServer(i, this.udpManager.getUDPSender(), false);
+                        }
+                    }
+                }
+                this.udpManager.getUDPSender().flush();
             }
-            if(this.tcpManager != null) {
+            if(this.tcpManager.isSocketClosed()) {
+                this.tcpManager.shutdown();
+                try {
+                    this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT);
+                } catch(IOException e) {
+                    Logger.logStackTraceStatic(LogLevel.VERY_LOW, "The Socket of the TCPManager was closed and setting up a new TCPManager raised an exception: " + e.toString(), e);
+                    this.running = false;
+                }
+            } else {
                 this.tcpManager.processConnections();
+            }
+            synchronized(this.waitObject) {
+                try {
+                    this.waitObject.wait(100);
+                } catch(InterruptedException e) {}
+            }
+            if(this.isLastMasterServerLookupDue(true, this.settings.getListsDownloadInterval(TimeUnit.HOURS), TimeUnit.HOURS)) {
+                Logger.logStatic(LogLevel.HIGH, "Updating the master server list (Download of the domains and refreshing of the IPs)");
+                this.lookUpAndGetMasterServerList(true);
             }
         }
     }
