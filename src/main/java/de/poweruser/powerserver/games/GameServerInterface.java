@@ -17,6 +17,8 @@ public interface GameServerInterface {
 
     public boolean checkLastHeartbeat(long timeDiff);
 
+    public boolean checkLastQuery(long timeDiff);
+
     public boolean hasAnsweredToQuery();
 
     public boolean isBroadcastedServer();

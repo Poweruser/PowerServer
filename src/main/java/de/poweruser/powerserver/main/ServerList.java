@@ -20,7 +20,8 @@ public class ServerList {
     private GameBase game;
     private Map<InetSocketAddress, GameServerInterface> servers;
 
-    private static final long allowedServerTimeout = 3600L * 1000L; // one hour
+    private static final long allowedHeartbeatTimeout = 900L * 1000L; // 15minutes
+    private static final long allowedQueryTimeout = 900 * 1000L; // 15minutes
 
     public ServerList(GameBase game) {
         this.game = game;
@@ -78,7 +79,7 @@ public class ServerList {
         while(iter.hasNext()) {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
             GameServerInterface gsi = entry.getValue();
-            if(gsi.checkLastHeartbeat(allowedServerTimeout)) {
+            if(gsi.checkLastHeartbeat(allowedHeartbeatTimeout) || gsi.checkLastQuery(allowedQueryTimeout)) {
                 if(gsi.hasAnsweredToQuery()) {
                     list.add(entry.getKey());
                 }

@@ -15,6 +15,7 @@ public abstract class GameServerBase implements GameServerInterface {
 
     private int queryPort;
     private long lastHeartbeat;
+    private long lastQueryReply;
     private boolean realHeartbeat;
     private QueryBuffer queryBuffer;
     private boolean hasAnswered;
@@ -24,6 +25,7 @@ public abstract class GameServerBase implements GameServerInterface {
 
     public GameServerBase(GameBase game) {
         this.lastHeartbeat = -1L;
+        this.lastQueryReply = -1L;
         this.realHeartbeat = false;
         this.game = game;
         this.queryInfo = new MessageData();
@@ -78,6 +80,11 @@ public abstract class GameServerBase implements GameServerInterface {
         return (System.currentTimeMillis() - this.lastHeartbeat) < timeDiff;
     }
 
+    @Override
+    public boolean checkLastQuery(long timeDiff) {
+        return (System.currentTimeMillis() - this.lastQueryReply) < timeDiff;
+    }
+
     private void setQueryPort(MessageData data) {
         String queryPort = null;
         if(data.isHeartBeat()) {
@@ -108,6 +115,7 @@ public abstract class GameServerBase implements GameServerInterface {
                 Logger.logStatic(LogLevel.NORMAL, logMessage);
             }
             this.hasAnswered = true;
+            this.lastQueryReply = System.currentTimeMillis();
         }
     }
 
