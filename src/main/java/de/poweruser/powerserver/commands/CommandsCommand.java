@@ -1,5 +1,8 @@
 package de.poweruser.powerserver.commands;
 
+import de.poweruser.powerserver.logger.LogLevel;
+import de.poweruser.powerserver.logger.Logger;
+
 public class CommandsCommand extends CommandBase {
 
     public CommandsCommand(String commandString) {
@@ -14,8 +17,19 @@ public class CommandsCommand extends CommandBase {
 
     @Override
     public void showCommandHelp() {
-        // TODO Auto-generated method stub
-
+        StringBuilder sb = new StringBuilder();
+        sb.append("Overview over all available commands:\n\n");
+        sb.append("loglevel <#>      Sets the level of logging ");
+        for(LogLevel l: LogLevel.values()) {
+            sb.append(l.getValue());
+            sb.append("(");
+            sb.append(l.toString());
+            sb.append(") ");
+        }
+        sb.append("\n");
+        sb.append("commands       Shows this list of available commands\n");
+        sb.append("help                    Displays some general information about this application");
+        Logger.logStatic(LogLevel.VERY_LOW, sb.toString());
     }
 
 }
