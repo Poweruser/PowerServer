@@ -14,6 +14,7 @@ import de.poweruser.powerserver.games.GeneralDataKeysEnum;
 import de.poweruser.powerserver.gamespy.EncType;
 import de.poweruser.powerserver.gamespy.GamespyValidation;
 import de.poweruser.powerserver.gamespy.encoders.EncoderInterface;
+import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.MessageData;
 import de.poweruser.powerserver.main.parser.GamespyProtocol1Parser;
@@ -152,7 +153,7 @@ public class QueryConnection {
                 try {
                     data = encoder.encode(this.requestedGame.getActiveServers());
                 } catch(IOException e) {
-                    Logger.logStackTraceStatic("Error while encoding a serverlist with Encoder " + encoder.getClass().getSimpleName() + " for EncType " + this.encType.toString() + ": " + e.toString(), e);
+                    Logger.logStackTraceStatic(LogLevel.LOW, "Error while encoding a serverlist with Encoder " + encoder.getClass().getSimpleName() + " for EncType " + this.encType.toString() + ": " + e.toString(), e);
                 }
                 if(data != null) {
                     int count = 0;
@@ -161,7 +162,7 @@ public class QueryConnection {
                         count |= data[i];
                     }
                     String logMessage = "QUERY Successful from " + this.client.getInetAddress().toString() + " : Sent " + data.length + " Bytes (" + (count / 6) + " IPV4 Servers with " + count + " Bytes)";
-                    Logger.logStatic(logMessage);
+                    Logger.logStatic(LogLevel.HIGH, logMessage);
 
                     this.sendData(data);
                 } else {
@@ -186,8 +187,8 @@ public class QueryConnection {
         try {
             data = parser.parse(null, str);
         } catch(ParserException e) {
-            Logger.logStatic("Error while checking list query:");
-            Logger.log(e);
+            Logger.logStatic(LogLevel.LOW, "Error while checking list query:");
+            Logger.log(LogLevel.LOW, e);
         }
         if(data != null) {
             if(data.containsKey(GeneralDataKeysEnum.GAMENAME) && data.containsKey(GeneralDataKeysEnum.LIST) && data.containsKey(GeneralDataKeysEnum.FINAL)) {
@@ -229,7 +230,7 @@ public class QueryConnection {
                 this.receivePos += len;
             }
         } catch(IOException e) {
-            Logger.logStackTraceStatic("Error while reading input: " + e.toString(), e);
+            Logger.logStackTraceStatic(LogLevel.LOW, "Error while reading input: " + e.toString(), e);
         }
     }
 
@@ -242,8 +243,8 @@ public class QueryConnection {
         try {
             data = parser.parse(null, str);
         } catch(ParserException e) {
-            Logger.logStatic("Error while checking challenge response:");
-            Logger.log(e);
+            Logger.logStatic(LogLevel.HIGH, "Error while checking challenge response:");
+            Logger.log(LogLevel.HIGH, e);
         }
         if(data != null) {
             if(data.containsKey(GeneralDataKeysEnum.GAMENAME) && data.containsKey(GeneralDataKeysEnum.FINAL) && data.containsKey(GeneralDataKeysEnum.ENCTYPE) && data.containsKey(GeneralDataKeysEnum.VALIDATE)) {
@@ -282,7 +283,7 @@ public class QueryConnection {
             this.out.write(data);
             this.out.flush();
         } catch(IOException e) {
-            Logger.logStackTraceStatic("Error while sending data to " + this.client.getInetAddress().toString(), e);
+            Logger.logStackTraceStatic(LogLevel.HIGH, "Error while sending data to " + this.client.getInetAddress().toString(), e);
         }
     }
 

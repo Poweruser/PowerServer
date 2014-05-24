@@ -28,4 +28,8 @@ public enum LogLevel {
         }
         return null;
     }
+
+    public boolean doesPass(LogLevel filter) {
+        return this.getValue() <= filter.getValue();
+    }
 }

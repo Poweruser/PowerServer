@@ -143,7 +143,7 @@ public class Settings {
                         }
                     }
                 } catch(IOException e) {
-                    Logger.logStatic("Could not read the master server list at " + list.toString() + " - Reason: " + e.toString());
+                    Logger.logStatic(LogLevel.LOW, "Could not read the master server list at " + list.toString() + " - Reason: " + e.toString());
                 }
                 if(input != null) {
                     try {

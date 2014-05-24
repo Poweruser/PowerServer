@@ -12,6 +12,7 @@ import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GameServerBase;
 import de.poweruser.powerserver.games.GameServerInterface;
 import de.poweruser.powerserver.games.GeneralDataKeysEnum;
+import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
 
 public class ServerList {
@@ -39,7 +40,7 @@ public class ServerList {
             GameServerInterface server = this.getOrCreateServer(serverAddress);
             return server.incomingHeartBeatBroadcast(serverAddress, data);
         } else {
-            Logger.logStatic("Got a heartbeatbroadcast, that is missing the host key");
+            Logger.logStatic(LogLevel.HIGH, "Got a heartbeatbroadcast, that is missing the host key");
         }
         return false;
     }
@@ -83,7 +84,7 @@ public class ServerList {
                 }
             } else {
                 iter.remove();
-                Logger.logStatic("Removed server " + entry.getKey().toString() + " of game " + this.game.getGameDisplayName((GameServerBase) gsi) + ". Timeout reached.");
+                Logger.logStatic(LogLevel.NORMAL, "Removed server " + entry.getKey().toString() + " of game " + this.game.getGameDisplayName((GameServerBase) gsi) + ". Timeout reached.");
             }
         }
         return list;

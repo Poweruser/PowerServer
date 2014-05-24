@@ -31,7 +31,7 @@ public class Logger {
         this.dateFormat = new SimpleDateFormat("[dd.MM.yy-HH:mm:ss]");
     }
 
-    public static void log(ParserException exception) {
+    public static void log(LogLevel level, ParserException exception) {
         StringBuilder sb = new StringBuilder();
         sb.append(instance.currentTimeString());
         sb.append(" ");
@@ -40,24 +40,28 @@ public class Logger {
         sb.append(exception.getGameName());
         sb.append("\" with received data:\n");
         sb.append(exception.getData());
-        logStatic(sb.toString());
+        logStatic(level, sb.toString());
     }
 
-    public static void logStackTraceStatic(String message, Exception e) {
+    public static void logStackTraceStatic(LogLevel level, String message, Exception e) {
         ByteArrayOutputStream ba = new ByteArrayOutputStream();
         PrintWriter pw = new PrintWriter(ba);
         pw.println(message);
         e.printStackTrace(pw);
         pw.close();
-        logStatic(ba.toString());
+        logStatic(level, ba.toString());
     }
 
-    public void log(String message) {
-        this.writeToFile(message);
+    public void log(LogLevel level, String message) {
+        if(level.doesPass(this.getLogLevel())) {
+            this.writeToFile(message);
+        }
     }
 
-    public static void logStatic(String message) {
-        instance.writeToFile(message);
+    public static void logStatic(LogLevel level, String message) {
+        if(instance != null && level.doesPass(instance.getLogLevel())) {
+            instance.writeToFile(message);
+        }
     }
 
     private synchronized void writeToFile(String message) {

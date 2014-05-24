@@ -1,6 +1,7 @@
 package de.poweruser.powerserver.gamespy;
 
 import de.poweruser.powerserver.games.GameBase;
+import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
 
 /*
@@ -47,12 +48,12 @@ public class GamespyValidation {
         if(correctValidate.equals(response)) {
             return true;
         } else {
-            Logger.logStatic("Comparing of challengeResponse failed!");
-            Logger.logStatic("Gamename: " + game.getGameName());
-            Logger.logStatic("Gamekey: " + game.getGamespyKey());
-            Logger.logStatic("Challenge: " + new String(this.securekey));
-            Logger.logStatic("Validate " + correctValidate);
-            Logger.logStatic("Client-Response: " + response);
+            Logger.logStatic(LogLevel.HIGH, "Comparing of challengeResponse failed!");
+            Logger.logStatic(LogLevel.HIGH, "Gamename: " + game.getGameName());
+            Logger.logStatic(LogLevel.HIGH, "Gamekey: " + game.getGamespyKey());
+            Logger.logStatic(LogLevel.HIGH, "Challenge: " + new String(this.securekey));
+            Logger.logStatic(LogLevel.HIGH, "Validate " + correctValidate);
+            Logger.logStatic(LogLevel.HIGH, "Client-Response: " + response);
         }
         return false;
     }

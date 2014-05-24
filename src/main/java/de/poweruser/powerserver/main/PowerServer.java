@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GamesEnum;
 import de.poweruser.powerserver.gamespy.EncType;
+import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.parser.GamespyProtocol1Parser;
 import de.poweruser.powerserver.main.parser.ParserException;
@@ -77,7 +78,7 @@ public class PowerServer extends Observable {
             if(game != null) {
                 gameList.add(game);
             } else {
-                Logger.logStatic("Game \"" + gamename + "\" from settings file not recognized");
+                Logger.logStatic(LogLevel.LOW, "Game \"" + gamename + "\" from settings file not recognized");
             }
         }
         this.supportedGames.retainAll(gameList);
@@ -125,15 +126,15 @@ public class PowerServer extends Observable {
         try {
             data = this.gsp1Parser.parse(null, message);
         } catch(ParserException e) {
-            Logger.logStatic("Error while parsing an incoming udpmessage:");
-            Logger.log(e);
+            Logger.logStatic(LogLevel.HIGH, "Error while parsing an incoming udpmessage:");
+            Logger.log(LogLevel.HIGH, e);
         }
         if(data != null) {
             GameBase game = data.getGame();
             if(game == null) {
-                Logger.logStatic("Couldnt find corresponding game for message: " + message.toString());
+                Logger.logStatic(LogLevel.HIGH, "Couldnt find corresponding game for message: " + message.toString());
             } else if(!this.isGameSupported(game)) {
-                Logger.logStatic("Got an incoming message for an unsupported game: " + message.toString());
+                Logger.logStatic(LogLevel.HIGH, "Got an incoming message for an unsupported game: " + message.toString());
             } else {
                 ServerList list = game.getServerList();
                 InetSocketAddress sender = message.getSender();
@@ -158,7 +159,7 @@ public class PowerServer extends Observable {
                                 udpSender.queueQuery(server, game.createStatusQuery(false));
                             }
                         } else {
-                            Logger.logStatic("Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
+                            Logger.logStatic(LogLevel.NORMAL, "Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
                         }
                     } else {
                         list.incomingQueryAnswer(sender, data);

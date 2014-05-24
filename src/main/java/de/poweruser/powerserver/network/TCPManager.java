@@ -13,6 +13,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
+import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.network.QueryConnection.State;
 
@@ -42,9 +43,9 @@ public class TCPManager implements Runnable {
             try {
                 client = this.serverSocket.accept();
             } catch(SocketException e) {
-                Logger.logStatic(e.toString());
+                Logger.logStatic(LogLevel.VERY_LOW, "The TCPManager failed to accept an incoming query connection: " + e.toString());
             } catch(IOException e) {
-                Logger.logStatic(e.toString());
+                Logger.logStatic(LogLevel.VERY_LOW, "The TCPManager failed to accept an incoming query connection: " + e.toString());
             }
             if(client != null) {
                 if(this.guard.isAnotherConnectionAllowed(client)) {
@@ -52,7 +53,7 @@ public class TCPManager implements Runnable {
                     try {
                         connection = new QueryConnection(client);
                     } catch(IOException e) {
-                        Logger.logStackTraceStatic("Error while creating a QueryConnection: " + e.toString(), e);
+                        Logger.logStackTraceStatic(LogLevel.LOW, "Error while creating a QueryConnection: " + e.toString(), e);
                     }
                     if(connection != null) {
                         this.connections.add(connection);
@@ -95,7 +96,7 @@ public class TCPManager implements Runnable {
                     if(failMessage != null) {
                         logMessage += " Reason: " + failMessage;
                     }
-                    Logger.logStatic(logMessage);
+                    Logger.logStatic(LogLevel.LOW, logMessage);
                 }
             }
         }
@@ -161,7 +162,7 @@ public class TCPManager implements Runnable {
                     q.forceClose();
                 }
             }
-            Logger.logStatic("Temporary ban of " + BAN_DURATION + " " + BAN_UNIT.toString().toLowerCase() + " for " + address + ". Too many open connections");
+            Logger.logStatic(LogLevel.NORMAL, "Temporary ban of " + BAN_DURATION + " " + BAN_UNIT.toString().toLowerCase() + " for " + address + ". Too many open connections");
         }
 
         private boolean canBanBeLifted(InetAddress address, long duration, TimeUnit unit) {

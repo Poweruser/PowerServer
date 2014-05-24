@@ -9,6 +9,7 @@ import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
 
+import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.PowerServer;
 
@@ -43,7 +44,7 @@ public class UDPSender {
             try {
                 this.udpSocket.send(packet);
             } catch(IOException e) {
-                Logger.logStatic(e.toString() + "\nFailed to send a server query to " + packet.getSocketAddress().toString() + " - Content: " + new String(packet.getData()));
+                Logger.logStatic(LogLevel.VERY_LOW, e.toString() + "\nFailed to send a server query to " + packet.getSocketAddress().toString() + " - Content: " + new String(packet.getData()));
             }
         }
         this.queries.clear();
@@ -51,7 +52,7 @@ public class UDPSender {
             try {
                 this.udpSocket.send(packet);
             } catch(IOException e) {
-                Logger.logStatic(e.toString() + "\nFailed to send a heartbeatbroadcast to a masterserver at " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ". Content: " + new String(packet.getData()));
+                Logger.logStatic(LogLevel.VERY_LOW, e.toString() + "\nFailed to send a heartbeatbroadcast to a masterserver at " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ". Content: " + new String(packet.getData()));
             }
         }
         this.broadcasts.clear();

@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.MessageData;
 import de.poweruser.powerserver.main.QueryInfo;
@@ -104,7 +105,7 @@ public abstract class GameServerBase implements GameServerInterface {
                 if(name != null) {
                     logMessage += " -> " + name;
                 }
-                Logger.logStatic(logMessage);
+                Logger.logStatic(LogLevel.NORMAL, logMessage);
             }
             this.hasAnswered = true;
         }
