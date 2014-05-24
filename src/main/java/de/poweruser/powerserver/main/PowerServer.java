@@ -108,6 +108,15 @@ public class PowerServer extends Observable {
         while(this.running) {
             if(this.udpManager == null || !this.udpManager.hasMessages()) {
                 if(this.udpManager != null) {
+                    for(GameBase game: this.supportedGames) {
+                        ServerList list = game.getServerList();
+                        List<InetSocketAddress> toQuery = list.checkForServersToQueryAndOutdatedServers();
+                        if(toQuery != null) {
+                            for(InetSocketAddress i: toQuery) {
+                                list.queryServer(i, this.udpManager.getUDPSender(), false);
+                            }
+                        }
+                    }
                     this.udpManager.getUDPSender().flush();
                 }
                 synchronized(this.waitObject) {
@@ -154,7 +163,7 @@ public class PowerServer extends Observable {
                         boolean firstHeartBeat = list.incomingHeartBeat(server, data);
                         udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
                         if(firstHeartBeat || data.hasStateChanged()) {
-                            udpSender.queueQuery(server, game.createStatusQuery(false));
+                            list.queryServer(server, udpSender, false);
                         }
                     } else if(data.isHeartBeatBroadcast()) {
                         if(!this.masterServers.contains(sender.getAddress())) {
@@ -165,7 +174,7 @@ public class PowerServer extends Observable {
                         if(this.masterServers.contains(sender.getAddress())) {
                             boolean firstHeartBeat = list.incomingHeartBeatBroadcast(server, data);
                             if((firstHeartBeat || data.hasStateChanged()) && list.isBroadcastedServer(server)) {
-                                udpSender.queueQuery(server, game.createStatusQuery(false));
+                                list.queryServer(server, udpSender, false);
                             }
                         } else {
                             Logger.logStatic(LogLevel.NORMAL, "Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());

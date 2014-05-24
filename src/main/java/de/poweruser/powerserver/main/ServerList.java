@@ -14,6 +14,7 @@ import de.poweruser.powerserver.games.GameServerInterface;
 import de.poweruser.powerserver.games.GeneralDataKeysEnum;
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
+import de.poweruser.powerserver.network.UDPSender;
 
 public class ServerList {
 
@@ -21,7 +22,8 @@ public class ServerList {
     private Map<InetSocketAddress, GameServerInterface> servers;
 
     private static final long allowedHeartbeatTimeout = 900L * 1000L; // 15minutes
-    private static final long allowedQueryTimeout = 900 * 1000L; // 15minutes
+    private static final long allowedQueryTimeout = 1800 * 1000L; // 30minutes
+    private static final long emergencyQueryInterval = 180 * 1000L; // 3minutes
 
     public ServerList(GameBase game) {
         this.game = game;
@@ -73,21 +75,55 @@ public class ServerList {
         return gameServer;
     }
 
+    public List<InetSocketAddress> checkForServersToQueryAndOutdatedServers() {
+        List<InetSocketAddress> serversToQuery = null;
+        Iterator<Entry<InetSocketAddress, GameServerInterface>> iter = this.servers.entrySet().iterator();
+        while(iter.hasNext()) {
+            Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
+            GameServerInterface gsi = entry.getValue();
+            if(!gsi.checkLastHeartbeat(allowedHeartbeatTimeout)) {
+                if(!gsi.checkLastQueryReply(allowedQueryTimeout)) {
+                    iter.remove();
+                    Logger.logStatic(LogLevel.NORMAL, "Removed server " + entry.getKey().toString() + " of game " + this.game.getGameDisplayName((GameServerBase) gsi) + ". Timeout reached.");
+                } else if(!gsi.checkLastQueryRequest(emergencyQueryInterval)) {
+                    if(serversToQuery == null) {
+                        serversToQuery = new ArrayList<InetSocketAddress>();
+                    }
+                    serversToQuery.add(entry.getKey());
+                    String logMessage = "The server " + entry.getKey().toString();
+                    String serverName = gsi.getServerName();
+                    if(serverName != null) {
+                        logMessage += " (" + serverName + ")";
+                    }
+                    logMessage += " does not send heartbeats anymore, or they dont reach this server. Sending back a query instead.";
+                    Logger.logStatic(LogLevel.HIGH, logMessage);
+                }
+            }
+        }
+        return serversToQuery;
+    }
+
     public List<InetSocketAddress> getActiveServers() {
         List<InetSocketAddress> list = new ArrayList<InetSocketAddress>();
         Iterator<Entry<InetSocketAddress, GameServerInterface>> iter = this.servers.entrySet().iterator();
         while(iter.hasNext()) {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
             GameServerInterface gsi = entry.getValue();
-            if(gsi.checkLastHeartbeat(allowedHeartbeatTimeout) || gsi.checkLastQuery(allowedQueryTimeout)) {
+            if(gsi.checkLastHeartbeat(allowedHeartbeatTimeout) || gsi.checkLastQueryReply(allowedQueryTimeout)) {
                 if(gsi.hasAnsweredToQuery()) {
                     list.add(entry.getKey());
                 }
-            } else {
-                iter.remove();
-                Logger.logStatic(LogLevel.NORMAL, "Removed server " + entry.getKey().toString() + " of game " + this.game.getGameDisplayName((GameServerBase) gsi) + ". Timeout reached.");
             }
         }
         return list;
+    }
+
+    public void queryServer(InetSocketAddress server, UDPSender udpSender, boolean queryPlayers) {
+        GameServerInterface gsi = this.getServer(server);
+        if(gsi != null) {
+            gsi.queryWasSent();
+            udpSender.queueQuery(server, this.game.createStatusQuery(queryPlayers));
+        }
+
     }
 }

@@ -17,11 +17,15 @@ public interface GameServerInterface {
 
     public boolean checkLastHeartbeat(long timeDiff);
 
-    public boolean checkLastQuery(long timeDiff);
+    public boolean checkLastQueryReply(long timeDiff);
+
+    public boolean checkLastQueryRequest(long timeDiff);
 
     public boolean hasAnsweredToQuery();
 
     public boolean isBroadcastedServer();
 
     public String getServerName();
+
+    public void queryWasSent();
 }
