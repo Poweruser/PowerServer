@@ -11,6 +11,10 @@ import java.util.Observable;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import de.poweruser.powerserver.commands.CommandRegistry;
+import de.poweruser.powerserver.commands.CommandsCommand;
+import de.poweruser.powerserver.commands.HelpCommand;
+import de.poweruser.powerserver.commands.LogLevelCommand;
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GamesEnum;
 import de.poweruser.powerserver.gamespy.EncType;
@@ -36,6 +40,7 @@ public class PowerServer extends Observable {
     private long lastMasterServerRefresh;
     private long lastMasterServerDownload;
     private Set<GameBase> supportedGames;
+    private CommandRegistry commandReg;
 
     public static final int MASTERSERVER_UDP_PORT = 27900;
     public static final int MASTERSERVER_TCP_PORT = 28900;
@@ -43,6 +48,10 @@ public class PowerServer extends Observable {
     public PowerServer() throws IOException {
         for(GamesEnum g: GamesEnum.values()) {}
         for(EncType enc: EncType.values()) {}
+        this.commandReg = new CommandRegistry();
+        this.commandReg.register(new HelpCommand("help"));
+        this.commandReg.register(new LogLevelCommand("loglevel"));
+        this.commandReg.register(new CommandsCommand("commands"));
         this.running = false;
         this.settings = new Settings(new File("settings.cfg"));
         this.supportedGames = new HashSet<GameBase>();
@@ -183,5 +192,9 @@ public class PowerServer extends Observable {
             time = this.lastMasterServerRefresh;
         }
         return (System.currentTimeMillis() - time) > TimeUnit.MILLISECONDS.convert(timeDiff, inputUnit);
+    }
+
+    public void issueCommand(String command) {
+        this.commandReg.issueCommand(command);
     }
 }
