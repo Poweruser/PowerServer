@@ -17,10 +17,12 @@ public class Logger {
     private SimpleDateFormat dateFormat;
     private static Logger instance;
     public static boolean guiInUse;
+    private LogLevel logLevel;
 
     public Logger(File logFile) throws IOException {
         this.guiInUse = false;
         this.instance = this;
+        this.logLevel = LogLevel.NORMAL;
         this.logFile = logFile;
         if(!this.logFile.exists()) {
             this.logFile.createNewFile();
@@ -79,5 +81,22 @@ public class Logger {
 
     private String currentTimeString() {
         return this.dateFormat.format(new Date());
+    }
+
+    public void setLogLevel(LogLevel level) {
+        this.logLevel = level;
+    }
+
+    public static void setLogLevel(int value) {
+        if(instance != null) {
+            LogLevel l = LogLevel.valueToLevel(value);
+            if(l != null) {
+                instance.setLogLevel(l);
+            }
+        }
+    }
+
+    public LogLevel getLogLevel() {
+        return this.logLevel;
     }
 }
