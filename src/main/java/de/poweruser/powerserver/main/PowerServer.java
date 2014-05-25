@@ -145,6 +145,7 @@ public class PowerServer extends Observable {
             } else {
                 this.tcpManager.processConnections();
             }
+            this.commandReg.issueNextQueuedCommand();
             synchronized(this.waitObject) {
                 try {
                     this.waitObject.wait(100);
@@ -226,11 +227,12 @@ public class PowerServer extends Observable {
         return (System.currentTimeMillis() - time) > TimeUnit.MILLISECONDS.convert(timeDiff, inputUnit);
     }
 
-    public void issueCommand(String command) {
-        this.commandReg.issueCommand(command);
+    public void queueCommand(String command) {
+        this.commandReg.queueCommand(command);
     }
 
     public String getVersion() {
         return VERSION;
     }
+
 }

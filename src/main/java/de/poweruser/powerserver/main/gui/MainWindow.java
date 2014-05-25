@@ -72,7 +72,7 @@ public class MainWindow extends JFrame implements Observer {
                     if(!line.trim().isEmpty()) {
                         source.setText("");
                         MainWindow.this.addCommandToHistory(line);
-                        MainWindow.this.server.issueCommand(line);
+                        MainWindow.this.server.queueCommand(line);
                     }
                 } else if(event.getKeyCode() == KeyEvent.VK_UP) {
                     String previous = MainWindow.this.selectPreviousCommand();

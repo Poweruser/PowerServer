@@ -1,5 +1,6 @@
 package de.poweruser.powerserver.commands;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,16 +10,19 @@ import de.poweruser.powerserver.logger.Logger;
 public class CommandRegistry {
 
     private Map<String, CommandInterface> commandMap;
+    private ArrayDeque<String> commandQueue;
 
     public CommandRegistry() {
         this.commandMap = new HashMap<String, CommandInterface>();
+        this.commandQueue = new ArrayDeque<String>();
     }
 
     public void register(CommandBase command) {
         this.commandMap.put(command.getCommandString(), command);
     }
 
-    public void issueCommand(String line) {
+    public void issueNextQueuedCommand() {
+        String line = this.commandQueue.pollFirst();
         if(line == null || line.trim().isEmpty()) { return; };
         String formated = line.trim().replaceAll("\\s+", " ");
         String[] items = formated.split(" ");
@@ -37,5 +41,9 @@ public class CommandRegistry {
         } else {
             Logger.logStatic(LogLevel.VERY_LOW, "Unknown command '" + commandString + "'. Type 'commands' to get a list of all available commands.");
         }
+    }
+
+    public void queueCommand(String command) {
+        this.commandQueue.addLast(command);
     }
 }
