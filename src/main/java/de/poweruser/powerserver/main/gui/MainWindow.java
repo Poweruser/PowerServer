@@ -7,8 +7,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -20,7 +18,7 @@ import javax.swing.ScrollPaneConstants;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.PowerServer;
 
-public class MainWindow extends JFrame implements Observer {
+public class MainWindow extends JFrame {
 
     private static final long serialVersionUID = 2846198182943968671L;
 
@@ -108,24 +106,14 @@ public class MainWindow extends JFrame implements Observer {
     }
 
     public void shutdown() {
-        if(this.server != null) {
-            this.server.deleteObserver(this);
-        }
         this.alreadyShuttingDown = true;
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.dispatchEvent(new WindowEvent(MainWindow.this, WindowEvent.WINDOW_CLOSING));
     }
 
-    @Override
-    public void update(Observable arg0, Object arg1) {
-        // TODO Auto-generated method stub
-
-    }
-
     public void setModel(PowerServer server) {
         this.server = server;
         this.setTitle("PowerServer " + server.getVersion());
-        this.server.addObserver(this);
     }
 
     private void addCommandToHistory(String line) {

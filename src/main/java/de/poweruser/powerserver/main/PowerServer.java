@@ -8,7 +8,6 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Observable;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -31,7 +30,7 @@ import de.poweruser.powerserver.network.UDPMessage;
 import de.poweruser.powerserver.network.UDPSender;
 import de.poweruser.powerserver.settings.Settings;
 
-public class PowerServer extends Observable {
+public class PowerServer {
 
     private GamespyProtocol1Parser gsp1Parser;
     private UDPManager udpManager;
