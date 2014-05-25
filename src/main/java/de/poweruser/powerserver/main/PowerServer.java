@@ -17,6 +17,7 @@ import de.poweruser.powerserver.commands.CommandsCommand;
 import de.poweruser.powerserver.commands.ExitCommand;
 import de.poweruser.powerserver.commands.HelpCommand;
 import de.poweruser.powerserver.commands.LogLevelCommand;
+import de.poweruser.powerserver.commands.ReloadSettingsCommand;
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GamesEnum;
 import de.poweruser.powerserver.gamespy.EncType;
@@ -56,6 +57,7 @@ public class PowerServer extends Observable {
         this.commandReg.register(new HelpCommand("help"));
         this.commandReg.register(new LogLevelCommand("setloglevel"));
         this.commandReg.register(new CommandsCommand("commands"));
+        this.commandReg.register(new ReloadSettingsCommand("reload", this));
         String[] exitAliases = new String[] { "exit", "stop", "quit", "shutdown", "end" };
         for(String str: exitAliases) {
             this.commandReg.register(new ExitCommand(str, this));
@@ -69,7 +71,7 @@ public class PowerServer extends Observable {
         this.gsp1Parser = new GamespyProtocol1Parser();
     }
 
-    private void reloadSettingsFile() throws IOException {
+    public void reloadSettingsFile() {
         this.settings.load();
         if(this.settings.isPublicMode()) {
             this.lookUpAndGetMasterServerList(true);

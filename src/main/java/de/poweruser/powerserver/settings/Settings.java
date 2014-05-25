@@ -39,6 +39,7 @@ public class Settings {
         this.masterServerLists.clear();
         this.supportedGames.clear();
         BufferedReader br = null;
+        Logger.logStatic(LogLevel.NORMAL, "Loading the settings file ...");
         try {
             br = new BufferedReader(new FileReader(this.settingsFile));
             String line = null;

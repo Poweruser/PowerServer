@@ -27,6 +27,7 @@ public class CommandsCommand extends CommandBase {
             sb.append(") ");
         }
         sb.append("\n");
+        sb.append("reload                      Reloads the settings file\n");
         sb.append("commands             Shows this list of available commands\n");
         sb.append("help                          Displays some general information about this application\n");
         sb.append("exit                            Shuts down the server. Aliases: quit, shutdown, stop, end");
