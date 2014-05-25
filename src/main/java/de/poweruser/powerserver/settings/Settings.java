@@ -65,6 +65,7 @@ public class Settings {
                 br.close();
             } catch(IOException e) {}
         }
+        Logger.logStatic(LogLevel.LOW, "The server is operating in " + (this.isPublicMode() ? "PUBLIC" : "PRIVATE") + " mode");
     }
 
     enum ConfigSection {
@@ -155,14 +156,19 @@ public class Settings {
                 }
             }
         }
+        String logMessage = "";
         ArrayList<InetAddress> list = new ArrayList<InetAddress>();
         for(String s: this.masterServers) {
             try {
                 InetAddress i = InetAddress.getByName(s);
                 list.add(i);
+                logMessage += (i.toString() + "\n");
             } catch(UnknownHostException e) {
                 Logger.logStatic(LogLevel.LOW, "The master server domain '" + s + "' could not be resolved: " + e.toString());
             }
+        }
+        if(!logMessage.isEmpty()) {
+            Logger.logStatic(LogLevel.LOW, "The loaded master servers are:\n" + logMessage);
         }
         return list;
     }
