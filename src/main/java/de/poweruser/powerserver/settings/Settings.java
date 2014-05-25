@@ -117,6 +117,10 @@ public class Settings {
         this.publicMode = active;
     }
 
+    public boolean isPublicMode() {
+        return this.publicMode;
+    }
+
     public List<InetAddress> getMasterServerList(boolean forceDownload) {
         if(forceDownload) {
             for(URL list: this.masterServerLists) {

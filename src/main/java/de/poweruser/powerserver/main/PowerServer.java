@@ -176,23 +176,27 @@ public class PowerServer extends Observable {
                     UDPSender udpSender = this.udpManager.getUDPSender();
                     if(data.isHeartBeat()) {
                         boolean firstHeartBeat = list.incomingHeartBeat(server, data);
-                        udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
+                        if(this.settings.isPublicMode()) {
+                            udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
+                        }
                         if(firstHeartBeat || data.hasStateChanged()) {
                             list.queryServer(server, udpSender, false);
                         }
                     } else if(data.isHeartBeatBroadcast()) {
-                        if(!this.masterServers.contains(sender.getAddress())) {
-                            if(this.isLastMasterServerLookupDue(false, 5L, TimeUnit.MINUTES)) {
-                                this.lookUpAndGetMasterServerList(false);
+                        if(this.settings.isPublicMode()) {
+                            if(!this.masterServers.contains(sender.getAddress())) {
+                                if(this.isLastMasterServerLookupDue(false, 5L, TimeUnit.MINUTES)) {
+                                    this.lookUpAndGetMasterServerList(false);
+                                }
                             }
-                        }
-                        if(this.masterServers.contains(sender.getAddress())) {
-                            boolean firstHeartBeat = list.incomingHeartBeatBroadcast(server, data);
-                            if((firstHeartBeat || data.hasStateChanged()) && list.isBroadcastedServer(server)) {
-                                list.queryServer(server, udpSender, false);
+                            if(this.masterServers.contains(sender.getAddress())) {
+                                boolean firstHeartBeat = list.incomingHeartBeatBroadcast(server, data);
+                                if((firstHeartBeat || data.hasStateChanged()) && list.isBroadcastedServer(server)) {
+                                    list.queryServer(server, udpSender, false);
+                                }
+                            } else {
+                                Logger.logStatic(LogLevel.NORMAL, "Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
                             }
-                        } else {
-                            Logger.logStatic(LogLevel.NORMAL, "Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
                         }
                     } else {
                         list.incomingQueryAnswer(sender, data);
