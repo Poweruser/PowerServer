@@ -108,6 +108,9 @@ public class MainWindow extends JFrame implements Observer {
     }
 
     public void shutdown() {
+        if(this.server != null) {
+            this.server.deleteObserver(this);
+        }
         this.alreadyShuttingDown = true;
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.dispatchEvent(new WindowEvent(MainWindow.this, WindowEvent.WINDOW_CLOSING));
