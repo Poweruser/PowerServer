@@ -26,7 +26,8 @@ public class HelpCommand extends CommandBase {
         sb.append("Operation Flashpoint:Resistance  [opflashr]\n");
         sb.append("Arma: Cold War Assault  [opflashr]\n\n");
         sb.append("This application is open-source and the project's site is:  https://github.com/Poweruser/PowerServer/\n");
-        sb.append("Developed by Poweruser - 2014");
+        sb.append("Developed by Poweruser - 2014\n\n");
+        sb.append("Type 'commands' to see a list of available commands");
         Logger.logStatic(LogLevel.VERY_LOW, sb.toString());
 
     }
