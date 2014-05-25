@@ -51,8 +51,10 @@ public class PowerServer extends Observable {
     public static final int MASTERSERVER_TCP_PORT = 28900;
 
     public PowerServer() throws IOException {
-        for(GamesEnum g: GamesEnum.values()) {}
-        for(EncType enc: EncType.values()) {}
+        for(@SuppressWarnings("unused")
+        GamesEnum g: GamesEnum.values()) {}
+        for(@SuppressWarnings("unused")
+        EncType enc: EncType.values()) {}
         this.commandReg = new CommandRegistry();
         this.commandReg.register(new HelpCommand("help"));
         this.commandReg.register(new LogLevelCommand("setloglevel"));
