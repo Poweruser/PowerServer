@@ -17,24 +17,24 @@ public class LogLevelCommand extends CommandBase {
             if(v.verify(arguments[0])) {
                 int value = v.getVerifiedValue();
                 Logger.setLogLevel(value);
-                Logger.logStatic(LogLevel.VERY_LOW, "Log level set to " + LogLevel.valueToLevel(value).toString() + " (" + value + ")");
+                Logger.logStatic(LogLevel.VERY_LOW, "Log level set to " + LogLevel.valueToLevel(value).toString() + " (" + value + ")", true);
                 return true;
             } else {
                 boolean found = false;
                 for(LogLevel l: LogLevel.values()) {
                     if(l.toString().equalsIgnoreCase(arguments[0])) {
                         Logger.setLogLevel(l.getValue());
-                        Logger.logStatic(LogLevel.VERY_LOW, "Log level set to " + l.toString() + " (" + l.getValue() + ")");
+                        Logger.logStatic(LogLevel.VERY_LOW, "Log level set to " + l.toString() + " (" + l.getValue() + ")", true);
                         found = true;
                         break;
                     }
                 }
                 if(!found) {
-                    Logger.logStatic(LogLevel.VERY_LOW, "Invalid argument specified");
+                    Logger.logStatic(LogLevel.VERY_LOW, "Invalid argument specified", true);
                 }
             }
         } else if(arguments.length > 1) {
-            Logger.logStatic(LogLevel.VERY_LOW, "Invalid arguments specified");
+            Logger.logStatic(LogLevel.VERY_LOW, "Invalid arguments specified", true);
         }
         return false;
     }
@@ -50,7 +50,7 @@ public class LogLevelCommand extends CommandBase {
         sb.append("     2  -  Normal: Relevant information on the server events are logged as well\n");
         sb.append("     3  -  High: Minor errors that usually can be ignored are logged as well\n");
         sb.append("     4  -  Very high: Logs all kinds of error and events");
-        Logger.logStatic(LogLevel.VERY_LOW, sb.toString());
+        Logger.logStatic(LogLevel.VERY_LOW, sb.toString(), true);
 
     }
 }

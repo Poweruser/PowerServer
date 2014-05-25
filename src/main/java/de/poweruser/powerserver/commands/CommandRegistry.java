@@ -33,13 +33,13 @@ public class CommandRegistry {
         }
         String commandString = items[0];
         if(this.commandMap.containsKey(commandString)) {
-            Logger.logStatic(LogLevel.VERY_LOW, "Entered command: '" + formated + "'");
+            Logger.logStatic(LogLevel.VERY_LOW, "Entered command: '" + formated + "'", true);
             CommandInterface com = this.commandMap.get(commandString);
             if(!com.handle(arguments)) {
                 com.showCommandHelp();
             }
         } else {
-            Logger.logStatic(LogLevel.VERY_LOW, "Unknown command '" + commandString + "'. Type 'commands' to get a list of all available commands.");
+            Logger.logStatic(LogLevel.VERY_LOW, "Unknown command '" + commandString + "'. Type 'commands' to get a list of all available commands.", true);
         }
     }
 

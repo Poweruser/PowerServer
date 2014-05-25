@@ -43,30 +43,42 @@ public class Logger {
         logStatic(level, sb.toString());
     }
 
-    public static void logStackTraceStatic(LogLevel level, String message, Exception e) {
+    public static void logStackTraceStatic(LogLevel level, String message, Exception e, boolean printToSystemOut) {
         ByteArrayOutputStream ba = new ByteArrayOutputStream();
         PrintWriter pw = new PrintWriter(ba);
         pw.println(message);
         e.printStackTrace(pw);
         pw.close();
-        logStatic(level, ba.toString());
+        logStatic(level, ba.toString(), printToSystemOut);
+    }
+
+    public static void logStackTraceStatic(LogLevel level, String message, Exception e) {
+        Logger.logStackTraceStatic(level, message, e, false);
+    }
+
+    public void log(LogLevel level, String message, boolean printToSystemOut) {
+        if(level.doesPass(this.getLogLevel())) {
+            this.writeToFile(message, printToSystemOut);
+        }
     }
 
     public void log(LogLevel level, String message) {
-        if(level.doesPass(this.getLogLevel())) {
-            this.writeToFile(message);
+        this.log(level, message, false);
+    }
+
+    public static void logStatic(LogLevel level, String message, boolean printToSystemOut) {
+        if(instance != null && level.doesPass(instance.getLogLevel())) {
+            instance.writeToFile(message, printToSystemOut);
         }
     }
 
     public static void logStatic(LogLevel level, String message) {
-        if(instance != null && level.doesPass(instance.getLogLevel())) {
-            instance.writeToFile(message);
-        }
+        Logger.logStatic(level, message, false);
     }
 
-    private synchronized void writeToFile(String message) {
+    private synchronized void writeToFile(String message, boolean printToSystemOut) {
         String output = this.currentTimeString() + " " + message;
-        if(guiInUse) {
+        if(guiInUse || printToSystemOut) {
             System.out.println(output);
         }
         BufferedWriter bw = null;

@@ -39,7 +39,7 @@ public class Settings {
         this.masterServerLists.clear();
         this.supportedGames.clear();
         BufferedReader br = null;
-        Logger.logStatic(LogLevel.NORMAL, "Loading the settings file ...");
+        Logger.logStatic(LogLevel.NORMAL, "Loading the settings file ...", true);
         try {
             br = new BufferedReader(new FileReader(this.settingsFile));
             String line = null;
@@ -58,14 +58,14 @@ public class Settings {
                 }
             }
         } catch(IOException e) {
-            System.out.println("IO Error while reading settings file: " + this.settingsFile.getName() + ": " + e.getMessage());
+            Logger.logStatic(LogLevel.VERY_LOW, "IO Error while reading settings file: " + this.settingsFile.getName() + ": " + e.getMessage(), true);
         }
         if(br != null) {
             try {
                 br.close();
             } catch(IOException e) {}
         }
-        Logger.logStatic(LogLevel.LOW, "The server is operating in " + (this.isPublicMode() ? "PUBLIC" : "PRIVATE") + " mode");
+        Logger.logStatic(LogLevel.LOW, "The server is operating in " + (this.isPublicMode() ? "PUBLIC" : "PRIVATE") + " mode", true);
     }
 
     enum ConfigSection {
@@ -168,7 +168,7 @@ public class Settings {
             }
         }
         if(!logMessage.isEmpty()) {
-            Logger.logStatic(LogLevel.LOW, "The loaded master servers are:\n" + logMessage);
+            Logger.logStatic(LogLevel.LOW, "The loaded master servers are:\n" + logMessage, true);
         }
         return list;
     }

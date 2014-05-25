@@ -31,7 +31,7 @@ public class CommandsCommand extends CommandBase {
         sb.append("commands             Shows this list of available commands\n");
         sb.append("help                          Displays some general information about this application\n");
         sb.append("exit                            Shuts down the server. Aliases: quit, shutdown, stop, end");
-        Logger.logStatic(LogLevel.VERY_LOW, sb.toString());
+        Logger.logStatic(LogLevel.VERY_LOW, sb.toString(), true);
     }
 
 }

@@ -16,15 +16,18 @@ public class Main {
                 gui = false;
             }
         }
-        Logger logger = new Logger(new File("server.log"));
+        File logFile = new File("server.log");
+        Logger logger = new Logger(logFile);
         MainWindow m = null;
         if(gui) {
             m = new MainWindow();
             m.setVisible(true);
+        } else {
+            logger.log(LogLevel.VERY_LOW, "Operating in console mode. Check the log file " + logFile.getAbsolutePath() + " for a more detailed log", true);
         }
         PowerServer server = null;
         ConsoleReader reader = null;
-        logger.log(LogLevel.VERY_LOW, "Starting the master server ...");
+        logger.log(LogLevel.VERY_LOW, "Starting the master server ...", true);
         try {
             server = new PowerServer();
             if(m != null) {
@@ -33,14 +36,14 @@ public class Main {
                 reader = new ConsoleReader(server);
             }
         } catch(IOException e) {
-            Logger.logStackTraceStatic(LogLevel.VERY_LOW, "Failed to set up the server: " + e.toString(), e);
+            Logger.logStackTraceStatic(LogLevel.VERY_LOW, "Failed to set up the server: " + e.toString(), e, true);
         }
         if(server != null) {
             try {
                 server.mainloop();
-                logger.log(LogLevel.VERY_LOW, "Shutting down the master server ...");
+                logger.log(LogLevel.VERY_LOW, "Shutting down the master server ...", true);
             } catch(Exception e) {
-                Logger.logStackTraceStatic(LogLevel.VERY_LOW, "The server quit unexpectedly with an exception of type: " + e.toString(), e);
+                Logger.logStackTraceStatic(LogLevel.VERY_LOW, "The server quit unexpectedly with an exception of type: " + e.toString(), e, true);
             }
             server.shutdown();
         }
