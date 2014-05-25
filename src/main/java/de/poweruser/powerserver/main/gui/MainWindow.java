@@ -50,7 +50,6 @@ public class MainWindow extends JFrame implements Observer {
                 }
             }
         });
-        this.setTitle("PowerServer");
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.setLayout(new BorderLayout());
         JTextArea textArea = new JTextArea();
@@ -122,6 +121,7 @@ public class MainWindow extends JFrame implements Observer {
 
     public void setModel(PowerServer server) {
         this.server = server;
+        this.setTitle("PowerServer " + server.getVersion());
         this.server.addObserver(this);
     }
 
