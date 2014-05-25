@@ -23,11 +23,14 @@ public class Main {
             m.setVisible(true);
         }
         PowerServer server = null;
+        ConsoleReader reader = null;
         logger.log(LogLevel.VERY_LOW, "Starting the master server ...");
         try {
             server = new PowerServer();
             if(m != null) {
                 m.setModel(server);
+            } else {
+                reader = new ConsoleReader(server);
             }
         } catch(IOException e) {
             Logger.logStackTraceStatic(LogLevel.VERY_LOW, "Failed to set up the server: " + e.toString(), e);
@@ -43,6 +46,9 @@ public class Main {
         }
         if(m != null) {
             m.shutdown();
+        }
+        if(reader != null) {
+            reader.shutdown();
         }
     }
 }
