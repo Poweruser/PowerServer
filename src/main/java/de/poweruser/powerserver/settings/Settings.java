@@ -24,13 +24,11 @@ public class Settings {
     private List<String> supportedGames;
     private int downloadInterval;
     private boolean publicMode;
-    private LogLevel logLevel;
 
     public Settings(File settingsFile) {
-        this.instance = this;
+        instance = this;
         this.downloadInterval = 24;
         this.publicMode = true;
-        this.logLevel = LogLevel.NORMAL;
         this.masterServerLists = new ArrayList<URL>();
         this.masterServers = new ArrayList<String>();
         this.supportedGames = new ArrayList<String>();
