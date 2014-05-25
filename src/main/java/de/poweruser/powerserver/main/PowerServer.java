@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.commands.CommandRegistry;
 import de.poweruser.powerserver.commands.CommandsCommand;
+import de.poweruser.powerserver.commands.ExitCommand;
 import de.poweruser.powerserver.commands.HelpCommand;
 import de.poweruser.powerserver.commands.LogLevelCommand;
 import de.poweruser.powerserver.games.GameBase;
@@ -53,6 +54,10 @@ public class PowerServer extends Observable {
         this.commandReg.register(new HelpCommand("help"));
         this.commandReg.register(new LogLevelCommand("setloglevel"));
         this.commandReg.register(new CommandsCommand("commands"));
+        String[] exitAliases = new String[] { "exit", "stop", "quit", "shutdown", "end" };
+        for(String str: exitAliases) {
+            this.commandReg.register(new ExitCommand(str, this));
+        }
         this.running = false;
         this.settings = new Settings(new File("settings.cfg"));
         this.supportedGames = new HashSet<GameBase>();

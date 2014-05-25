@@ -39,7 +39,13 @@ public class Main {
             } catch(Exception e) {
                 Logger.logStackTraceStatic(LogLevel.VERY_LOW, "The server quit unexpectedly with an exception of type: " + e.toString(), e);
             }
+            if(m != null) {
+                server.deleteObserver(m);
+            }
             server.shutdown();
+        }
+        if(m != null) {
+            m.shutdown();
         }
     }
 }

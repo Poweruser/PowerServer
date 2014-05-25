@@ -43,9 +43,13 @@ public class TCPManager implements Runnable {
             try {
                 client = this.serverSocket.accept();
             } catch(SocketException e) {
-                Logger.logStatic(LogLevel.VERY_LOW, "The TCPManager failed to accept an incoming query connection: " + e.toString());
+                if(this.running) {
+                    Logger.logStatic(LogLevel.VERY_LOW, "The TCPManager failed to accept an incoming query connection: " + e.toString());
+                }
             } catch(IOException e) {
-                Logger.logStatic(LogLevel.VERY_LOW, "The TCPManager failed to accept an incoming query connection: " + e.toString());
+                if(this.running) {
+                    Logger.logStatic(LogLevel.VERY_LOW, "The TCPManager failed to accept an incoming query connection: " + e.toString());
+                }
             }
             if(client != null) {
                 if(this.guard.isAnotherConnectionAllowed(client)) {

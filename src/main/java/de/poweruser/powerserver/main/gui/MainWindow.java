@@ -45,9 +45,7 @@ public class MainWindow extends JFrame implements Observer {
                         if(MainWindow.this.server != null) {
                             MainWindow.this.server.shutdown();
                         }
-                        MainWindow.this.alreadyShuttingDown = true;
-                        MainWindow.this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-                        MainWindow.this.dispatchEvent(new WindowEvent(MainWindow.this, WindowEvent.WINDOW_CLOSING));
+                        MainWindow.this.shutdown();
                     }
                 }
             }
@@ -108,6 +106,12 @@ public class MainWindow extends JFrame implements Observer {
         System.setErr(ps);
         System.setOut(ps);
         Logger.guiInUse = true;
+    }
+
+    public void shutdown() {
+        this.alreadyShuttingDown = true;
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.dispatchEvent(new WindowEvent(MainWindow.this, WindowEvent.WINDOW_CLOSING));
     }
 
     @Override
