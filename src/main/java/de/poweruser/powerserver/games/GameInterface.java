@@ -1,5 +1,7 @@
 package de.poweruser.powerserver.games;
 
+import java.net.InetSocketAddress;
+
 import de.poweruser.powerserver.main.MessageData;
 import de.poweruser.powerserver.main.parser.ParserException;
 import de.poweruser.powerserver.network.UDPMessage;
@@ -19,5 +21,5 @@ public interface GameInterface {
 
     public DataKeysInterface getHeartBeatBroadcastDataKey();
 
-    public GameServerInterface createNewServer();
+    public GameServerInterface createNewServer(InetSocketAddress server);
 }

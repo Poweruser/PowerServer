@@ -1,6 +1,5 @@
 package de.poweruser.powerserver.games;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,9 +21,9 @@ public abstract class GameServerBase implements GameServerInterface {
     private boolean hasAnswered;
     protected MessageData queryInfo;
     protected GameBase game;
-    protected InetAddress serverAddress;
+    protected InetSocketAddress serverAddress;
 
-    public GameServerBase(GameBase game) {
+    public GameServerBase(GameBase game, InetSocketAddress server) {
         this.lastHeartbeat = -1L;
         this.lastQueryReply = -1L;
         this.lastQueryRequest = -1L;
@@ -33,13 +32,13 @@ public abstract class GameServerBase implements GameServerInterface {
         this.queryInfo = new MessageData();
         this.hasAnswered = false;
         this.queryBuffer = new QueryBuffer();
+        this.serverAddress = server;
     }
 
     @Override
     public boolean incomingHeartbeat(InetSocketAddress serverAddress, MessageData data) {
-        if(data.isHeartBeat()) {
+        if(data.isHeartBeat() && this.serverAddress.equals(serverAddress)) {
             this.realHeartbeat = true;
-            this.serverAddress = serverAddress.getAddress();
             this.setQueryPort(data);
             return this.newHeartBeat();
         }
@@ -54,8 +53,7 @@ public abstract class GameServerBase implements GameServerInterface {
 
     @Override
     public boolean incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) {
-        if(data.isHeartBeatBroadcast() && this.isBroadcastedServer()) {
-            this.serverAddress = serverAddress.getAddress();
+        if(data.isHeartBeatBroadcast() && this.isBroadcastedServer() && this.serverAddress.equals(serverAddress)) {
             this.setQueryPort(data);
             return this.newHeartBeat();
         }
@@ -64,10 +62,12 @@ public abstract class GameServerBase implements GameServerInterface {
 
     @Override
     public void incomingQueryAnswer(InetSocketAddress serverAddress, MessageData data) {
-        if(this.queryBuffer.put(data)) {
-            MessageData completeQuery = this.queryBuffer.getQueryIfComplete();
-            if(completeQuery != null) {
-                this.processNewMessage(completeQuery);
+        if(this.serverAddress.equals(serverAddress)) {
+            if(this.queryBuffer.put(data)) {
+                MessageData completeQuery = this.queryBuffer.getQueryIfComplete();
+                if(completeQuery != null) {
+                    this.processNewMessage(completeQuery);
+                }
             }
         }
     }
@@ -110,7 +110,7 @@ public abstract class GameServerBase implements GameServerInterface {
         if(completeQuery.isQueryAnswer()) {
             this.queryInfo.update(completeQuery);
             if(!this.hasAnswered) {
-                String logMessage = "New server for game " + this.game.getGameDisplayName(this) + ": " + this.serverAddress.getHostAddress();
+                String logMessage = "New server for game " + this.game.getGameDisplayName(this) + ": " + this.serverAddress.getAddress().getHostAddress();
                 String gamePort = this.game.getGamePort(this);
                 if(gamePort != null) {
                     logMessage += ":" + gamePort;

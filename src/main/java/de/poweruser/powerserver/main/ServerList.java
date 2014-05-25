@@ -67,7 +67,7 @@ public class ServerList {
     private GameServerInterface getOrCreateServer(InetSocketAddress server) {
         GameServerInterface gameServer;
         if(!this.servers.containsKey(server)) {
-            gameServer = this.game.createNewServer();
+            gameServer = this.game.createNewServer(server);
             this.servers.put(server, gameServer);
         } else {
             gameServer = this.servers.get(server);

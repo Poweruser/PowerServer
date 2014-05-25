@@ -1,5 +1,7 @@
 package de.poweruser.powerserver.games.opflashr;
 
+import java.net.InetSocketAddress;
+
 import de.poweruser.powerserver.games.DataKeysInterface;
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GameServerBase;
@@ -45,8 +47,8 @@ public class OperationFlashpointResistance extends GameBase {
     }
 
     @Override
-    public GameServerInterface createNewServer() {
-        return new OFPServer(this);
+    public GameServerInterface createNewServer(InetSocketAddress server) {
+        return new OFPServer(this, server);
     }
 
     @Override
