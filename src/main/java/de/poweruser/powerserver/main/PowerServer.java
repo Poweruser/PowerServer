@@ -115,7 +115,8 @@ public class PowerServer extends Observable {
                     this.running = false;
                 }
             } else {
-                while(this.udpManager.hasMessages()) {
+                int messageCount = 0;
+                while(this.udpManager.hasMessages() && messageCount++ < 50) {
                     this.handleIncomingMessage(this.udpManager.takeFirstMessage());
                 }
                 for(GameBase game: this.supportedGames) {
