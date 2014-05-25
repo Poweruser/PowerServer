@@ -20,8 +20,8 @@ public class Logger {
     private LogLevel logLevel;
 
     public Logger(File logFile) throws IOException {
-        this.guiInUse = false;
-        this.instance = this;
+        guiInUse = false;
+        instance = this;
         this.logLevel = LogLevel.NORMAL;
         this.logFile = logFile;
         if(!this.logFile.exists()) {
