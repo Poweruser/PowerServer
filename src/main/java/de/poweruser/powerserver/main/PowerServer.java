@@ -71,7 +71,9 @@ public class PowerServer extends Observable {
 
     private void reloadSettingsFile() throws IOException {
         this.settings.load();
-        this.lookUpAndGetMasterServerList(true);
+        if(this.settings.isPublicMode()) {
+            this.lookUpAndGetMasterServerList(true);
+        }
         this.updateSupportedGames();
     }
 
@@ -146,7 +148,7 @@ public class PowerServer extends Observable {
                     this.waitObject.wait(100);
                 } catch(InterruptedException e) {}
             }
-            if(this.isLastMasterServerLookupDue(true, this.settings.getListsDownloadInterval(TimeUnit.HOURS), TimeUnit.HOURS)) {
+            if(this.settings.isPublicMode() && this.isLastMasterServerLookupDue(true, this.settings.getListsDownloadInterval(TimeUnit.HOURS), TimeUnit.HOURS)) {
                 Logger.logStatic(LogLevel.HIGH, "Updating the master server list (Download of the domains and refreshing of the IPs)");
                 this.lookUpAndGetMasterServerList(true);
             }
