@@ -19,7 +19,7 @@ public class CommandsCommand extends CommandBase {
     public void showCommandHelp() {
         StringBuilder sb = new StringBuilder();
         sb.append("Overview over all available commands:\n\n");
-        sb.append("setloglevel <#>      Sets the level of logging. Values:  ");
+        sb.append("setloglevel <#>\t\tSets the level of logging. Values:  ");
         for(LogLevel l: LogLevel.values()) {
             sb.append(l.getValue());
             sb.append("(");
@@ -27,10 +27,10 @@ public class CommandsCommand extends CommandBase {
             sb.append(") ");
         }
         sb.append("\n");
-        sb.append("reload                      Reloads the settings file\n");
-        sb.append("commands             Shows this list of available commands\n");
-        sb.append("help                          Displays some general information about this application\n");
-        sb.append("exit                            Shuts down the server. Aliases: quit, shutdown, stop, end");
+        sb.append("reload    \t\tReloads the settings file\n");
+        sb.append("commands\t\tShows this list of available commands\n");
+        sb.append("help    \t\tDisplays some general information about this application\n");
+        sb.append("exit    \t\tShuts down the server. Aliases: quit, shutdown, stop, end");
         Logger.logStatic(LogLevel.VERY_LOW, sb.toString(), true);
     }
 
