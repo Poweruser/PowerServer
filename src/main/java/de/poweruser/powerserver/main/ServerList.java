@@ -33,6 +33,12 @@ public class ServerList {
     public boolean incomingHeartBeat(InetSocketAddress serverAddress, MessageData data) {
         if(serverAddress != null) {
             GameServerInterface server = this.getOrCreateServer(serverAddress);
+            String serverName = server.getServerName();
+            String logMessage = "Received a heartbeat from the server " + serverAddress.toString();
+            if(serverName != null) {
+                logMessage += (" ( " + serverName + " )");
+            }
+            Logger.logStatic(LogLevel.HIGH, logMessage);
             return server.incomingHeartbeat(serverAddress, data);
         }
         return false;
@@ -41,7 +47,15 @@ public class ServerList {
     public boolean incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) {
         if(data.containsKey(GeneralDataKeysEnum.HEARTBEATBROADCAST) && data.containsKey(GeneralDataKeysEnum.HOST)) {
             GameServerInterface server = this.getOrCreateServer(serverAddress);
-            return server.incomingHeartBeatBroadcast(serverAddress, data);
+            if(server.isBroadcastedServer()) {
+                String serverName = server.getServerName();
+                String logMessage = "Received a heartbeat broadcast for the server " + serverAddress.toString();
+                if(serverName != null) {
+                    logMessage += (" ( " + serverName + " )");
+                }
+                Logger.logStatic(LogLevel.HIGH, logMessage);
+                return server.incomingHeartBeatBroadcast(serverAddress, data);
+            }
         } else {
             Logger.logStatic(LogLevel.HIGH, "Got a heartbeatbroadcast, that is missing the host key");
         }
