@@ -95,5 +95,5 @@ public interface GameServerInterface {
 
     public String getServerName();
 
-    public void queryWasSent();
+    public void markQueryRequestAsSentWithCurrentTime();
 }

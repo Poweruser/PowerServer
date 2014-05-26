@@ -133,7 +133,7 @@ public abstract class GameServerBase implements GameServerInterface {
     }
 
     @Override
-    public void queryWasSent() {
+    public void markQueryRequestAsSentWithCurrentTime() {
         this.lastQueryRequest = System.currentTimeMillis();
     }
 

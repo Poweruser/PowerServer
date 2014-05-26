@@ -136,7 +136,7 @@ public class ServerList {
     public void queryServer(InetSocketAddress server, UDPSender udpSender, boolean queryPlayers) {
         GameServerInterface gsi = this.getServer(server);
         if(gsi != null) {
-            gsi.queryWasSent();
+            gsi.markQueryRequestAsSentWithCurrentTime();
             udpSender.queueQuery(server, this.game.createStatusQuery(queryPlayers));
         }
 
