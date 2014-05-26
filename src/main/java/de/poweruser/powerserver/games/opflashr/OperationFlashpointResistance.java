@@ -73,6 +73,7 @@ public class OperationFlashpointResistance extends GameBase {
 
     @Override
     public String getGamePort(GameServerBase gameServer) {
+        if(!this.equals(gameServer.getGame())) { throw new IllegalArgumentException("The game of the gameServer does not match the selected game: " + gameServer.getGame().getGameName() + " vs " + this.getGameName()); }
         MessageData data = gameServer.getQueryInfo();
         String out = null;
         if(data.containsKey(DataKeyEnum.HOSTPORT)) {

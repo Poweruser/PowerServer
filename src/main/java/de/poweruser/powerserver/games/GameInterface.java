@@ -44,7 +44,7 @@ public interface GameInterface {
 
     public String getGameDisplayName(GameServerBase gameServer) throws IllegalArgumentException;
 
-    public String getGamePort(GameServerBase gameServer);
+    public String getGamePort(GameServerBase gameServer) throws IllegalArgumentException;
 
     public MessageData parseMessage(UDPMessage msg) throws ParserException;
 

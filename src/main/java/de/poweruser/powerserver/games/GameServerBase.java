@@ -111,7 +111,7 @@ public abstract class GameServerBase implements GameServerInterface {
             this.queryInfo.update(completeQuery);
             if(!this.hasAnswered) {
                 String logMessage = "New server for game " + this.getDisplayName() + ": " + this.serverAddress.getAddress().getHostAddress();
-                String gamePort = this.game.getGamePort(this);
+                String gamePort = this.getGamePort();
                 if(gamePort != null) {
                     logMessage += ":" + gamePort;
                 }
@@ -147,6 +147,10 @@ public abstract class GameServerBase implements GameServerInterface {
 
     public String getDisplayName() {
         return this.game.getGameDisplayName(this);
+    }
+
+    public String getGamePort() {
+        return this.game.getGamePort(this);
     }
 
     public GameBase getGame() {
