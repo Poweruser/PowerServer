@@ -31,14 +31,18 @@ public interface GameInterface {
      * gameServer. The display name may vary within a game, with different
      * versions of it for example.
      * The game that is represented by the gameServer must match the game that
-     * this is method is called upon
+     * this is method is called upon. If it does not match an
+     * IllegalArgumentException is thrown
      * 
      * @param gameServer
      *            the server that the display name shall be generated for
      * @return The display name of the game that is represented by gameServer
+     * @throws IllegalArgumentException
+     *             When the both games, the game that getGameDisplayName is
+     *             called on and the game of the gameServer, do not match
      */
 
-    public String getGameDisplayName(GameServerBase gameServer);
+    public String getGameDisplayName(GameServerBase gameServer) throws IllegalArgumentException;
 
     public String getGamePort(GameServerBase gameServer);
 

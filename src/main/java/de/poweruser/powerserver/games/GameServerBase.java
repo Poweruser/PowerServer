@@ -110,7 +110,7 @@ public abstract class GameServerBase implements GameServerInterface {
         if(completeQuery.isQueryAnswer()) {
             this.queryInfo.update(completeQuery);
             if(!this.hasAnswered) {
-                String logMessage = "New server for game " + this.game.getGameDisplayName(this) + ": " + this.serverAddress.getAddress().getHostAddress();
+                String logMessage = "New server for game " + this.getDisplayName() + ": " + this.serverAddress.getAddress().getHostAddress();
                 String gamePort = this.game.getGamePort(this);
                 if(gamePort != null) {
                     logMessage += ":" + gamePort;
@@ -143,6 +143,14 @@ public abstract class GameServerBase implements GameServerInterface {
     @Override
     public boolean isBroadcastedServer() {
         return !this.realHeartbeat;
+    }
+
+    public String getDisplayName() {
+        return this.game.getGameDisplayName(this);
+    }
+
+    public GameBase getGame() {
+        return this.game;
     }
 
     private class QueryBuffer {

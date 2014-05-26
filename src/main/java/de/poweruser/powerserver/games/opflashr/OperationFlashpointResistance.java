@@ -52,7 +52,8 @@ public class OperationFlashpointResistance extends GameBase {
     }
 
     @Override
-    public String getGameDisplayName(GameServerBase gameServer) {
+    public String getGameDisplayName(GameServerBase gameServer) throws IllegalArgumentException {
+        if(!this.equals(gameServer.getGame())) { throw new IllegalArgumentException("The game of the gameServer does not match the selected game: " + gameServer.getGame().getGameName() + " vs " + this.getGameName()); }
         MessageData data = gameServer.getQueryInfo();
         String out = this.displayName;
         String version = null;
