@@ -49,7 +49,7 @@ public enum GeneralDataKeysEnum implements DataKeysInterface {
         }
     }
 
-    public Object getVerifierCopy() {
+    public VerificationInterface getVerifierCopy() {
         if(this.verifier == null) { return new DummyVerify(); }
         return this.verifier.createCopy();
     }
