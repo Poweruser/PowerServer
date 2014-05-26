@@ -119,9 +119,44 @@ public interface GameInterface {
 
     public DataKeysInterface getHeartBeatBroadcastDataKey();
 
+    /**
+     * Creates the heart-beat broadcast in form of a DatagramPacket, that only
+     * contains the necessary data, but no target address or port yet. The
+     * required input are the query address of the game server, and the parsed
+     * key-value data from the corresponding received heart-beat.
+     * 
+     * @param server
+     *            The query address of the game server, that this heart-beat
+     *            broadcast is for
+     * @param data
+     *            The parsed data of the received heart-beat as MessageData
+     * @return A DatagramPacket without any target information, it only contains
+     *         the heart-beat broadcast data specific to the game
+     */
+
     public DatagramPacket createHeartbeatBroadcast(InetSocketAddress server, MessageData data);
 
+    /**
+     * Creates a new game server object for the game that this method is called
+     * upon. The game server object is initialized with the corresponding game
+     * and the query address of the game server.
+     * 
+     * @param server
+     *            The query address of the game server
+     * @return The created game server object, concealed as GameServerInterface
+     */
     public GameServerInterface createNewServer(InetSocketAddress server);
+
+    /**
+     * Creates a server query in form of a DatagramPacket for the corresponding
+     * game, that only contains the query data.
+     * 
+     * @param queryPlayers
+     *            A boolean flag that decides whether the server's player
+     *            information shall be queried as well or not
+     * @return A DatagramPacket without any target information, it only contains
+     *         the query data specific to the game
+     */
 
     public DatagramPacket createStatusQuery(boolean queryPlayers);
 }
