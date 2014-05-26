@@ -1,6 +1,7 @@
 package de.poweruser.powerserver.games;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.main.MessageData;
 
@@ -15,11 +16,24 @@ public interface GameServerInterface {
 
     public int getQueryPort();
 
-    public boolean checkLastHeartbeat(long timeDiff);
+    /**
+     * Checks whether the last heart-beat for this server has been received not
+     * longer ago, then the specified time duration.
+     * 
+     * @param timeDiff
+     *            The time duration to check
+     * @param unit
+     * @return true, if the last heart-beat was received within the specified
+     *         duration, or if no heart-beat has been received yet
+     *         false, if a heart-beat has been received already and it was
+     *         received longer ago than the specified duration
+     */
 
-    public boolean checkLastQueryReply(long timeDiff);
+    public boolean checkLastHeartbeat(long timeDiff, TimeUnit unit);
 
-    public boolean checkLastQueryRequest(long timeDiff);
+    public boolean checkLastQueryReply(long timeDiff, TimeUnit unit);
+
+    public boolean checkLastQueryRequest(long timeDiff, TimeUnit unit);
 
     public boolean hasAnsweredToQuery();
 

@@ -3,6 +3,7 @@ package de.poweruser.powerserver.games;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
@@ -78,18 +79,18 @@ public abstract class GameServerBase implements GameServerInterface {
     }
 
     @Override
-    public boolean checkLastHeartbeat(long timeDiff) {
-        return (System.currentTimeMillis() - this.lastHeartbeat) < timeDiff;
+    public boolean checkLastHeartbeat(long timeDiff, TimeUnit unit) {
+        return (System.currentTimeMillis() - this.lastHeartbeat) < TimeUnit.MILLISECONDS.convert(timeDiff, unit);
     }
 
     @Override
-    public boolean checkLastQueryReply(long timeDiff) {
-        return (System.currentTimeMillis() - this.lastQueryReply) < timeDiff;
+    public boolean checkLastQueryReply(long timeDiff, TimeUnit unit) {
+        return (System.currentTimeMillis() - this.lastQueryReply) < TimeUnit.MILLISECONDS.convert(timeDiff, unit);
     }
 
     @Override
-    public boolean checkLastQueryRequest(long timeDiff) {
-        return (System.currentTimeMillis() - this.lastQueryRequest) < timeDiff;
+    public boolean checkLastQueryRequest(long timeDiff, TimeUnit unit) {
+        return (System.currentTimeMillis() - this.lastQueryRequest) < TimeUnit.MILLISECONDS.convert(timeDiff, unit);
     }
 
     private void setQueryPort(MessageData data) {

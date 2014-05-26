@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GameServerBase;
@@ -21,9 +22,9 @@ public class ServerList {
     private GameBase game;
     private Map<InetSocketAddress, GameServerInterface> servers;
 
-    private static final long allowedHeartbeatTimeout = 900L * 1000L; // 15minutes
-    private static final long allowedQueryTimeout = 1800 * 1000L; // 30minutes
-    private static final long emergencyQueryInterval = 180 * 1000L; // 3minutes
+    private static final long allowedHeartbeatTimeout = 15L; // 15minutes
+    private static final long allowedQueryTimeout = 30L; // 30minutes
+    private static final long emergencyQueryInterval = 3L; // 3minutes
 
     public ServerList(GameBase game) {
         this.game = game;
@@ -95,11 +96,11 @@ public class ServerList {
         while(iter.hasNext()) {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
             GameServerInterface gsi = entry.getValue();
-            if(!gsi.checkLastHeartbeat(allowedHeartbeatTimeout)) {
-                if(!gsi.checkLastQueryReply(allowedQueryTimeout)) {
+            if(!gsi.checkLastHeartbeat(allowedHeartbeatTimeout, TimeUnit.MINUTES)) {
+                if(!gsi.checkLastQueryReply(allowedQueryTimeout, TimeUnit.MINUTES)) {
                     iter.remove();
                     Logger.logStatic(LogLevel.NORMAL, "Removed server " + entry.getKey().toString() + " of game " + ((GameServerBase) gsi).getDisplayName() + ". Timeout reached.");
-                } else if(!gsi.checkLastQueryRequest(emergencyQueryInterval)) {
+                } else if(!gsi.checkLastQueryRequest(emergencyQueryInterval, TimeUnit.MINUTES)) {
                     if(serversToQuery == null) {
                         serversToQuery = new ArrayList<InetSocketAddress>();
                     }
@@ -123,7 +124,7 @@ public class ServerList {
         while(iter.hasNext()) {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
             GameServerInterface gsi = entry.getValue();
-            if(gsi.checkLastHeartbeat(allowedHeartbeatTimeout) || gsi.checkLastQueryReply(allowedQueryTimeout)) {
+            if(gsi.checkLastHeartbeat(allowedHeartbeatTimeout, TimeUnit.MINUTES) || gsi.checkLastQueryReply(allowedQueryTimeout, TimeUnit.MINUTES)) {
                 if(gsi.hasAnsweredToQuery()) {
                     list.add(entry.getKey());
                 }
