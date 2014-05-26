@@ -72,29 +72,35 @@ public class MessageData implements CombineableInterface<MessageData> {
     /**
      * Checks if this MessageData represents the data of a received heart-beat.
      * More specifically it checks if the mapping of this MessageData contains
-     * the data key that represents the key for a heart-beat
+     * the data key that represents the key for a heart-beat.
      * 
-     * @return true, if mapping contains the heart-beat data key.
+     * The assigned value to the heart-beat data key is verified as well. If
+     * it does not pass the checks, this method returns false
+     * 
+     * @return true, if mapping contains a valid heart-beat data key and value.
      *         Otherwise false
      */
 
     public boolean isHeartBeat() {
-        return this.containsKey(GeneralDataKeysEnum.HEARTBEAT);
+        return this.checkKeyAndValue(GeneralDataKeysEnum.HEARTBEAT);
     }
 
     /**
      * Checks if this MessageData represents the data of a received heart-beat
      * broadcast. More specifically it checks if the mapping of this MessageData
-     * contains the data key that represents the key for a heart-beat broadcast
-     * and the seconds required key in a heart-beat broadcast, the host address
-     * key
+     * contains a valid data key that represents the key for a heart-beat
+     * broadcast and the second required key in a heart-beat broadcast, a valid
+     * host address key.
+     * The assigned values to the data keys are verified as well. If they do not
+     * pass the checks, this method returns false
      * 
-     * @return true, if mapping contains the heart-beat broadcast, and the host
-     *         data key. Otherwise false
+     * @return true, if the mapping contains the valid heart-beat broadcast and
+     *         valid host data key and value.
+     *         Otherwise false
      */
 
     public boolean isHeartBeatBroadcast() {
-        return this.containsKey(GeneralDataKeysEnum.HEARTBEATBROADCAST) && this.containsKey(GeneralDataKeysEnum.HOST);
+        return this.checkKeyAndValue(GeneralDataKeysEnum.HEARTBEATBROADCAST) && this.checkKeyAndValue(GeneralDataKeysEnum.HOST);
     }
 
     /**
@@ -111,13 +117,7 @@ public class MessageData implements CombineableInterface<MessageData> {
      */
 
     public boolean hasStateChanged() {
-        GeneralDataKeysEnum key = GeneralDataKeysEnum.STATECHANGED;
-        if(this.containsKey(key)) {
-            String data = this.getData(key);
-            IntVerify verifier = new IntVerify(1, 1);
-            return verifier.verify(data);
-        }
-        return false;
+        return this.checkKeyAndValue(GeneralDataKeysEnum.STATECHANGED);
     }
 
     /**
@@ -132,7 +132,12 @@ public class MessageData implements CombineableInterface<MessageData> {
      */
 
     public boolean isQueryAnswer() {
-        return this.containsKey(GeneralDataKeysEnum.QUERYID);
+        return this.checkKeyAndValue(GeneralDataKeysEnum.QUERYID);
+    }
+
+    private boolean checkKeyAndValue(GeneralDataKeysEnum key) {
+        if(this.containsKey(key)) { return key.getVerifierCopy().verify(this.getData(key)); }
+        return false;
     }
 
     public InetSocketAddress constructQuerySocketAddress(InetSocketAddress sender) {
