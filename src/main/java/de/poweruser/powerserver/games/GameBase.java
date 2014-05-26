@@ -1,6 +1,5 @@
 package de.poweruser.powerserver.games;
 
-import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
@@ -75,46 +74,6 @@ public abstract class GameBase implements GameInterface {
     @Override
     public boolean equals(Object o) {
         return (o != null && o instanceof GameBase && ((GameBase) o).getGameName().equalsIgnoreCase(this.gamename));
-    }
-
-    public DatagramPacket createHeartbeatBroadcast(InetSocketAddress server, MessageData data) {
-        if(data.containsKey(GeneralDataKeysEnum.HEARTBEAT)) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("\\");
-            builder.append(GeneralDataKeysEnum.HEARTBEATBROADCAST.getKeyString());
-            builder.append("\\");
-            builder.append(data.getData(GeneralDataKeysEnum.HEARTBEAT));
-            builder.append("\\");
-            builder.append(GeneralDataKeysEnum.HOST.getKeyString());
-            builder.append("\\");
-            builder.append(server.getAddress().getHostAddress());
-            builder.append("\\");
-            builder.append(GeneralDataKeysEnum.GAMENAME.getKeyString());
-            builder.append("\\");
-            builder.append(this.gamename);
-            if(data.containsKey(GeneralDataKeysEnum.STATECHANGED)) {
-                builder.append("\\");
-                builder.append(GeneralDataKeysEnum.STATECHANGED.getKeyString());
-                builder.append("\\");
-                builder.append(data.getData(GeneralDataKeysEnum.STATECHANGED));
-            }
-            byte[] message = builder.toString().getBytes();
-            return new DatagramPacket(message, message.length);
-        }
-        return null;
-    }
-
-    public DatagramPacket createStatusQuery(boolean queryPlayers) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("\\");
-        if(queryPlayers) {
-            builder.append("info\\rules\\players");
-        } else {
-            builder.append("status");
-        }
-        builder.append("\\");
-        byte[] message = builder.toString().getBytes();
-        return new DatagramPacket(message, message.length);
     }
 
     public List<InetSocketAddress> getActiveServers() {

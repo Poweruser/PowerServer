@@ -1,5 +1,6 @@
 package de.poweruser.powerserver.games;
 
+import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
 
 import de.poweruser.powerserver.main.MessageData;
@@ -118,5 +119,9 @@ public interface GameInterface {
 
     public DataKeysInterface getHeartBeatBroadcastDataKey();
 
+    public DatagramPacket createHeartbeatBroadcast(InetSocketAddress server, MessageData data);
+
     public GameServerInterface createNewServer(InetSocketAddress server);
+
+    public DatagramPacket createStatusQuery(boolean queryPlayers);
 }

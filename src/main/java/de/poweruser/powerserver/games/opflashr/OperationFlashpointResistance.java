@@ -1,11 +1,13 @@
 package de.poweruser.powerserver.games.opflashr;
 
+import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
 
 import de.poweruser.powerserver.games.DataKeysInterface;
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GameServerBase;
 import de.poweruser.powerserver.games.GameServerInterface;
+import de.poweruser.powerserver.games.GeneralDataKeysEnum;
 import de.poweruser.powerserver.main.MessageData;
 import de.poweruser.powerserver.main.parser.DataParserInterface;
 
@@ -80,5 +82,49 @@ public class OperationFlashpointResistance extends GameBase {
             out = data.getData(DataKeyEnum.HOSTPORT);
         }
         return out;
+    }
+
+    @Override
+    public DatagramPacket createHeartbeatBroadcast(InetSocketAddress server, MessageData data) {
+        DataKeysInterface heartbeat = this.getHeartBeatDataKey();
+        DataKeysInterface broadcast = this.getHeartBeatBroadcastDataKey();
+        if(heartbeat != null && broadcast != null && data.containsKey(heartbeat)) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("\\");
+            builder.append(broadcast.getKeyString());
+            builder.append("\\");
+            builder.append(data.getData(heartbeat));
+            builder.append("\\");
+            builder.append(GeneralDataKeysEnum.HOST.getKeyString());
+            builder.append("\\");
+            builder.append(server.getAddress().getHostAddress());
+            builder.append("\\");
+            builder.append(GeneralDataKeysEnum.GAMENAME.getKeyString());
+            builder.append("\\");
+            builder.append(this.gamename);
+            if(data.containsKey(GeneralDataKeysEnum.STATECHANGED)) {
+                builder.append("\\");
+                builder.append(GeneralDataKeysEnum.STATECHANGED.getKeyString());
+                builder.append("\\");
+                builder.append(data.getData(GeneralDataKeysEnum.STATECHANGED));
+            }
+            byte[] message = builder.toString().getBytes();
+            return new DatagramPacket(message, message.length);
+        }
+        return null;
+    }
+
+    @Override
+    public DatagramPacket createStatusQuery(boolean queryPlayers) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("\\");
+        if(queryPlayers) {
+            builder.append("info\\rules\\players");
+        } else {
+            builder.append("status");
+        }
+        builder.append("\\");
+        byte[] message = builder.toString().getBytes();
+        return new DatagramPacket(message, message.length);
     }
 }
