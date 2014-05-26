@@ -44,13 +44,77 @@ public interface GameInterface {
 
     public String getGameDisplayName(GameServerBase gameServer) throws IllegalArgumentException;
 
+    /**
+     * Gets the game port that the passed game server is running on. If that
+     * information was not received through a query answer yet, this method
+     * returns null.
+     * The game that is represented by the gameServer must match the game that
+     * this is method is called upon. If it does not match an
+     * IllegalArgumentException is thrown
+     * 
+     * @param gameServer
+     *            the server of which its game port shall be returned
+     * @return the game port the server is running on as a String. If none is
+     *         set yet, it returns null
+     * @throws IllegalArgumentException
+     *             An IllegalArgumentException is thrown, when the both games,
+     *             the game that getGamePort is called on and the game of the
+     *             gameServer, do not match
+     */
+
     public String getGamePort(GameServerBase gameServer) throws IllegalArgumentException;
+
+    /**
+     * Parses a UDPMessage specifically for this game. The game uses the parser
+     * that is assigned to it for this task.
+     * 
+     * @param msg
+     *            The UDPMessage to parse
+     * @return The parsed data as a MessageData object
+     * @throws ParserException
+     *             A ParserException is thrown when an error happens during
+     *             parsing or when the input is in a unexpected or corrupt
+     *             format. When, or in what cases a ParserException is thrown
+     *             completely depends on the parser that the game, this method
+     *             is
+     *             called upon, uses.
+     */
 
     public MessageData parseMessage(UDPMessage msg) throws ParserException;
 
+    /**
+     * Verifies a key-value pair based on the available data keys for this game.
+     * These include the general data keys defined in
+     * de.poweruser.powerserver.games.GeneralDataKeysEnum and the ones that were
+     * additionally defined for this game. This method returns only true if a
+     * matching data key could be found and the value passes the test of its
+     * assigned verifier. In all other cases this method returns false.
+     * 
+     * @param key
+     *            The data key of the key-value pair to check, as a String
+     * @param value
+     *            The value of the key-value pair to check, as a String
+     * @return true, if a matching data key was found and the value passes the
+     *         test of its assigned verifier, otherwise false
+     */
+
     public boolean verifyDataKeyAndValue(String key, String value);
 
+    /**
+     * Returns the data key of this game, that is responsible for marking a sent
+     * message as a server heart-beat.
+     * 
+     * @return the heart-beat data key or null if the game has none
+     */
+
     public DataKeysInterface getHeartBeatDataKey();
+
+    /**
+     * Returns the data key of this game, that is responsible for marking a sent
+     * message as a server heart-beat broadcast.
+     * 
+     * @return the heart-beat broadcast data key or null if the game has none
+     */
 
     public DataKeysInterface getHeartBeatBroadcastDataKey();
 
