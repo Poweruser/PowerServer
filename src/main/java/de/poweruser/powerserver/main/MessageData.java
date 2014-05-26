@@ -13,31 +13,102 @@ import de.poweruser.powerserver.main.parser.dataverification.QueryIdFormatVerify
 
 public class MessageData implements CombineableInterface<MessageData> {
 
+    /**
+     * The key-value mapping of the stored data. The keys of this map are the
+     * data keys in their String representation that
+     * DataKeysInterface.getKeyString() returns. The values of this map are the
+     * corresponding data values as String
+     */
     private HashMap<String, String> map;
+
+    /**
+     * A constructor which initializes a empty mapping
+     */
 
     public MessageData() {
         this.map = new HashMap<String, String>();
     }
 
+    /**
+     * A constructor which initializes the key-value mapping of this MessageData
+     * with an passed mapping
+     * 
+     * @param map
+     *            The mapping that shall be assigned to this MessageData
+     */
+
     public MessageData(HashMap<String, String> map) {
         this.map = map;
     }
+
+    /**
+     * Checks if the mapping of this MessageData contains the passed key
+     * 
+     * @param key
+     *            A data key that implements the DataKeysInterface
+     * @return true if the mapping contains the key, otherwise false
+     */
 
     public boolean containsKey(DataKeysInterface key) {
         return this.map.containsKey(key.getKeyString());
     }
 
+    /**
+     * Returns the data that is assigned to the passed data key within the
+     * mapping of MessageData. If the mapping does not contain this key, the
+     * returned value is the one that the mapping returns in this case, which
+     * should be null.
+     * 
+     * @param key
+     *            A data key that implements the DataKeysInterface
+     * @return the data as String that is assigned to the passed data key. If
+     *         the mapping does not contain the key, null
+     */
+
     public String getData(DataKeysInterface key) {
         return this.map.get(key.getKeyString());
     }
+
+    /**
+     * Checks if this MessageData represents the data of a received heart-beat.
+     * More specifically it checks if the mapping of this MessageData contains
+     * the data key that represents the key for a heart-beat
+     * 
+     * @return true, if mapping contains the heart-beat data key.
+     *         Otherwise false
+     */
 
     public boolean isHeartBeat() {
         return this.containsKey(GeneralDataKeysEnum.HEARTBEAT);
     }
 
+    /**
+     * Checks if this MessageData represents the data of a received heart-beat
+     * broadcast. More specifically it checks if the mapping of this MessageData
+     * contains the data key that represents the key for a heart-beat broadcast
+     * and the seconds required key in a heart-beat broadcast, the host address
+     * key
+     * 
+     * @return true, if mapping contains the heart-beat broadcast, and the host
+     *         data key. Otherwise false
+     */
+
     public boolean isHeartBeatBroadcast() {
         return this.containsKey(GeneralDataKeysEnum.HEARTBEATBROADCAST) && this.containsKey(GeneralDataKeysEnum.HOST);
     }
+
+    /**
+     * Checks if this MessageData represents the data contains a valid
+     * statechanged data key flag. This flag usually is only part of heart-beats
+     * and heart-beat broadcasts, but it is not guaranteed. So check if this
+     * MessageData represents a heart-beat, a heart-beat broadcast or something
+     * else first.
+     * The assigned value to the statechanged data key is verified as well. If
+     * it does not pass the checks, this method returns false
+     * 
+     * @return true, if the mapping contains a valid statechanged data key and
+     *         value. Otherwise false
+     */
 
     public boolean hasStateChanged() {
         GeneralDataKeysEnum key = GeneralDataKeysEnum.STATECHANGED;
@@ -48,6 +119,17 @@ public class MessageData implements CombineableInterface<MessageData> {
         }
         return false;
     }
+
+    /**
+     * Checks if this MessageData represents a query answer. More specifically
+     * this method checks if the mapping of this MessageData contains a valid
+     * queryid data key.
+     * The assigned value to the statechanged data key is verified as well. If
+     * it does not pass the checks, this method returns false
+     * 
+     * @return true, if the mapping contains a valid queryid data key and value.
+     *         Otherwise false
+     */
 
     public boolean isQueryAnswer() {
         return this.containsKey(GeneralDataKeysEnum.QUERYID);

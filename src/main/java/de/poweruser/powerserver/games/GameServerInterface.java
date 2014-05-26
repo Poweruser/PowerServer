@@ -95,5 +95,11 @@ public interface GameServerInterface {
 
     public String getServerName();
 
+    /**
+     * Sets a flag with the current time for the last sent query request. This
+     * flag will be used when testing for the last send time of a query request
+     * with the method checkLastQueryRequest(long, TimeUnit)
+     */
+
     public void markQueryRequestAsSentWithCurrentTime();
 }
