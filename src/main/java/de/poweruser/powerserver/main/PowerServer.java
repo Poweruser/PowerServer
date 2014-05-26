@@ -207,8 +207,10 @@ public class PowerServer {
                                 Logger.logStatic(LogLevel.NORMAL, "Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
                             }
                         }
-                    } else {
+                    } else if(data.isQueryAnswer()) {
                         list.incomingQueryAnswer(sender, data);
+                    } else {
+                        Logger.logStatic(LogLevel.HIGH, "Received a UDPMessage from " + sender.getAddress().toString() + " that could not be recognised as either a heartbeat, a heartbeat broadcast or a query answer: " + message.toString());
                     }
                 }
             }
