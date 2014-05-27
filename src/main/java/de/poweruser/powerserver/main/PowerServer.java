@@ -155,7 +155,7 @@ public class PowerServer {
                     this.waitObject.wait(100);
                 } catch(InterruptedException e) {}
             }
-            if(this.settings.isPublicMode() && this.isLastMasterServerLookupDue(true, this.settings.getListsDownloadInterval(TimeUnit.HOURS), TimeUnit.HOURS)) {
+            if(this.settings.isPublicMode() && this.isLastMasterServerLookupDue(true, this.settings.getListsDownloadInterval(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
                 Logger.logStatic(LogLevel.HIGH, "Updating the master server list (Download of the domains and refreshing of the IPs)");
                 this.lookUpAndGetMasterServerList(true);
             }
