@@ -171,6 +171,7 @@ public class PowerServer {
             Logger.logStatic(LogLevel.HIGH, "Error while parsing an incoming udpmessage:");
             Logger.log(LogLevel.HIGH, e);
         }
+        this.gsp1Parser.reset();
         if(data != null) {
             GameBase game = data.getGame();
             if(game == null) {

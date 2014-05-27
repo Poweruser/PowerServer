@@ -87,4 +87,8 @@ public class GamespyProtocol1Parser implements DataParserInterface {
     private boolean isGameNameKey(String key) {
         return GeneralDataKeysEnum.GAMENAME.getKeyString().equalsIgnoreCase(key);
     }
+
+    public void reset() {
+        this.parsedGame = null;
+    }
 }
