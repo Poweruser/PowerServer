@@ -54,7 +54,9 @@ public class UDPManager implements Observer {
     }
 
     public UDPMessage takeFirstMessage() {
-        return this.messageQueue.poll();
+        UDPMessage message = this.messageQueue.poll();
+        if(!this.receiver.isBanned(message.getSender().getAddress())) { return message; }
+        return null;
     }
 
     public int getPort() {

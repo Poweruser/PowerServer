@@ -64,6 +64,10 @@ public class UDPReceiverThread extends Observable implements Runnable {
         }
     }
 
+    public boolean isBanned(InetAddress address) {
+        return this.banlist.isBanned(address);
+    }
+
     private class BanList<T> {
         private HashMap<T, Long> banlist;
 
