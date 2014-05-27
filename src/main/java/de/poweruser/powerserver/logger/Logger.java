@@ -33,8 +33,6 @@ public class Logger {
 
     public static void log(LogLevel level, ParserException exception) {
         StringBuilder sb = new StringBuilder();
-        sb.append(instance.currentTimeString());
-        sb.append(" ");
         sb.append(exception.getErrorMessage());
         sb.append(" For Game \"");
         sb.append(exception.getGameName());
