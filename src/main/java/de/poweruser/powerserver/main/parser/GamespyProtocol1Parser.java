@@ -63,7 +63,7 @@ public class GamespyProtocol1Parser implements DataParserInterface {
             if(foundGame != null) {
                 this.parsedGame = foundGame;
                 for(Entry<String, String> entry: map.entrySet()) {
-                    if(!this.parsedGame.verifyDataKeyAndValue(entry.getKey(), entry.getValue())) { throw new ParserException("Found invalid data key \"" + key + "\" and value \"" + value + "\".", message, this.parsedGame); }
+                    if(!this.parsedGame.verifyDataKeyAndValue(entry.getKey(), entry.getValue())) { throw new ParserException("Found invalid data key \"" + entry.getKey() + "\" and value \"" + entry.getValue() + "\".", message, this.parsedGame); }
                 }
             } else {
                 throw new ParserException("The gamename \"" + value + "\" in this message was not recognised.", message, this.parsedGame);
