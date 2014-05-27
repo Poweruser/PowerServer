@@ -64,8 +64,10 @@ public class ServerList {
     }
 
     public void incomingQueryAnswer(InetSocketAddress sender, MessageData data) {
-        GameServerInterface server = this.getOrCreateServer(sender);
-        server.incomingQueryAnswer(sender, data);
+        GameServerInterface server = this.getServer(sender);
+        if(server != null) {
+            server.incomingQueryAnswer(sender, data);
+        }
     }
 
     private GameServerInterface getServer(InetSocketAddress server) {
