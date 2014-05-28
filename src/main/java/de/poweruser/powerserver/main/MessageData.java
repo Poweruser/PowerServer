@@ -140,6 +140,30 @@ public class MessageData implements CombineableInterface<MessageData> {
         return false;
     }
 
+    /**
+     * This method constructs the game server's query address from this
+     * MessageData, that is used for sending queries to and receiving query
+     * answers from. Depending on the type of data that is represented by this
+     * MessageData (heart-beat / heart-beat broadcast / query answer) the query
+     * port is stored in different locations.
+     * 
+     * For a heart-beat:
+     * game server address: the address the message was sent from
+     * game server query port: the value of the data key HEARTBEAT
+     * 
+     * For a heart-beat broadcast:
+     * game server address: the value of the data key HOST
+     * game server query port: the value of the data key HEARTBEATBROADCAST
+     * 
+     * For a query answer:
+     * The game servers address and query port is the senders socket address
+     * that the message was received from
+     * 
+     * @param sender
+     *            The sender's InetSocketAddress that has sent this message data
+     * @return The InetSocketAddress that targets the game server's query port
+     */
+
     public InetSocketAddress constructQuerySocketAddress(InetSocketAddress sender) {
         InetAddress server = null;
         int queryPort = 0;
