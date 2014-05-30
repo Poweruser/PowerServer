@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
@@ -27,9 +28,7 @@ public class UDPSender {
 
     public void queueHeartBeatBroadcast(List<InetAddress> masterServers, DatagramPacket packet) {
         for(InetAddress ms: masterServers) {
-            packet.setAddress(ms);
-            packet.setPort(PowerServer.MASTERSERVER_UDP_PORT);
-            this.broadcasts.put(packet.getSocketAddress(), packet);
+            this.broadcasts.put(new InetSocketAddress(ms, PowerServer.MASTERSERVER_UDP_PORT), packet);
         }
     }
 
@@ -48,8 +47,10 @@ public class UDPSender {
             }
         }
         this.queries.clear();
-        for(DatagramPacket packet: this.broadcasts.values()) {
+        for(Entry<SocketAddress, DatagramPacket> entry: this.broadcasts.entrySet()) {
+            DatagramPacket packet = entry.getValue();
             try {
+                packet.setSocketAddress(entry.getKey());
                 this.udpSocket.send(packet);
             } catch(IOException e) {
                 Logger.logStatic(LogLevel.VERY_LOW, e.toString() + "\nFailed to send a heartbeatbroadcast to a masterserver at " + packet.getAddress().getHostAddress() + ":" + packet.getPort() + ". Content: " + new String(packet.getData()));
