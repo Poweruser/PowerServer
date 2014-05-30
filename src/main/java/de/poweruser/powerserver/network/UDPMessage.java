@@ -1,8 +1,8 @@
 package de.poweruser.powerserver.network;
 
+import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 
 public class UDPMessage {
 
@@ -26,6 +26,10 @@ public class UDPMessage {
 
     @Override
     public String toString() {
-        return new String(data, 0, data.length, StandardCharsets.UTF_8);
+        try {
+            return new String(data, 0, data.length, "UTF-8");
+        } catch(UnsupportedEncodingException thr) {
+            return new String(data, 0, data.length);
+        }
     }
 }
