@@ -44,7 +44,7 @@ public class PowerServer {
     private Set<GameBase> supportedGames;
     private CommandRegistry commandReg;
 
-    public static final String VERSION = "1.0 beta";
+    public static final String VERSION = "1.0.2 beta";
 
     public static final int MASTERSERVER_UDP_PORT = 27900;
     public static final int MASTERSERVER_TCP_PORT = 28900;
