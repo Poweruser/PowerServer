@@ -33,20 +33,20 @@ public interface GameServerInterface {
     public boolean checkLastHeartbeat(long timeDiff, TimeUnit unit);
 
     /**
-     * Checks whether the last query reply of this server has been received not
+     * Checks whether the last message of this server has been received not
      * longer ago, than the specified time duration
      * 
      * @param timeDiff
      *            The time duration to check
      * @param unit
      *            The time unit of the provided time duration
-     * @return true, if the last query reply was received within the specified
-     *         duration, or if no query reply has been received yet
-     *         false, if a query reply has been received already and it was
+     * @return true, if the last message was received within the specified
+     *         duration, or if no message has been received yet
+     *         false, if a message has been received already and it was
      *         received longer ago than the specified duration
      */
 
-    public boolean checkLastQueryReply(long timeDiff, TimeUnit unit);
+    public boolean checkLastMessage(long timeDiff, TimeUnit unit);
 
     /**
      * Checks whether the last query request of this server has been sent not

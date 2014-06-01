@@ -23,7 +23,7 @@ public class ServerList {
     private Map<InetSocketAddress, GameServerInterface> servers;
 
     private static final long allowedHeartbeatTimeout = 15L; // 15minutes
-    private static final long allowedQueryTimeout = 30L; // 30minutes
+    private static final long allowedMessageTimeout = 30L; // 30minutes
     private static final long emergencyQueryInterval = 3L; // 3minutes
 
     public ServerList(GameBase game) {
@@ -99,7 +99,7 @@ public class ServerList {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
             GameServerInterface gsi = entry.getValue();
             if(!gsi.checkLastHeartbeat(allowedHeartbeatTimeout, TimeUnit.MINUTES)) {
-                if(!gsi.checkLastQueryReply(allowedQueryTimeout, TimeUnit.MINUTES)) {
+                if(!gsi.checkLastMessage(allowedMessageTimeout, TimeUnit.MINUTES)) {
                     iter.remove();
                     Logger.logStatic(LogLevel.NORMAL, "Removed server " + entry.getKey().toString() + " of game " + ((GameServerBase) gsi).getDisplayName() + ". Timeout reached.");
                 } else if(!gsi.checkLastQueryRequest(emergencyQueryInterval, TimeUnit.MINUTES)) {
@@ -126,7 +126,7 @@ public class ServerList {
         while(iter.hasNext()) {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
             GameServerInterface gsi = entry.getValue();
-            if(gsi.checkLastHeartbeat(allowedHeartbeatTimeout, TimeUnit.MINUTES) || gsi.checkLastQueryReply(allowedQueryTimeout, TimeUnit.MINUTES)) {
+            if(gsi.checkLastMessage(allowedMessageTimeout, TimeUnit.MINUTES)) {
                 if(gsi.hasAnsweredToQuery()) {
                     list.add(entry.getKey());
                 }

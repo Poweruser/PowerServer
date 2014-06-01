@@ -15,7 +15,7 @@ public abstract class GameServerBase implements GameServerInterface {
 
     private int queryPort;
     private long lastHeartbeat;
-    private long lastQueryReply;
+    private long lastMessage;
     private long lastQueryRequest;
     private boolean realHeartbeat;
     private QueryBuffer queryBuffer;
@@ -26,7 +26,7 @@ public abstract class GameServerBase implements GameServerInterface {
 
     public GameServerBase(GameBase game, InetSocketAddress server) {
         this.lastHeartbeat = -1L;
-        this.lastQueryReply = -1L;
+        this.lastMessage = -1L;
         this.lastQueryRequest = -1L;
         this.realHeartbeat = false;
         this.game = game;
@@ -48,7 +48,9 @@ public abstract class GameServerBase implements GameServerInterface {
 
     private boolean newHeartBeat() {
         boolean firstHeartBeat = this.lastHeartbeat < 0L;
-        this.lastHeartbeat = System.currentTimeMillis();
+        long currentTime = System.currentTimeMillis();
+        this.lastHeartbeat = currentTime;
+        this.lastMessage = currentTime;
         return firstHeartBeat;
     }
 
@@ -84,8 +86,8 @@ public abstract class GameServerBase implements GameServerInterface {
     }
 
     @Override
-    public boolean checkLastQueryReply(long timeDiff, TimeUnit unit) {
-        return (System.currentTimeMillis() - this.lastQueryReply) < TimeUnit.MILLISECONDS.convert(timeDiff, unit);
+    public boolean checkLastMessage(long timeDiff, TimeUnit unit) {
+        return (System.currentTimeMillis() - this.lastMessage) < TimeUnit.MILLISECONDS.convert(timeDiff, unit);
     }
 
     @Override
@@ -123,7 +125,7 @@ public abstract class GameServerBase implements GameServerInterface {
                 Logger.logStatic(LogLevel.NORMAL, logMessage);
             }
             this.hasAnswered = true;
-            this.lastQueryReply = System.currentTimeMillis();
+            this.lastMessage = System.currentTimeMillis();
         }
     }
 
