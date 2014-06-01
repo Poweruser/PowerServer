@@ -4,16 +4,21 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.text.DefaultEditorKit;
 
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.PowerServer;
@@ -50,11 +55,27 @@ public class MainWindow extends JFrame {
         });
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         this.setLayout(new BorderLayout());
-        JTextArea textArea = new JTextArea();
+        final JTextArea textArea = new JTextArea();
         JScrollPane pane = new JScrollPane(textArea);
         pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         textArea.setEditable(false);
+        textArea.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(final MouseEvent e) {
+                if(e.isPopupTrigger()) {
+                    final JPopupMenu menu = new JPopupMenu();
+                    JMenuItem copyItem = new JMenuItem(textArea.getActionMap().get(DefaultEditorKit.copyAction));
+                    copyItem.setText("Copy");
+                    copyItem.setEnabled(textArea.getSelectionStart() != textArea.getSelectionEnd());
+                    menu.add(copyItem);
+                    JMenuItem selectAllItem = new JMenuItem(textArea.getActionMap().get(DefaultEditorKit.selectAllAction));
+                    menu.add(selectAllItem);
+                    menu.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
+
         this.add(pane, BorderLayout.CENTER);
         JTextField textField = new JTextField();
         textField.addKeyListener(new KeyListener() {
