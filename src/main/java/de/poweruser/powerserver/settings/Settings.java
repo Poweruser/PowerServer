@@ -25,12 +25,19 @@ public class Settings {
     private int downloadInterval;
     private boolean publicMode;
     private boolean queryServersOnHeartbeat;
+    private int maximumServerTimeout;
+    private int emergencyQueryInterval;
+
+    private static final int MINIMAL_SERVERTIMEOUT = 20;
+    private static final int ALLOWED_HEARTBEATTIMEOUT = 15;
 
     public Settings(File settingsFile) {
         instance = this;
         this.downloadInterval = 24;
         this.publicMode = true;
         this.queryServersOnHeartbeat = true;
+        this.maximumServerTimeout = 60;
+        this.calcEmergencyQueryInterval();
         this.masterServerLists = new ArrayList<URL>();
         this.masterServers = new ArrayList<String>();
         this.supportedGames = new ArrayList<String>();
@@ -187,5 +194,32 @@ public class Settings {
 
     protected void setQueryServersOnHeartbeat(boolean active) {
         this.queryServersOnHeartbeat = active;
+    }
+
+    protected void setMaximumServerTimeout(int timeout) {
+        if(timeout >= MINIMAL_SERVERTIMEOUT) {
+            this.maximumServerTimeout = timeout;
+            this.calcEmergencyQueryInterval();
+        }
+    }
+
+    public long getMaximumServerTimeout(TimeUnit unit) {
+        return unit.convert(this.maximumServerTimeout, TimeUnit.MINUTES);
+    }
+
+    private void calcEmergencyQueryInterval() {
+        if(this.maximumServerTimeout >= MINIMAL_SERVERTIMEOUT) {
+            this.emergencyQueryInterval = Math.max(1, (this.maximumServerTimeout - ALLOWED_HEARTBEATTIMEOUT) / 5);
+        } else {
+            this.emergencyQueryInterval = 5;
+        }
+    }
+
+    public long getEmergencyQueryInterval(TimeUnit unit) {
+        return unit.convert(this.emergencyQueryInterval, TimeUnit.MINUTES);
+    }
+
+    public long getAllowedHeartbeatTimeout(TimeUnit unit) {
+        return unit.convert(ALLOWED_HEARTBEATTIMEOUT, TimeUnit.MINUTES);
     }
 }

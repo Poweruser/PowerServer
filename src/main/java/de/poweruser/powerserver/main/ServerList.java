@@ -16,15 +16,12 @@ import de.poweruser.powerserver.games.GeneralDataKeysEnum;
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.network.UDPSender;
+import de.poweruser.powerserver.settings.Settings;
 
 public class ServerList {
 
     private GameBase game;
     private Map<InetSocketAddress, GameServerInterface> servers;
-
-    private static final long allowedHeartbeatTimeout = 15L; // 15minutes
-    private static final long allowedMessageTimeout = 30L; // 30minutes
-    private static final long emergencyQueryInterval = 3L; // 3minutes
 
     public ServerList(GameBase game) {
         this.game = game;
@@ -92,17 +89,17 @@ public class ServerList {
         return gameServer;
     }
 
-    public List<InetSocketAddress> checkForServersToQueryAndOutdatedServers() {
+    public List<InetSocketAddress> checkForServersToQueryAndOutdatedServers(Settings settings) {
         List<InetSocketAddress> serversToQuery = null;
         Iterator<Entry<InetSocketAddress, GameServerInterface>> iter = this.servers.entrySet().iterator();
         while(iter.hasNext()) {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
             GameServerInterface gsi = entry.getValue();
-            if(!gsi.checkLastHeartbeat(allowedHeartbeatTimeout, TimeUnit.MINUTES)) {
-                if(!gsi.checkLastMessage(allowedMessageTimeout, TimeUnit.MINUTES)) {
+            if(!gsi.checkLastHeartbeat(settings.getAllowedHeartbeatTimeout(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
+                if(!gsi.checkLastMessage(settings.getMaximumServerTimeout(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
                     iter.remove();
                     Logger.logStatic(LogLevel.NORMAL, "Removed server " + entry.getKey().toString() + " of game " + ((GameServerBase) gsi).getDisplayName() + ". Timeout reached.");
-                } else if(!gsi.checkLastQueryRequest(emergencyQueryInterval, TimeUnit.MINUTES)) {
+                } else if(!gsi.checkLastQueryRequest(settings.getEmergencyQueryInterval(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
                     if(serversToQuery == null) {
                         serversToQuery = new ArrayList<InetSocketAddress>();
                     }
@@ -120,13 +117,13 @@ public class ServerList {
         return serversToQuery;
     }
 
-    public List<InetSocketAddress> getActiveServers() {
+    public List<InetSocketAddress> getActiveServers(Settings settings) {
         List<InetSocketAddress> list = new ArrayList<InetSocketAddress>();
         Iterator<Entry<InetSocketAddress, GameServerInterface>> iter = this.servers.entrySet().iterator();
         while(iter.hasNext()) {
             Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
             GameServerInterface gsi = entry.getValue();
-            if(gsi.checkLastMessage(allowedMessageTimeout, TimeUnit.MINUTES)) {
+            if(gsi.checkLastMessage(settings.getMaximumServerTimeout(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
                 if(gsi.hasAnsweredToQuery()) {
                     list.add(entry.getKey());
                 }

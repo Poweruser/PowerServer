@@ -10,6 +10,7 @@ import de.poweruser.powerserver.main.ServerList;
 import de.poweruser.powerserver.main.parser.DataParserInterface;
 import de.poweruser.powerserver.main.parser.ParserException;
 import de.poweruser.powerserver.network.UDPMessage;
+import de.poweruser.powerserver.settings.Settings;
 
 public abstract class GameBase implements GameInterface {
 
@@ -19,6 +20,7 @@ public abstract class GameBase implements GameInterface {
     protected String gamespyKey;
     protected DataParserInterface parser;
     private ServerList serverList;
+    private Settings settings;
 
     protected GameBase(String gamename, String gamespyKey, DataParserInterface parser, DataKeysInterface[] dataKeys) {
         this.gamename = gamename;
@@ -35,6 +37,10 @@ public abstract class GameBase implements GameInterface {
             this.keyMap.put(d.getKeyString(), d);
         }
         this.serverList = new ServerList(this);
+    }
+
+    public void setSettings(Settings settings) {
+        this.settings = settings;
     }
 
     @Override
@@ -77,7 +83,7 @@ public abstract class GameBase implements GameInterface {
     }
 
     public List<InetSocketAddress> getActiveServers() {
-        return this.serverList.getActiveServers();
+        return this.serverList.getActiveServers(this.settings);
     }
 
     public ServerList getServerList() {

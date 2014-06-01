@@ -35,6 +35,11 @@ public class SectionGeneral extends SettingsReader {
             } else if(key.equalsIgnoreCase("queryServersOnHeartbeat")) {
                 boolVerifier = new BooleanVerify();
                 settings.setQueryServersOnHeartbeat(boolVerifier.verify(value));
+            } else if(key.equalsIgnoreCase("maximumServerTimeout")) {
+                intVerifier = new IntVerify(0, Integer.MAX_VALUE);
+                if(intVerifier.verify(value)) {
+                    settings.setMaximumServerTimeout(intVerifier.getVerifiedValue());
+                }
             }
         }
     }

@@ -50,8 +50,10 @@ public class PowerServer {
     public static final int MASTERSERVER_TCP_PORT = 28900;
 
     public PowerServer() throws IOException {
-        for(@SuppressWarnings("unused")
-        GamesEnum g: GamesEnum.values()) {}
+        this.settings = new Settings(new File("settings.cfg"));
+        for(GamesEnum g: GamesEnum.values()) {
+            g.getGame().setSettings(this.settings);
+        }
         for(@SuppressWarnings("unused")
         EncType enc: EncType.values()) {}
         this.commandReg = new CommandRegistry();
@@ -64,7 +66,6 @@ public class PowerServer {
             this.commandReg.register(new ExitCommand(str, this));
         }
         this.running = false;
-        this.settings = new Settings(new File("settings.cfg"));
         this.supportedGames = new HashSet<GameBase>();
         this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT);
         this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT);
@@ -129,7 +130,7 @@ public class PowerServer {
                 }
                 for(GameBase game: this.supportedGames) {
                     ServerList list = game.getServerList();
-                    List<InetSocketAddress> toQuery = list.checkForServersToQueryAndOutdatedServers();
+                    List<InetSocketAddress> toQuery = list.checkForServersToQueryAndOutdatedServers(this.settings);
                     if(toQuery != null) {
                         for(InetSocketAddress i: toQuery) {
                             list.queryServer(i, this.udpManager.getUDPSender(), false);
