@@ -25,9 +25,10 @@ public interface GameServerInterface {
      * @param unit
      *            The time unit of the provided time duration
      * @return true, if the last heart-beat was received within the specified
-     *         duration, or if no heart-beat has been received yet
+     *         duration
      *         false, if a heart-beat has been received already and it was
-     *         received longer ago than the specified duration
+     *         received longer ago than the specified duration, or if no
+     *         heart-beat has been received yet
      */
 
     public boolean checkLastHeartbeat(long timeDiff, TimeUnit unit);
@@ -41,9 +42,10 @@ public interface GameServerInterface {
      * @param unit
      *            The time unit of the provided time duration
      * @return true, if the last message was received within the specified
-     *         duration, or if no message has been received yet
+     *         duration
      *         false, if a message has been received already and it was
-     *         received longer ago than the specified duration
+     *         received longer ago than the specified duration, or if no message
+     *         has been received yet
      */
 
     public boolean checkLastMessage(long timeDiff, TimeUnit unit);
@@ -57,9 +59,10 @@ public interface GameServerInterface {
      * @param unit
      *            The time unit of the provided time duration
      * @return true, if the last query request was sent within the specified
-     *         duration, or if no query request has been sent yet
+     *         duration
      *         false, if a query request has been sent yet and it was sent
-     *         longer ago than the specified duration
+     *         longer ago than the specified duration, or if no query request
+     *         has been sent yet
      */
 
     public boolean checkLastQueryRequest(long timeDiff, TimeUnit unit);
