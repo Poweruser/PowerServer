@@ -139,20 +139,29 @@ public class Settings {
                 try {
                     input = new BufferedReader(new InputStreamReader(list.openStream()));
                     String inputLine = null;
-                    boolean read = false;
+                    boolean readOnline = false;
+                    boolean readOffline = false;
                     while((inputLine = input.readLine()) != null) {
                         inputLine = inputLine.trim().toLowerCase();
                         if(inputLine.startsWith("[\\online]")) {
-                            read = false;
+                            readOnline = false;
+                        } else if(inputLine.startsWith("[\\offline]")) {
+                            readOffline = false;
                             break;
                         }
-                        if(read) {
+                        if(readOnline) {
                             if(!this.masterServers.contains(inputLine)) {
                                 this.masterServers.add(inputLine);
                             }
+                        } else if(readOffline) {
+                            if(this.masterServers.contains(inputLine)) {
+                                this.masterServers.remove(inputLine);
+                            }
                         }
                         if(inputLine.startsWith("[online]")) {
-                            read = true;
+                            readOnline = true;
+                        } else if(inputLine.startsWith("[offline]")) {
+                            readOffline = true;
                         }
                     }
                 } catch(IOException e) {
