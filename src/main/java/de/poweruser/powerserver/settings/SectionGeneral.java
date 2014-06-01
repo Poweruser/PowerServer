@@ -32,6 +32,9 @@ public class SectionGeneral extends SettingsReader {
                 if(intVerifier.verify(value)) {
                     Logger.setLogLevel(intVerifier.getVerifiedValue());
                 }
+            } else if(key.equalsIgnoreCase("queryServersOnHeartbeat")) {
+                boolVerifier = new BooleanVerify();
+                settings.setQueryServersOnHeartbeat(boolVerifier.verify(value));
             }
         }
     }

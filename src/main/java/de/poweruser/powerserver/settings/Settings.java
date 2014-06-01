@@ -24,11 +24,13 @@ public class Settings {
     private List<String> supportedGames;
     private int downloadInterval;
     private boolean publicMode;
+    private boolean queryServersOnHeartbeat;
 
     public Settings(File settingsFile) {
         instance = this;
         this.downloadInterval = 24;
         this.publicMode = true;
+        this.queryServersOnHeartbeat = true;
         this.masterServerLists = new ArrayList<URL>();
         this.masterServers = new ArrayList<String>();
         this.supportedGames = new ArrayList<String>();
@@ -177,5 +179,13 @@ public class Settings {
         ArrayList<String> list = new ArrayList<String>();
         list.addAll(this.supportedGames);
         return list;
+    }
+
+    public boolean getQueryServersOnHeartbeat() {
+        return this.queryServersOnHeartbeat;
+    }
+
+    protected void setQueryServersOnHeartbeat(boolean active) {
+        this.queryServersOnHeartbeat = active;
     }
 }

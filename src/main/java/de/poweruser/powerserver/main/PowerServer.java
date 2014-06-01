@@ -189,7 +189,7 @@ public class PowerServer {
                         if(this.settings.isPublicMode()) {
                             udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
                         }
-                        if(firstHeartBeat || data.hasStateChanged()) {
+                        if(firstHeartBeat || (data.hasStateChanged() && this.settings.getQueryServersOnHeartbeat())) {
                             list.queryServer(server, udpSender, false);
                         }
                     } else if(data.isHeartBeatBroadcast()) {
@@ -201,7 +201,7 @@ public class PowerServer {
                             }
                             if(this.masterServers.contains(sender.getAddress())) {
                                 boolean firstHeartBeat = list.incomingHeartBeatBroadcast(server, data);
-                                if((firstHeartBeat || data.hasStateChanged()) && list.isBroadcastedServer(server)) {
+                                if((firstHeartBeat || (data.hasStateChanged() && this.settings.getQueryServersOnHeartbeat())) && list.isBroadcastedServer(server)) {
                                     list.queryServer(server, udpSender, false);
                                 }
                             } else {
