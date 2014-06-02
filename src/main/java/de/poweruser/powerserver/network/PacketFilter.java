@@ -74,9 +74,8 @@ public class PacketFilter {
             return true;
         }
 
-        private boolean checkInterval(long time, long allowedInterval) {
-            long a = time - this.lastIncoming;
-            return a >= allowedInterval;
+        private boolean checkInterval(long time, long allowedMinimumInterval) {
+            return this.lastIncoming <= (time - allowedMinimumInterval);
         }
 
         public boolean checkLastIncoming(long duration, TimeUnit unit) {
