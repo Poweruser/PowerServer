@@ -58,7 +58,7 @@ public class PacketFilter {
         private int violations;
 
         public FilterInfo() {
-            this.lastIncoming = -1;
+            this.lastIncoming = -1L;
             this.violations = 0;
         }
 
