@@ -40,6 +40,21 @@ public class SectionGeneral extends SettingsReader {
                 if(intVerifier.verify(value)) {
                     settings.setMaximumServerTimeout(intVerifier.getVerifiedValue());
                 }
+            } else if(key.equalsIgnoreCase("maximumSendViolations")) {
+                intVerifier = new IntVerify(0, Integer.MAX_VALUE);
+                if(intVerifier.verify(value)) {
+                    settings.setMaximumSendViolations(intVerifier.getVerifiedValue());
+                }
+            } else if(key.equalsIgnoreCase("allowedMinimumSendInterval")) {
+                intVerifier = new IntVerify(1, Integer.MAX_VALUE);
+                if(intVerifier.verify(value)) {
+                    settings.setAllowedMinimumSendInterval(intVerifier.getVerifiedValue());
+                }
+            } else if(key.equalsIgnoreCase("tempBanDuration")) {
+                intVerifier = new IntVerify(0, Integer.MAX_VALUE);
+                if(intVerifier.verify(value)) {
+                    settings.setTempBanDuration(intVerifier.getVerifiedValue());
+                }
             }
         }
     }

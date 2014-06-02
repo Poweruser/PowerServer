@@ -1,16 +1,13 @@
 package de.poweruser.powerserver.network;
 
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
+
+import de.poweruser.powerserver.settings.Settings;
 
 public class UDPManager implements Observer {
 
@@ -21,10 +18,10 @@ public class UDPManager implements Observer {
 
     public static final int MAX_MESSAGECOUNT_PER_CYCLE = 50;
 
-    public UDPManager(int port) throws SocketException {
+    public UDPManager(int port, Settings settings) throws SocketException {
         this.socket = new DatagramSocket(port);
         this.socket.setSoTimeout(10000);
-        this.receiver = new UDPReceiverThread(socket);
+        this.receiver = new UDPReceiverThread(socket, settings);
         this.receiver.addObserver(this);
         this.sender = new UDPSender(socket);
         this.messageQueue = new ConcurrentLinkedQueue<UDPMessage>();
@@ -65,30 +62,5 @@ public class UDPManager implements Observer {
 
     public UDPSender getUDPSender() {
         return this.sender;
-    }
-
-    public void checkUDPOverload() {
-        int messageCount = this.messageQueue.size();
-        if(messageCount > (MAX_MESSAGECOUNT_PER_CYCLE * 10)) {
-            HashMap<InetAddress, Integer> map = new HashMap<InetAddress, Integer>();
-            Iterator<UDPMessage> iter = this.messageQueue.iterator();
-            while(iter.hasNext()) {
-                UDPMessage m = iter.next();
-                InetAddress sender = m.getSender().getAddress();
-                int i = 0;
-                if(map.containsKey(sender)) {
-                    i = map.get(sender).intValue();
-                }
-                i++;
-                map.put(sender, i);
-            }
-            for(Entry<InetAddress, Integer> entry: map.entrySet()) {
-                int count = entry.getValue().intValue();
-                if(count * 10 > messageCount) {
-                    this.receiver.banSender(entry.getKey(), 15L, TimeUnit.MINUTES);
-                }
-            }
-            map.clear();
-        }
     }
 }

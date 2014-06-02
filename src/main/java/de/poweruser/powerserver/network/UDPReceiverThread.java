@@ -6,12 +6,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.util.HashMap;
 import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
+import de.poweruser.powerserver.settings.Settings;
 
 public class UDPReceiverThread extends Observable implements Runnable {
 
@@ -19,10 +19,14 @@ public class UDPReceiverThread extends Observable implements Runnable {
     private DatagramSocket socket;
     private Thread thread;
     private BanList<InetAddress> banlist;
+    private PacketFilter packetFilter;
+    private Settings settings;
 
-    public UDPReceiverThread(DatagramSocket socket) throws SocketException {
+    public UDPReceiverThread(DatagramSocket socket, Settings settings) throws SocketException {
         this.socket = socket;
         this.banlist = new BanList<InetAddress>();
+        this.settings = settings;
+        this.packetFilter = new PacketFilter(settings);
         this.running = true;
         this.thread = new Thread(this);
         this.thread.setName("PowerServer_UDPReceiverThread");
@@ -37,10 +41,15 @@ public class UDPReceiverThread extends Observable implements Runnable {
             try {
                 this.socket.receive(packet);
                 if(!this.banlist.isBanned(packet.getAddress())) {
-                    received = true;
+                    InetAddress sender = packet.getAddress();
+                    if(this.packetFilter.newIncoming(sender, System.currentTimeMillis())) {
+                        received = true;
+                    } else {
+                        this.banSender(sender, this.settings.getTempBanDuration(TimeUnit.MINUTES), TimeUnit.MINUTES);
+                    }
                 }
             } catch(SocketTimeoutException e) {
-                // ignore
+                this.packetFilter.cleanup();
             } catch(IOException e) {
                 if(this.running) {
                     Logger.logStackTraceStatic(LogLevel.VERY_LOW, "An error occured in the UDPReceiverThread while listening for incoming packets", e);
@@ -60,7 +69,7 @@ public class UDPReceiverThread extends Observable implements Runnable {
     protected void banSender(InetAddress sender, long duration, TimeUnit unit) {
         if(this.banlist.addBan(sender, duration, unit)) {
             long minutes = TimeUnit.MINUTES.convert(duration, unit);
-            Logger.logStatic(LogLevel.NORMAL, "Temporary Ban of " + minutes + " " + TimeUnit.MINUTES.toString().toLowerCase() + " for " + sender.getHostAddress() + ". Too many incoming UDP packets.");
+            Logger.logStatic(LogLevel.NORMAL, "Temporary Ban of " + minutes + " " + TimeUnit.MINUTES.toString().toLowerCase() + " for " + sender.getHostAddress() + ". Too much data is incoming too fast from this host.");
         }
     }
 
@@ -68,32 +77,4 @@ public class UDPReceiverThread extends Observable implements Runnable {
         return this.banlist.isBanned(address);
     }
 
-    private class BanList<T> {
-        private HashMap<T, Long> banlist;
-
-        public BanList() {
-            this.banlist = new HashMap<T, Long>();
-        }
-
-        public boolean addBan(T item, long duration, TimeUnit unit) {
-            if(!this.banlist.containsKey(item)) {
-                long milli = System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(duration, unit);
-                this.banlist.put(item, milli);
-                return true;
-            }
-            return false;
-        }
-
-        public boolean isBanned(T item) {
-            if(this.banlist.containsKey(item)) {
-                long unbanTime = this.banlist.get(item).longValue();
-                if(unbanTime > System.currentTimeMillis()) {
-                    return true;
-                } else {
-                    this.banlist.remove(item);
-                }
-            }
-            return false;
-        }
-    }
 }

@@ -27,6 +27,9 @@ public class Settings {
     private boolean queryServersOnHeartbeat;
     private int maximumServerTimeout;
     private int emergencyQueryInterval;
+    private int maximumSendViolations;
+    private int allowedMinimumSendInterval;
+    private int tempBanDuration;
 
     private static final int MINIMAL_SERVERTIMEOUT = 20;
     private static final int ALLOWED_HEARTBEATTIMEOUT = 15;
@@ -38,6 +41,9 @@ public class Settings {
         this.queryServersOnHeartbeat = true;
         this.maximumServerTimeout = 60;
         this.calcEmergencyQueryInterval();
+        this.maximumSendViolations = 50;
+        this.allowedMinimumSendInterval = 250;
+        this.tempBanDuration = 15;
         this.masterServerLists = new ArrayList<URL>();
         this.masterServers = new ArrayList<String>();
         this.supportedGames = new ArrayList<String>();
@@ -230,5 +236,29 @@ public class Settings {
 
     public long getAllowedHeartbeatTimeout(TimeUnit unit) {
         return unit.convert(ALLOWED_HEARTBEATTIMEOUT, TimeUnit.MINUTES);
+    }
+
+    public int getMaximumSendViolations() {
+        return this.maximumSendViolations;
+    }
+
+    public int getAllowedMinimumSendInterval() {
+        return this.allowedMinimumSendInterval;
+    }
+
+    protected void setMaximumSendViolations(int max) {
+        this.maximumSendViolations = max;
+    }
+
+    protected void setAllowedMinimumSendInterval(int interval) {
+        this.allowedMinimumSendInterval = interval;
+    }
+
+    public long getTempBanDuration(TimeUnit unit) {
+        return unit.convert(this.tempBanDuration, TimeUnit.MINUTES);
+    }
+
+    protected void setTempBanDuration(int duration) {
+        this.tempBanDuration = duration;
     }
 }

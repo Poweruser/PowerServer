@@ -67,7 +67,7 @@ public class PowerServer {
         }
         this.running = false;
         this.supportedGames = new HashSet<GameBase>();
-        this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT);
+        this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT, this.settings);
         this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT);
         this.reloadSettingsFile();
         this.gsp1Parser = new GamespyProtocol1Parser();
@@ -115,7 +115,7 @@ public class PowerServer {
             if(this.udpManager.isSocketClosed()) {
                 this.udpManager.shutdown();
                 try {
-                    this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT);
+                    this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT, this.settings);
                 } catch(SocketException e) {
                     Logger.logStackTraceStatic(LogLevel.VERY_LOW, "The Socket of the UDPManager was closed and setting up a new UDPManager raised an exception: " + e.toString(), e);
                     this.running = false;
@@ -124,9 +124,6 @@ public class PowerServer {
                 int messageCount = 0;
                 while(this.udpManager.hasMessages() && messageCount++ < UDPManager.MAX_MESSAGECOUNT_PER_CYCLE) {
                     this.handleIncomingMessage(this.udpManager.takeFirstMessage());
-                }
-                if(this.udpManager.hasMessages()) {
-                    this.udpManager.checkUDPOverload();
                 }
                 for(GameBase game: this.supportedGames) {
                     ServerList list = game.getServerList();
