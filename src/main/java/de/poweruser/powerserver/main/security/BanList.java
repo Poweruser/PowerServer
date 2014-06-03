@@ -1,4 +1,4 @@
-package de.poweruser.powerserver.network;
+package de.poweruser.powerserver.main.security;
 
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;

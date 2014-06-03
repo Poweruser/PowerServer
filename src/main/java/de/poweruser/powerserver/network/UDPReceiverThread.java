@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
+import de.poweruser.powerserver.main.security.BanList;
 import de.poweruser.powerserver.main.security.BanManager;
 import de.poweruser.powerserver.main.security.SecurityBanException;
 import de.poweruser.powerserver.settings.Settings;

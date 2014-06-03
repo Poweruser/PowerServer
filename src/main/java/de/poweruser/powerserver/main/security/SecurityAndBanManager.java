@@ -4,7 +4,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
-import de.poweruser.powerserver.network.BanList;
 
 public class SecurityAndBanManager extends SecurityManager implements BanManager {
 
