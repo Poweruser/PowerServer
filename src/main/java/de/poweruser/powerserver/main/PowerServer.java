@@ -24,6 +24,7 @@ import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
 import de.poweruser.powerserver.main.parser.GamespyProtocol1Parser;
 import de.poweruser.powerserver.main.parser.ParserException;
+import de.poweruser.powerserver.main.security.BanManager;
 import de.poweruser.powerserver.network.TCPManager;
 import de.poweruser.powerserver.network.UDPManager;
 import de.poweruser.powerserver.network.UDPMessage;
@@ -43,13 +44,15 @@ public class PowerServer {
     private long lastMasterServerDownload;
     private Set<GameBase> supportedGames;
     private CommandRegistry commandReg;
+    private BanManager banManager;
 
     public static final String VERSION = "1.0.2 beta";
 
     public static final int MASTERSERVER_UDP_PORT = 27900;
     public static final int MASTERSERVER_TCP_PORT = 28900;
 
-    public PowerServer() throws IOException {
+    public PowerServer(BanManager banManager) throws IOException {
+        this.banManager = banManager;
         this.settings = new Settings(new File("settings.cfg"));
         for(GamesEnum g: GamesEnum.values()) {
             g.getGame().setSettings(this.settings);
@@ -67,7 +70,7 @@ public class PowerServer {
         }
         this.running = false;
         this.supportedGames = new HashSet<GameBase>();
-        this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT, this.settings);
+        this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT, this.settings, this.banManager);
         this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT);
         this.reloadSettingsFile();
         this.gsp1Parser = new GamespyProtocol1Parser();
@@ -115,7 +118,7 @@ public class PowerServer {
             if(this.udpManager.isSocketClosed()) {
                 this.udpManager.shutdown();
                 try {
-                    this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT, this.settings);
+                    this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT, this.settings, this.banManager);
                 } catch(SocketException e) {
                     Logger.logStackTraceStatic(LogLevel.VERY_LOW, "The Socket of the UDPManager was closed and setting up a new UDPManager raised an exception: " + e.toString(), e);
                     this.running = false;

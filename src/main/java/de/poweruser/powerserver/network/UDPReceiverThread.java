@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
+import de.poweruser.powerserver.main.security.BanManager;
+import de.poweruser.powerserver.main.security.SecurityBanException;
 import de.poweruser.powerserver.settings.Settings;
 
 public class UDPReceiverThread extends Observable implements Runnable {
@@ -22,9 +24,13 @@ public class UDPReceiverThread extends Observable implements Runnable {
     private PacketFilter packetFilter;
     private Settings settings;
 
-    public UDPReceiverThread(DatagramSocket socket, Settings settings) throws SocketException {
+    public UDPReceiverThread(DatagramSocket socket, Settings settings, BanManager banManager) throws SocketException {
         this.socket = socket;
-        this.banlist = new BanList<InetAddress>();
+        if(banManager != null) {
+            this.banlist = banManager.getBanList();
+        } else {
+            this.banlist = new BanList<InetAddress>();
+        }
         this.settings = settings;
         this.packetFilter = new PacketFilter(settings);
         this.running = true;
@@ -48,6 +54,11 @@ public class UDPReceiverThread extends Observable implements Runnable {
                         this.banSender(sender, this.settings.getTempBanDuration(TimeUnit.MINUTES), TimeUnit.MINUTES);
                     }
                 }
+            } catch(SecurityBanException e) {
+                InetAddress host = e.getBannedHost();
+                this.banlist.isBanned(host);
+            } catch(SecurityException e) {
+                Logger.logStackTraceStatic(LogLevel.VERY_LOW, "SecurityException while receiving a UDP packet.", e);
             } catch(SocketTimeoutException e) {
                 this.packetFilter.cleanup();
             } catch(IOException e) {

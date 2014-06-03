@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
+import de.poweruser.powerserver.main.security.SecurityBanException;
 import de.poweruser.powerserver.network.QueryConnection.State;
 
 public class TCPManager implements Runnable {
@@ -42,6 +43,10 @@ public class TCPManager implements Runnable {
             Socket client = null;
             try {
                 client = this.serverSocket.accept();
+            } catch(SecurityBanException e) {
+
+            } catch(SecurityException e) {
+
             } catch(SocketException e) {
                 if(this.running) {
                     Logger.logStatic(LogLevel.VERY_LOW, "The TCPManager failed to accept an incoming query connection: " + e.toString());

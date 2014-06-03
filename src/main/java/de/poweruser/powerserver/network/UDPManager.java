@@ -7,6 +7,7 @@ import java.util.Observer;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import de.poweruser.powerserver.main.security.BanManager;
 import de.poweruser.powerserver.settings.Settings;
 
 public class UDPManager implements Observer {
@@ -18,10 +19,10 @@ public class UDPManager implements Observer {
 
     public static final int MAX_MESSAGECOUNT_PER_CYCLE = 50;
 
-    public UDPManager(int port, Settings settings) throws SocketException {
+    public UDPManager(int port, Settings settings, BanManager banManager) throws SocketException {
         this.socket = new DatagramSocket(port);
         this.socket.setSoTimeout(10000);
-        this.receiver = new UDPReceiverThread(socket, settings);
+        this.receiver = new UDPReceiverThread(socket, settings, banManager);
         this.receiver.addObserver(this);
         this.sender = new UDPSender(socket);
         this.messageQueue = new ConcurrentLinkedQueue<UDPMessage>();
