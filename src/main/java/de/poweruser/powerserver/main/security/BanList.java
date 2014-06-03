@@ -1,13 +1,13 @@
 package de.poweruser.powerserver.main.security;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class BanList<T> {
-    private HashMap<T, Long> banlist;
+    private ConcurrentHashMap<T, Long> banlist;
 
     public BanList() {
-        this.banlist = new HashMap<T, Long>();
+        this.banlist = new ConcurrentHashMap<T, Long>(16, 0.75f, 1);
     }
 
     public boolean addBan(T item, long duration, TimeUnit unit) {
