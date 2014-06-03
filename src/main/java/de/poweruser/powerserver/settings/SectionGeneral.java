@@ -55,6 +55,11 @@ public class SectionGeneral extends SettingsReader {
                 if(intVerifier.verify(value)) {
                     settings.setTempBanDuration(intVerifier.getVerifiedValue());
                 }
+            } else if(key.equalsIgnoreCase("connectionLimitPerClient")) {
+                intVerifier = new IntVerify(1, Integer.MAX_VALUE);
+                if(intVerifier.verify(value)) {
+                    settings.setConnectionLimitPerClient(intVerifier.getVerifiedValue());
+                }
             }
         }
     }

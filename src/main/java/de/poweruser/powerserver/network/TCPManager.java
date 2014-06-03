@@ -27,7 +27,6 @@ public class TCPManager implements Runnable {
     private Queue<QueryConnection> connections;
     private boolean running;
     private Thread thread;
-    private final int CONNECTION_LIMIT = 5;
     private ConnectionGuard guard;
     private Settings settings;
 
@@ -163,7 +162,7 @@ public class TCPManager implements Runnable {
 
             if(this.map.containsKey(address)) {
                 List<QueryConnection> list = this.map.get(address);
-                boolean allowed = (list.size() < CONNECTION_LIMIT);
+                boolean allowed = (list.size() < settings.getConnectionLimitPerClient());
                 if(!allowed) {
                     this.ban(address);
                 }

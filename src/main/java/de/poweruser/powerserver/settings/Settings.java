@@ -30,6 +30,7 @@ public class Settings {
     private int maximumSendViolations;
     private int allowedMinimumSendInterval;
     private int tempBanDuration;
+    private int connectionLimitPerClient;
 
     private static final int MINIMAL_SERVERTIMEOUT = 20;
     private static final int ALLOWED_HEARTBEATTIMEOUT = 15;
@@ -44,6 +45,7 @@ public class Settings {
         this.maximumSendViolations = 50;
         this.allowedMinimumSendInterval = 250;
         this.tempBanDuration = 15;
+        this.connectionLimitPerClient = 2;
         this.masterServerLists = new ArrayList<URL>();
         this.masterServers = new ArrayList<String>();
         this.supportedGames = new ArrayList<String>();
@@ -260,5 +262,13 @@ public class Settings {
 
     protected void setTempBanDuration(int duration) {
         this.tempBanDuration = duration;
+    }
+
+    public int getConnectionLimitPerClient() {
+        return this.connectionLimitPerClient;
+    }
+
+    protected void setConnectionLimitPerClient(int limit) {
+        this.connectionLimitPerClient = limit;
     }
 }
