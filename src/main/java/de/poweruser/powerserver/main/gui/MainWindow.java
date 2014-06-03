@@ -71,6 +71,7 @@ public class MainWindow extends JFrame {
                     copyItem.setEnabled(textArea.getSelectionStart() != textArea.getSelectionEnd());
                     menu.add(copyItem);
                     JMenuItem selectAllItem = new JMenuItem(textArea.getActionMap().get(DefaultEditorKit.selectAllAction));
+                    selectAllItem.setText("Select all");
                     menu.add(selectAllItem);
                     menu.show(e.getComponent(), e.getX(), e.getY());
                 }
