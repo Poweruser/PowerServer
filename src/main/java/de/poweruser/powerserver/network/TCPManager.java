@@ -15,8 +15,11 @@ import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
+import de.poweruser.powerserver.main.security.BanList;
+import de.poweruser.powerserver.main.security.BanManager;
 import de.poweruser.powerserver.main.security.SecurityBanException;
 import de.poweruser.powerserver.network.QueryConnection.State;
+import de.poweruser.powerserver.settings.Settings;
 
 public class TCPManager implements Runnable {
 
@@ -26,11 +29,13 @@ public class TCPManager implements Runnable {
     private Thread thread;
     private final int CONNECTION_LIMIT = 5;
     private ConnectionGuard guard;
+    private Settings settings;
 
-    public TCPManager(int port) throws IOException {
+    public TCPManager(int port, Settings settings, BanManager banManager) throws IOException {
         this.running = true;
         this.serverSocket = new ServerSocket(port);
-        this.guard = new ConnectionGuard();
+        this.settings = settings;
+        this.guard = new ConnectionGuard(banManager);
         this.connections = new ConcurrentLinkedQueue<QueryConnection>();
         this.thread = new Thread(this);
         this.thread.setName("PowerServer - TCPManager");
@@ -44,9 +49,10 @@ public class TCPManager implements Runnable {
             try {
                 client = this.serverSocket.accept();
             } catch(SecurityBanException e) {
-
+                InetAddress host = e.getBannedHost();
+                this.guard.checkBan(host);
             } catch(SecurityException e) {
-
+                Logger.logStackTraceStatic(LogLevel.VERY_LOW, "SecurityException while accepting an incoming TCP connection.", e);
             } catch(SocketException e) {
                 if(this.running) {
                     Logger.logStatic(LogLevel.VERY_LOW, "The TCPManager failed to accept an incoming query connection: " + e.toString());
@@ -117,14 +123,19 @@ public class TCPManager implements Runnable {
 
     private class ConnectionGuard {
         private HashMap<InetAddress, List<QueryConnection>> map;
-        private HashMap<InetAddress, Long> banlist;
+        private BanList<InetAddress> banlist;
 
-        private final long BAN_DURATION = 15L;
-        private final TimeUnit BAN_UNIT = TimeUnit.MINUTES;
-
-        public ConnectionGuard() {
+        public ConnectionGuard(BanManager banManager) {
             this.map = new HashMap<InetAddress, List<QueryConnection>>();
-            this.banlist = new HashMap<InetAddress, Long>();
+            if(banManager != null) {
+                this.banlist = banManager.getBanList();
+            } else {
+                this.banlist = new BanList<InetAddress>();
+            }
+        }
+
+        public void checkBan(InetAddress host) {
+            this.banlist.isBanned(host);
         }
 
         public void untrackConnection(QueryConnection c) {
@@ -148,13 +159,7 @@ public class TCPManager implements Runnable {
 
         public boolean isAnotherConnectionAllowed(Socket client) {
             InetAddress address = client.getInetAddress();
-            if(this.isBanned(address)) {
-                if(this.canBanBeLifted(address, 15L, TimeUnit.MINUTES)) {
-                    this.banlist.remove(address);
-                } else {
-                    return false;
-                }
-            }
+            if(this.banlist.isBanned(address)) { return false; }
 
             if(this.map.containsKey(address)) {
                 List<QueryConnection> list = this.map.get(address);
@@ -168,24 +173,17 @@ public class TCPManager implements Runnable {
         }
 
         private void ban(InetAddress address) {
-            this.banlist.put(address, System.currentTimeMillis());
+            TimeUnit unit = TimeUnit.MINUTES;
+            long duration = settings.getTempBanDuration(unit);
+            if(this.banlist.addBan(address, duration, unit)) {
+                Logger.logStatic(LogLevel.NORMAL, "Temporary ban of " + duration + " " + unit.toString().toLowerCase() + " for " + address.toString() + ". Too many open connections");
+            }
             if(this.map.containsKey(address)) {
                 List<QueryConnection> list = this.map.get(address);
                 for(QueryConnection q: list) {
                     q.forceClose();
                 }
             }
-            Logger.logStatic(LogLevel.NORMAL, "Temporary ban of " + BAN_DURATION + " " + BAN_UNIT.toString().toLowerCase() + " for " + address + ". Too many open connections");
-        }
-
-        private boolean canBanBeLifted(InetAddress address, long duration, TimeUnit unit) {
-            long time = TimeUnit.MILLISECONDS.convert(duration, unit);
-            if(this.isBanned(address)) { return (System.currentTimeMillis() - time) > this.banlist.get(address); }
-            return true;
-        }
-
-        public boolean isBanned(InetAddress address) {
-            return this.banlist.containsKey(address);
         }
     }
 

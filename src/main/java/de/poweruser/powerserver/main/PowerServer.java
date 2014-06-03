@@ -71,7 +71,7 @@ public class PowerServer {
         this.running = false;
         this.supportedGames = new HashSet<GameBase>();
         this.udpManager = new UDPManager(MASTERSERVER_UDP_PORT, this.settings, this.banManager);
-        this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT);
+        this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT, this.settings, this.banManager);
         this.reloadSettingsFile();
         this.gsp1Parser = new GamespyProtocol1Parser();
     }
@@ -142,7 +142,7 @@ public class PowerServer {
             if(this.tcpManager.isSocketClosed()) {
                 this.tcpManager.shutdown();
                 try {
-                    this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT);
+                    this.tcpManager = new TCPManager(MASTERSERVER_TCP_PORT, this.settings, this.banManager);
                 } catch(IOException e) {
                     Logger.logStackTraceStatic(LogLevel.VERY_LOW, "The Socket of the TCPManager was closed and setting up a new TCPManager raised an exception: " + e.toString(), e);
                     this.running = false;
