@@ -130,7 +130,7 @@ public class TCPManager implements Runnable {
             if(banManager != null) {
                 this.banlist = banManager.getBanList();
             } else {
-                this.banlist = new BanList<InetAddress>();
+                this.banlist = new BanList<InetAddress>(false);
             }
         }
 

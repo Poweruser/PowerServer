@@ -4,14 +4,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
-
 public class SecurityAndBanManager extends SecurityManager implements BanManager {
 
     private BanList<InetAddress> banList;
 
     public SecurityAndBanManager() {
         super();
-        this.banList = new BanList<InetAddress>();
+        this.banList = new BanList<InetAddress>(true);
     }
 
     @Override
