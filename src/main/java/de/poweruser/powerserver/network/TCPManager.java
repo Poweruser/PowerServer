@@ -142,6 +142,9 @@ public class TCPManager implements Runnable {
             if(this.map.containsKey(a)) {
                 List<QueryConnection> list = this.map.get(a);
                 list.remove(c);
+                if(list.isEmpty()) {
+                    this.map.remove(a);
+                }
             }
         }
 
@@ -152,6 +155,7 @@ public class TCPManager implements Runnable {
                 list = this.map.get(a);
             } else {
                 list = new ArrayList<QueryConnection>();
+                this.map.put(a, list);
             }
             list.add(c);
         }
