@@ -54,16 +54,18 @@ public class Main {
         } catch(IOException e) {
             Logger.logStackTraceStatic(LogLevel.VERY_LOW, "Failed to set up the server: " + e.toString(), e, true);
         }
+        boolean crash = false;
         if(server != null) {
             try {
                 server.mainloop();
                 logger.log(LogLevel.VERY_LOW, "Shutting down the master server ...", true);
             } catch(Exception e) {
+                crash = true;
                 Logger.logStackTraceStatic(LogLevel.VERY_LOW, "The server quit unexpectedly with an exception of type: " + e.toString(), e, true);
             }
             server.shutdown();
         }
-        if(m != null) {
+        if(m != null && !crash) {
             m.shutdown();
         }
         if(reader != null) {
