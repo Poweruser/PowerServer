@@ -160,7 +160,7 @@ public class QueryConnection {
                     Logger.logStackTraceStatic(LogLevel.LOW, "Error while encoding a serverlist with Encoder " + encoder.getClass().getSimpleName() + " for EncType " + this.encType.toString() + ": " + e.toString(), e);
                 }
                 if(data != null) {
-                    String logMessage = "QUERY Successful from " + this.client.getInetAddress().toString() + " : Sent " + data.length + " Bytes (" + serverCount + " servers)";
+                    String logMessage = "QUERY (EncType: " + this.encType.toString() + ") Successful from " + this.client.getInetAddress().toString() + " : Sent " + data.length + " Bytes (" + serverCount + " servers)";
                     Logger.logStatic(LogLevel.HIGH, logMessage);
 
                     this.sendData(data);
