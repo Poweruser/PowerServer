@@ -6,7 +6,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.games.GameBase;
@@ -82,12 +84,10 @@ public class QueryConnection {
     }
 
     public boolean check() {
-        if(!this.checkLastStateChange(TimeUnit.SECONDS, 10)) {
-            if(this.state.equals(State.LIST_SENT)) {
-                this.changeState(State.SUCCESSFUL);
-            } else {
-                this.changeStateFail(State.TIMEOUT, "The connection timed out. Last state: " + this.state.toString());
-            }
+        if(this.state.equals(State.LIST_SENT) && !this.checkLastStateChange(TimeUnit.SECONDS, 3)) {
+            this.changeState(State.SUCCESSFUL);
+        } else if(!this.checkLastStateChange(TimeUnit.SECONDS, 10)) {
+            this.changeStateFail(State.TIMEOUT, "The connection timed out. Last state: " + this.state.toString());
         }
         switch(this.state) {
             case NEW:
@@ -149,19 +149,18 @@ public class QueryConnection {
         if(this.requestedGame != null && this.encType != null) {
             EncoderInterface encoder = this.encType.getEncoder();
             if(encoder != null) {
+                List<InetSocketAddress> serverList = this.requestedGame.getActiveServers();
+                int serverCount = serverList.size();
                 byte[] data = null;
                 try {
-                    data = encoder.encode(this.requestedGame.getActiveServers());
+                    data = encoder.encode(this.requestedGame.getGamespyKey(), this.validation.getValidationString(), serverList);
                 } catch(IOException e) {
+                    Logger.logStackTraceStatic(LogLevel.LOW, "Error while encoding a serverlist with Encoder " + encoder.getClass().getSimpleName() + " for EncType " + this.encType.toString() + ": " + e.toString(), e);
+                } catch(IllegalArgumentException e) {
                     Logger.logStackTraceStatic(LogLevel.LOW, "Error while encoding a serverlist with Encoder " + encoder.getClass().getSimpleName() + " for EncType " + this.encType.toString() + ": " + e.toString(), e);
                 }
                 if(data != null) {
-                    int count = 0;
-                    for(int i = 4; i < 8; i++) {
-                        count <<= 8;
-                        count |= data[i];
-                    }
-                    String logMessage = "QUERY Successful from " + this.client.getInetAddress().toString() + " : Sent " + data.length + " Bytes (" + (count / 6) + " IPV4 Servers with " + count + " Bytes)";
+                    String logMessage = "QUERY Successful from " + this.client.getInetAddress().toString() + " : Sent " + data.length + " Bytes (" + serverCount + " servers)";
                     Logger.logStatic(LogLevel.HIGH, logMessage);
 
                     this.sendData(data);

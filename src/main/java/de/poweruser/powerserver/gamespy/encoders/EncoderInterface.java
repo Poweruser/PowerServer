@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface EncoderInterface {
 
-    public byte[] encode(List<InetSocketAddress> servers) throws IOException;
+    public byte[] encode(String gamekey, String validate, List<InetSocketAddress> servers) throws IOException;
+
 }

@@ -1,12 +1,13 @@
 package de.poweruser.powerserver.gamespy;
 
+import de.poweruser.powerserver.gamespy.encoders.EncType2Encoder;
 import de.poweruser.powerserver.gamespy.encoders.EncoderInterface;
 import de.poweruser.powerserver.gamespy.encoders.OFPMonitorEncoder;
 
 public enum EncType {
     BASIC(0, null),
     ADVANCED1(1, null),
-    ADVANCED2(2, null),
+    ADVANCED2(2, new EncType2Encoder()),
     OFPMONITOR(3, new OFPMonitorEncoder());
 
     private int type;

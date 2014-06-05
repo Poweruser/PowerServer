@@ -27,7 +27,7 @@ public class OFPMonitorEncoder implements EncoderInterface {
      */
 
     @Override
-    public byte[] encode(List<InetSocketAddress> servers) throws IOException {
+    public byte[] encode(String gamekey, String validate, List<InetSocketAddress> servers) throws IOException {
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
         DataOutputStream stream = new DataOutputStream(byteArray);
         List<InetSocketAddress> ipv4 = new ArrayList<InetSocketAddress>();
