@@ -1,7 +1,8 @@
-/* AUTOMATICALLY GENERATED ON Tue Jun 03 13:01:42 CEST 2014*/
+/* AUTOMATICALLY GENERATED ON Fri Jun 06 15:01:59 CEST 2014*/
 /* DO NOT EDIT */
 
 grant {
+  permission java.awt.AWTPermission "accessClipboard";
   permission java.awt.AWTPermission "showWindowWithoutWarningBanner";
   permission java.io.FilePermission "settings.cfg", "read";
   permission java.io.FilePermission "server.log", "read";
