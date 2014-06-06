@@ -38,4 +38,7 @@ public class SecurityAndBanManager extends SecurityManager implements BanManager
         }
     }
 
+    static {
+        java.security.Security.setProperty("networkaddress.cache.ttl", "20");
+    }
 }
