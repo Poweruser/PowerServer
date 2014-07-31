@@ -98,7 +98,7 @@ public class ServerList {
             if(!gsi.checkLastHeartbeat(settings.getAllowedHeartbeatTimeout(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
                 if(!gsi.checkLastMessage(settings.getMaximumServerTimeout(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
                     iter.remove();
-                    Logger.logStatic(LogLevel.NORMAL, "Removed server " + entry.getKey().toString() + " of game " + ((GameServerBase) gsi).getDisplayName() + ". Timeout reached.");
+                    Logger.logStatic(LogLevel.NORMAL, "Removed server " + entry.getKey().toString() + " (" + entry.getValue().getServerName() + ") of game " + ((GameServerBase) gsi).getDisplayName() + ". Timeout reached.");
                 } else if(!gsi.checkLastQueryRequest(settings.getEmergencyQueryInterval(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
                     if(serversToQuery == null) {
                         serversToQuery = new ArrayList<InetSocketAddress>();
