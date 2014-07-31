@@ -36,7 +36,7 @@ public class ServerList {
             if(serverName != null) {
                 logMessage += (" ( " + serverName + " )");
             }
-            Logger.logStatic(LogLevel.HIGH, logMessage);
+            Logger.logStatic(LogLevel.VERY_HIGH, logMessage);
             return server.incomingHeartbeat(serverAddress, data);
         }
         return false;
@@ -51,7 +51,7 @@ public class ServerList {
                 if(serverName != null) {
                     logMessage += (" ( " + serverName + " )");
                 }
-                Logger.logStatic(LogLevel.HIGH, logMessage);
+                Logger.logStatic(LogLevel.VERY_HIGH, logMessage);
                 return server.incomingHeartBeatBroadcast(serverAddress, data);
             }
         } else {
