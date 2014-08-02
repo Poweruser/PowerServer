@@ -175,15 +175,26 @@ public class PowerServer {
         this.gsp1Parser.reset();
         if(data != null) {
             GameBase game = data.getGame();
-            if(game == null) {
+            if(game == null && !data.isQueryAnswer()) {
                 Logger.logStatic(LogLevel.HIGH, "Couldnt find corresponding game for message: " + message.toString());
-            } else if(!this.isGameSupported(game)) {
+            } else if(game != null && !this.isGameSupported(game)) {
                 Logger.logStatic(LogLevel.HIGH, "Got an incoming message for an unsupported game: " + message.toString());
             } else {
-                ServerList list = game.getServerList();
                 InetSocketAddress sender = message.getSender();
                 InetSocketAddress server = data.constructQuerySocketAddress(sender);
-                if(server != null) {
+                ServerList list = null;
+                if(game != null) {
+                    list = game.getServerList();
+                } else {
+                    for(GameBase gb: this.supportedGames) {
+                        ServerList serverList = gb.getServerList();
+                        if(serverList.hasServer(server)) {
+                            list = serverList;
+                            break;
+                        }
+                    }
+                }
+                if(server != null && list != null) {
                     UDPSender udpSender = this.udpManager.getUDPSender();
                     if(data.isHeartBeat()) {
                         boolean firstHeartBeat = list.incomingHeartBeat(server, data);

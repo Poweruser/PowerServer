@@ -67,6 +67,10 @@ public class ServerList {
         }
     }
 
+    public boolean hasServer(InetSocketAddress server) {
+        return this.servers.containsKey(server);
+    }
+
     private GameServerInterface getServer(InetSocketAddress server) {
         if(this.servers.containsKey(server)) { return this.servers.get(server); }
         return null;
