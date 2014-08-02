@@ -18,6 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.DefaultEditorKit;
 
 import de.poweruser.powerserver.logger.Logger;
@@ -92,6 +93,7 @@ public class MainWindow extends JFrame {
                     String line = source.getText();
                     if(!line.trim().isEmpty()) {
                         source.setText("");
+                        textArea.setCaretPosition(textArea.getDocument().getLength());
                         MainWindow.this.addCommandToHistory(line);
                         MainWindow.this.server.queueCommand(line);
                     }
@@ -117,11 +119,13 @@ public class MainWindow extends JFrame {
             public void keyTyped(KeyEvent e) {}
         });
         this.add(textField, BorderLayout.SOUTH);
+        ((DefaultCaret) textArea.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         this.setMinimumSize(new Dimension(600, 400));
         this.setResizable(true);
         this.setLocationRelativeTo(null);
         pack();
         TextAreaOutputStream taos = new TextAreaOutputStream(textArea);
+        taos.setVerticalScrollBar(pane.getVerticalScrollBar());
         PrintStream ps = new PrintStream(taos);
         System.setErr(ps);
         System.setOut(ps);

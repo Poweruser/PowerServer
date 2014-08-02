@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.JScrollBar;
 import javax.swing.JTextArea;
 
 public class TextAreaOutputStream extends OutputStream {
@@ -26,6 +27,10 @@ public class TextAreaOutputStream extends OutputStream {
         if(maxlin < 1) { throw new IllegalArgumentException("TextAreaOutputStream maximum lines must be positive (value=" + maxlin + ")"); }
         oneByte = new byte[1];
         appender = new Appender(txtara, maxlin);
+    }
+
+    public void setVerticalScrollBar(JScrollBar verticalScrollBar) {
+        this.appender.setVerticalScrollBar(verticalScrollBar);
     }
 
     /** Clear the current console text area. */
@@ -75,6 +80,7 @@ public class TextAreaOutputStream extends OutputStream {
 
     static class Appender implements Runnable {
         private final JTextArea textArea;
+        private JScrollBar vScrollBar;
         private final int maxLines; // maximum lines allowed in text area
         private final LinkedList<Integer> lengths; // length of lines within
                                                    // text area
@@ -92,6 +98,7 @@ public class TextAreaOutputStream extends OutputStream {
             maxLines = maxlin;
             lengths = new LinkedList<Integer>();
             values = new ArrayList<String>();
+            vScrollBar = null;
 
             curLength = 0;
             clear = false;
@@ -132,13 +139,24 @@ public class TextAreaOutputStream extends OutputStream {
                     lengths.addLast(curLength);
                     curLength = 0;
                 }
+                boolean scroll = false;
+                if(vScrollBar != null) {
+                    int currentPosition = vScrollBar.getValue();
+                    int maxPosition = vScrollBar.getMaximum() - vScrollBar.getVisibleAmount();
+                    scroll = (currentPosition >= maxPosition - 200);
+                }
                 textArea.append(val);
+                if(scroll) {
+                    textArea.setCaretPosition(textArea.getDocument().getLength());
+                }
             }
             values.clear();
             clear = false;
             queue = true;
         }
 
+        public void setVerticalScrollBar(JScrollBar verticalScrollBar) {
+            vScrollBar = verticalScrollBar;
+        }
     }
-
 }
