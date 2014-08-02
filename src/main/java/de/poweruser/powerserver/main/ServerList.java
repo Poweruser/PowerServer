@@ -114,7 +114,7 @@ public class ServerList {
                         logMessage += " (" + serverName + ")";
                     }
                     logMessage += " does not send heartbeats anymore, or they dont reach this server. Sending back a query instead.";
-                    Logger.logStatic(LogLevel.HIGH, logMessage);
+                    Logger.logStatic(LogLevel.VERY_HIGH, logMessage);
                 }
             }
         }
