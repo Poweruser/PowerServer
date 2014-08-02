@@ -140,9 +140,10 @@ public class MainWindow extends JFrame {
     }
 
     private void addCommandToHistory(String line) {
-        if(!this.commandHistory.contains(line)) {
-            this.commandHistory.add(line);
+        if(this.commandHistory.contains(line)) {
+            this.commandHistory.remove(line);
         }
+        this.commandHistory.add(line);
         while(this.commandHistory.size() > this.maxHistorySize) {
             this.commandHistory.remove(0);
         }
