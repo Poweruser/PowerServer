@@ -46,6 +46,10 @@ public abstract class GameServerBase implements GameServerInterface {
         return false;
     }
 
+    public void activateServerManually() {
+        this.newHeartBeat();
+    }
+
     private boolean newHeartBeat() {
         boolean firstHeartBeat = this.lastHeartbeat < 0L;
         long currentTime = System.currentTimeMillis();

@@ -144,4 +144,15 @@ public class ServerList {
         }
 
     }
+
+    public boolean addServer(InetSocketAddress server) {
+        if(this.hasServer(server)) {
+            GameServerBase gsb = (GameServerBase) this.getServer(server);
+            Logger.logStatic(LogLevel.LOW, "The server " + server.toString() + " (" + gsb.getServerName() + ") is already enlisted for the game " + gsb.getDisplayName());
+            return false;
+        }
+        GameServerInterface gsi = this.getOrCreateServer(server);
+        ((GameServerBase) gsi).activateServerManually();
+        return true;
+    }
 }

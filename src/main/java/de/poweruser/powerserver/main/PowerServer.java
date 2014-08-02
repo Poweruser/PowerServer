@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import de.poweruser.powerserver.commands.AddServerCommand;
 import de.poweruser.powerserver.commands.CommandRegistry;
 import de.poweruser.powerserver.commands.CommandsCommand;
 import de.poweruser.powerserver.commands.ExitCommand;
@@ -64,6 +65,7 @@ public class PowerServer {
         this.commandReg.register(new LogLevelCommand("setloglevel"));
         this.commandReg.register(new CommandsCommand("commands"));
         this.commandReg.register(new ReloadSettingsCommand("reload", this));
+        this.commandReg.register(new AddServerCommand("addserver", this));
         String[] exitAliases = new String[] { "exit", "stop", "quit", "shutdown", "end" };
         for(String str: exitAliases) {
             this.commandReg.register(new ExitCommand(str, this));
@@ -254,4 +256,16 @@ public class PowerServer {
         return VERSION;
     }
 
+    public void addServer(GameBase game, InetAddress address, int port) {
+        if(game != null && this.supportedGames.contains(game)) {
+            ServerList serverList = game.getServerList();
+            InetSocketAddress serverAddress = new InetSocketAddress(address, port);
+            if(serverList.addServer(serverAddress)) {
+                serverList.queryServer(serverAddress, this.udpManager.getUDPSender(), false);
+            }
+        } else {
+            String gamename = (game == null ? "null" : game.getGameName());
+            Logger.logStatic(LogLevel.LOW, "Error while trying to add the server to the list: The passed game \"" + gamename + "\" is not supported.");
+        }
+    }
 }

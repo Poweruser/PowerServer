@@ -28,6 +28,7 @@ public class CommandsCommand extends CommandBase {
         }
         sb.append("\n");
         sb.append("reload    \t\tReloads the settings file\n");
+        sb.append("addserver <game id-key> <Address:QueryPort>\tAdds a server to a game's server list\n");
         sb.append("commands\t\tShows this list of available commands\n");
         sb.append("help    \t\tDisplays some general information about this application\n");
         sb.append("exit    \t\tShuts down the server. Aliases: quit, shutdown, stop, end");
