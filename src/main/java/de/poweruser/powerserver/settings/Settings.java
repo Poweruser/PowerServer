@@ -76,11 +76,12 @@ public class Settings {
             }
         } catch(IOException e) {
             Logger.logStatic(LogLevel.VERY_LOW, "IO Error while reading settings file: " + this.settingsFile.getName() + ": " + e.getMessage(), true);
-        }
-        if(br != null) {
-            try {
-                br.close();
-            } catch(IOException e) {}
+        } finally {
+            if(br != null) {
+                try {
+                    br.close();
+                } catch(IOException e) {}
+            }
         }
         Logger.logStatic(LogLevel.LOW, "The server is operating in " + (this.isPublicMode() ? "PUBLIC" : "PRIVATE") + " mode", true);
     }
@@ -174,11 +175,12 @@ public class Settings {
                     }
                 } catch(IOException e) {
                     Logger.logStatic(LogLevel.LOW, "Could not read the master server list at " + list.toString() + " - Reason: " + e.toString());
-                }
-                if(input != null) {
-                    try {
-                        input.close();
-                    } catch(IOException e) {}
+                } finally {
+                    if(input != null) {
+                        try {
+                            input.close();
+                        } catch(IOException e) {}
+                    }
                 }
             }
         }

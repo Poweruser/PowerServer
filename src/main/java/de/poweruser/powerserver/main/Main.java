@@ -28,21 +28,17 @@ public class Main {
             logger.log(LogLevel.VERY_LOW, "Operating in console mode. Check the log file " + logFile.getAbsolutePath() + " for a more detailed log", true);
         }
         File policyFile = new File("PowerServer.policy");
-        boolean securityManagerEnabled = false;
-        SecurityAndBanManager secManager = null;
+        SecurityAndBanManager secManager = new SecurityAndBanManager();
         if(policyFile.exists()) {
             System.setProperty("java.security.policy", policyFile.getName());
-            secManager = new SecurityAndBanManager();
             System.setSecurityManager(secManager);
-            securityManagerEnabled = true;
-        }
-        if(securityManagerEnabled) {
             Logger.logStatic(LogLevel.VERY_LOW, "SecurityManager enabled.");
         } else {
             Logger.logStatic(LogLevel.VERY_LOW, "SecurityManager not enabled. The policy file \"PowerServer.policy\" is missing.");
         }
         PowerServer server = null;
         ConsoleReader reader = null;
+        secManager.loadBanListFromFile();
         logger.log(LogLevel.VERY_LOW, "Starting the master server ...", true);
         try {
             server = new PowerServer(secManager);

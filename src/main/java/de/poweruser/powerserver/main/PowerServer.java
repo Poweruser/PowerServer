@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.commands.AddServerCommand;
+import de.poweruser.powerserver.commands.BanIPCommand;
 import de.poweruser.powerserver.commands.CommandRegistry;
 import de.poweruser.powerserver.commands.CommandsCommand;
 import de.poweruser.powerserver.commands.ExitCommand;
@@ -45,14 +46,14 @@ public class PowerServer {
     private long lastMasterServerDownload;
     private Set<GameBase> supportedGames;
     private CommandRegistry commandReg;
-    private BanManager banManager;
+    private BanManager<InetAddress> banManager;
 
     public static final String VERSION = "1.1.1";
 
     public static final int MASTERSERVER_UDP_PORT = 27900;
     public static final int MASTERSERVER_TCP_PORT = 28900;
 
-    public PowerServer(BanManager banManager) throws IOException {
+    public PowerServer(BanManager<InetAddress> banManager) throws IOException {
         this.banManager = banManager;
         this.settings = new Settings(new File("settings.cfg"));
         for(GamesEnum g: GamesEnum.values()) {
@@ -66,6 +67,7 @@ public class PowerServer {
         this.commandReg.register(new CommandsCommand("commands"));
         this.commandReg.register(new ReloadSettingsCommand("reload", this));
         this.commandReg.register(new AddServerCommand("addserver", this));
+        this.commandReg.register(new BanIPCommand("ban", this));
         String[] exitAliases = new String[] { "exit", "stop", "quit", "shutdown", "end" };
         for(String str: exitAliases) {
             this.commandReg.register(new ExitCommand(str, this));
@@ -153,6 +155,9 @@ public class PowerServer {
                 this.tcpManager.processConnections();
             }
             this.commandReg.issueNextQueuedCommand();
+            if(this.banManager.hasChanged()) {
+                this.banManager.saveBanListToFile();
+            }
             synchronized(this.waitObject) {
                 try {
                     this.waitObject.wait(100);
@@ -267,5 +272,9 @@ public class PowerServer {
             String gamename = (game == null ? "null" : game.getGameName());
             Logger.logStatic(LogLevel.LOW, "Error while trying to add the server to the list: The passed game \"" + gamename + "\" is not supported.");
         }
+    }
+
+    public BanManager<InetAddress> getBanManager() {
+        return this.banManager;
     }
 }

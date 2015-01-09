@@ -1,6 +1,7 @@
 package de.poweruser.powerserver.network;
 
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Observable;
 import java.util.Observer;
@@ -19,7 +20,7 @@ public class UDPManager implements Observer {
 
     public static final int MAX_MESSAGECOUNT_PER_CYCLE = 50;
 
-    public UDPManager(int port, Settings settings, BanManager banManager) throws SocketException {
+    public UDPManager(int port, Settings settings, BanManager<InetAddress> banManager) throws SocketException {
         this.socket = new DatagramSocket(port);
         this.socket.setSoTimeout(10000);
         this.receiver = new UDPReceiverThread(socket, settings, banManager);

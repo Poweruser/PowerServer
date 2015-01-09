@@ -1,14 +1,20 @@
 package de.poweruser.powerserver.main.security;
 
-import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
+public interface BanManager<T> {
 
-public interface BanManager {
+    public boolean isBanned(T item);
 
-    public boolean isBanned(InetAddress address);
+    public boolean addTempBanByTimeStamp(T item, long timeStamp);
 
-    public boolean addBan(InetAddress address, long duration, TimeUnit unit);
+    public boolean addTempBanByDuration(T item, long duration, TimeUnit unit);
 
-    public BanList<InetAddress> getBanList();
+    public boolean addPermBan(T item);
+
+    public boolean saveBanListToFile();
+
+    public String getUnbanDate(T item);
+
+    public boolean hasChanged();
 }

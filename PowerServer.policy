@@ -5,6 +5,8 @@ grant {
   permission java.awt.AWTPermission "accessClipboard";
   permission java.awt.AWTPermission "showWindowWithoutWarningBanner";
   permission java.io.FilePermission "settings.cfg", "read";
+  permission java.io.FilePermission "banlist.cfg", "read";
+  permission java.io.FilePermission "banlist.cfg", "write";
   permission java.io.FilePermission "server.log", "read";
   permission java.io.FilePermission "server.log", "write";
   permission java.lang.RuntimePermission "setIO";
