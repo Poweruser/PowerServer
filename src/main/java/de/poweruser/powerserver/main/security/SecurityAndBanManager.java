@@ -41,7 +41,7 @@ public class SecurityAndBanManager extends SecurityManager implements BanManager
                 }
                 String[] split = line.split("\\" + banEntryDelimiter);
                 InetAddress address = null;
-                Long timeStamp = null;
+                long timeStamp = Long.MAX_VALUE;
                 for(int i = 0; i < split.length; i++) {
                     String item = split[i];
                     switch(i) {
@@ -59,7 +59,7 @@ public class SecurityAndBanManager extends SecurityManager implements BanManager
                             break;
                     }
                 }
-                if(address != null && timeStamp != null) {
+                if(address != null) {
                     if(this.addTempBanByTimeStamp(address, timeStamp)) {
                         entriesLoaded++;
                     }
