@@ -27,8 +27,10 @@ public class UDPSender {
     }
 
     public void queueHeartBeatBroadcast(List<InetAddress> masterServers, DatagramPacket packet) {
-        for(InetAddress ms: masterServers) {
-            this.broadcasts.put(new InetSocketAddress(ms, PowerServer.MASTERSERVER_UDP_PORT), packet);
+        if(packet != null) {
+            for(InetAddress ms: masterServers) {
+                this.broadcasts.put(new InetSocketAddress(ms, PowerServer.MASTERSERVER_UDP_PORT), packet);
+            }
         }
     }
 
