@@ -23,6 +23,7 @@ public abstract class GameServerBase implements GameServerInterface {
     protected MessageData queryInfo;
     protected GameBase game;
     protected InetSocketAddress serverAddress;
+    private boolean manuallyAdded;
 
     public GameServerBase(GameBase game, InetSocketAddress server) {
         this.lastHeartbeat = -1L;
@@ -34,20 +35,18 @@ public abstract class GameServerBase implements GameServerInterface {
         this.hasAnswered = false;
         this.queryBuffer = new QueryBuffer();
         this.serverAddress = server;
+        this.manuallyAdded = false;
     }
 
     @Override
-    public boolean incomingHeartbeat(InetSocketAddress serverAddress, MessageData data) {
+    public boolean incomingHeartbeat(InetSocketAddress serverAddress, MessageData data, boolean manuallyAdded) {
         if(data.isHeartBeat() && this.serverAddress.equals(serverAddress)) {
             this.realHeartbeat = true;
+            this.manuallyAdded = manuallyAdded;
             this.setQueryPort(data);
             return this.newHeartBeat();
         }
         return false;
-    }
-
-    public void activateServerManually() {
-        this.newHeartBeat();
     }
 
     private boolean newHeartBeat() {
@@ -68,15 +67,14 @@ public abstract class GameServerBase implements GameServerInterface {
     }
 
     @Override
-    public void incomingQueryAnswer(InetSocketAddress serverAddress, MessageData data) {
+    public boolean incomingQueryAnswer(InetSocketAddress serverAddress, MessageData data) {
         if(this.serverAddress.equals(serverAddress)) {
             if(this.queryBuffer.put(data)) {
                 MessageData completeQuery = this.queryBuffer.getQueryIfComplete();
-                if(completeQuery != null) {
-                    this.processNewMessage(completeQuery);
-                }
+                if(completeQuery != null) { return this.processNewMessage(completeQuery); }
             }
         }
+        return false;
     }
 
     @Override
@@ -113,7 +111,7 @@ public abstract class GameServerBase implements GameServerInterface {
     }
 
     @Override
-    public void processNewMessage(MessageData completeQuery) {
+    public boolean processNewMessage(MessageData completeQuery) {
         if(completeQuery.isQueryAnswer()) {
             this.queryInfo.update(completeQuery);
             if(!this.hasAnswered) {
@@ -130,7 +128,9 @@ public abstract class GameServerBase implements GameServerInterface {
             }
             this.hasAnswered = true;
             this.lastMessage = System.currentTimeMillis();
+            return this.manuallyAdded;
         }
+        return false;
     }
 
     @Override

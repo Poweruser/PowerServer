@@ -28,7 +28,7 @@ public class ServerList {
         this.servers = new HashMap<InetSocketAddress, GameServerInterface>();
     }
 
-    public boolean incomingHeartBeat(InetSocketAddress serverAddress, MessageData data) {
+    public boolean incomingHeartBeat(InetSocketAddress serverAddress, MessageData data, boolean manuallyAdded) {
         if(serverAddress != null) {
             GameServerInterface server = this.getOrCreateServer(serverAddress);
             String serverName = server.getServerName();
@@ -37,7 +37,7 @@ public class ServerList {
                 logMessage += (" ( " + serverName + " )");
             }
             Logger.logStatic(LogLevel.VERY_HIGH, logMessage);
-            return server.incomingHeartbeat(serverAddress, data);
+            return server.incomingHeartbeat(serverAddress, data, manuallyAdded);
         }
         return false;
     }
@@ -60,11 +60,10 @@ public class ServerList {
         return false;
     }
 
-    public void incomingQueryAnswer(InetSocketAddress sender, MessageData data) {
+    public boolean incomingQueryAnswer(InetSocketAddress sender, MessageData data) {
         GameServerInterface server = this.getServer(sender);
-        if(server != null) {
-            server.incomingQueryAnswer(sender, data);
-        }
+        if(server != null) { return server.incomingQueryAnswer(sender, data); }
+        return false;
     }
 
     public boolean hasServer(InetSocketAddress server) {
@@ -143,16 +142,5 @@ public class ServerList {
             udpSender.queueQuery(server, this.game.createStatusQuery(queryPlayers));
         }
 
-    }
-
-    public boolean addServer(InetSocketAddress server) {
-        if(this.hasServer(server)) {
-            GameServerBase gsb = (GameServerBase) this.getServer(server);
-            Logger.logStatic(LogLevel.LOW, "The server " + server.toString() + " (" + gsb.getServerName() + ") is already enlisted for the game " + gsb.getDisplayName());
-            return false;
-        }
-        GameServerInterface gsi = this.getOrCreateServer(server);
-        ((GameServerBase) gsi).activateServerManually();
-        return true;
     }
 }

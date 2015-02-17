@@ -6,13 +6,13 @@ import java.util.concurrent.TimeUnit;
 import de.poweruser.powerserver.main.MessageData;
 
 public interface GameServerInterface {
-    public void processNewMessage(MessageData completeQuery);
+    public boolean processNewMessage(MessageData completeQuery);
 
-    public boolean incomingHeartbeat(InetSocketAddress serverAddress, MessageData message);
+    public boolean incomingHeartbeat(InetSocketAddress serverAddress, MessageData message, boolean manuallyAdded);
 
     public boolean incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data);
 
-    public void incomingQueryAnswer(InetSocketAddress serverAddress, MessageData data);
+    public boolean incomingQueryAnswer(InetSocketAddress serverAddress, MessageData data);
 
     public int getQueryPort();
 

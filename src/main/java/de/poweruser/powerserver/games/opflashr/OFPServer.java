@@ -13,8 +13,8 @@ public class OFPServer extends GameServerBase {
     }
 
     @Override
-    public void processNewMessage(MessageData message) {
-        super.processNewMessage(message);
+    public boolean processNewMessage(MessageData message) {
+        return super.processNewMessage(message);
     }
 
     @Override

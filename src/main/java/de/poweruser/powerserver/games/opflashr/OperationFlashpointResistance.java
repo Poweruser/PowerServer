@@ -88,12 +88,13 @@ public class OperationFlashpointResistance extends GameBase {
     public DatagramPacket createHeartbeatBroadcast(InetSocketAddress server, MessageData data) {
         DataKeysInterface heartbeat = this.getHeartBeatDataKey();
         DataKeysInterface broadcast = this.getHeartBeatBroadcastDataKey();
-        if(heartbeat != null && broadcast != null && data.containsKey(heartbeat)) {
+        String queryPort = (heartbeat != null && data.containsKey(heartbeat) ? data.getData(heartbeat) : String.valueOf(server.getPort()));
+        if(broadcast != null) {
             StringBuilder builder = new StringBuilder();
             builder.append("\\");
             builder.append(broadcast.getKeyString());
             builder.append("\\");
-            builder.append(data.getData(heartbeat));
+            builder.append(queryPort);
             builder.append("\\");
             builder.append(GeneralDataKeysEnum.HOST.getKeyString());
             builder.append("\\");

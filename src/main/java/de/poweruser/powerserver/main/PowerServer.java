@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,7 @@ import de.poweruser.powerserver.commands.LogLevelCommand;
 import de.poweruser.powerserver.commands.ReloadSettingsCommand;
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GamesEnum;
+import de.poweruser.powerserver.games.GeneralDataKeysEnum;
 import de.poweruser.powerserver.gamespy.EncType;
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
@@ -180,6 +182,7 @@ public class PowerServer {
             Logger.log(LogLevel.HIGH, e);
         }
         this.gsp1Parser.reset();
+
         if(data != null) {
             GameBase game = data.getGame();
             if(game == null && !data.isQueryAnswer()) {
@@ -189,52 +192,74 @@ public class PowerServer {
             } else {
                 InetSocketAddress sender = message.getSender();
                 InetSocketAddress server = data.constructQuerySocketAddress(sender);
-                ServerList list = null;
-                if(game != null) {
-                    list = game.getServerList();
-                } else {
-                    for(GameBase gb: this.supportedGames) {
-                        ServerList serverList = gb.getServerList();
-                        if(serverList.hasServer(server)) {
-                            list = serverList;
-                            break;
-                        }
-                    }
-                }
-                if(server != null && list != null) {
-                    UDPSender udpSender = this.udpManager.getUDPSender();
-                    if(data.isHeartBeat()) {
-                        boolean firstHeartBeat = list.incomingHeartBeat(server, data);
-                        if(this.settings.isPublicMode()) {
-                            udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
-                        }
-                        if(firstHeartBeat || (data.hasStateChanged() && this.settings.getQueryServersOnHeartbeat())) {
-                            list.queryServer(server, udpSender, false);
-                        }
-                    } else if(data.isHeartBeatBroadcast()) {
-                        if(this.settings.isPublicMode()) {
-                            if(!this.masterServers.contains(sender.getAddress())) {
-                                if(this.isLastMasterServerLookupDue(false, 5L, TimeUnit.MINUTES)) {
-                                    this.lookUpAndGetMasterServerList(false);
-                                }
-                            }
-                            if(this.masterServers.contains(sender.getAddress())) {
-                                boolean firstHeartBeat = list.incomingHeartBeatBroadcast(server, data);
-                                if((firstHeartBeat || (data.hasStateChanged() && this.settings.getQueryServersOnHeartbeat())) && list.isBroadcastedServer(server)) {
-                                    list.queryServer(server, udpSender, false);
-                                }
-                            } else {
-                                Logger.logStatic(LogLevel.NORMAL, "Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server! Message: " + message.toString());
-                            }
-                        }
-                    } else if(data.isQueryAnswer()) {
-                        list.incomingQueryAnswer(sender, data);
-                    } else {
-                        Logger.logStatic(LogLevel.HIGH, "Received a UDPMessage from " + sender.getAddress().toString() + " that could not be recognised as either a heartbeat, a heartbeat broadcast or a query answer: " + message.toString());
+                this.handleIncomingMessage(sender, server, data, message);
+            }
+        }
+    }
+
+    private String getUDPMessageString(String prefix, UDPMessage message) {
+        if(message == null) { return ""; }
+        return prefix + message.toString();
+    }
+
+    private void handleIncomingMessage(InetSocketAddress sender, InetSocketAddress server, MessageData data, UDPMessage message) {
+        if(data == null) { return; }
+
+        boolean manuallyAdded = message == null;
+        GameBase game = data.getGame();
+        if(game == null && !data.isQueryAnswer()) {
+            Logger.logStatic(LogLevel.HIGH, "Couldnt find corresponding game" + this.getUDPMessageString(" for message: ", message));
+        } else if(game != null && !this.isGameSupported(game)) {
+            Logger.logStatic(LogLevel.HIGH, "Got an incoming message for an unsupported game" + this.getUDPMessageString(": ", message));
+        } else {
+            ServerList list = null;
+            if(game != null) {
+                list = game.getServerList();
+            } else {
+                for(GameBase gb: this.supportedGames) {
+                    ServerList serverList = gb.getServerList();
+                    if(serverList.hasServer(server)) {
+                        list = serverList;
+                        break;
                     }
                 }
             }
+            if(server != null && list != null) {
+                UDPSender udpSender = this.udpManager.getUDPSender();
+                if(data.isHeartBeat()) {
+                    boolean firstHeartBeat = list.incomingHeartBeat(server, data, manuallyAdded);
+                    if(this.settings.isPublicMode()) {
+                        udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
+                    }
+                    if(firstHeartBeat || (data.hasStateChanged() && this.settings.getQueryServersOnHeartbeat())) {
+                        list.queryServer(server, udpSender, false);
+                    }
+                } else if(data.isHeartBeatBroadcast()) {
+                    if(this.settings.isPublicMode()) {
+                        if(!this.masterServers.contains(sender.getAddress())) {
+                            if(this.isLastMasterServerLookupDue(false, 5L, TimeUnit.MINUTES)) {
+                                this.lookUpAndGetMasterServerList(false);
+                            }
+                        }
+                        if(this.masterServers.contains(sender.getAddress())) {
+                            boolean firstHeartBeat = list.incomingHeartBeatBroadcast(server, data);
+                            if((firstHeartBeat || (data.hasStateChanged() && this.settings.getQueryServersOnHeartbeat())) && list.isBroadcastedServer(server)) {
+                                list.queryServer(server, udpSender, false);
+                            }
+                        } else {
+                            Logger.logStatic(LogLevel.NORMAL, "Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server!" + this.getUDPMessageString(" Message: ", message));
+                        }
+                    }
+                } else if(data.isQueryAnswer()) {
+                    if(list.incomingQueryAnswer(server, data) && this.settings.isPublicMode()) {
+                        udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
+                    }
+                } else {
+                    Logger.logStatic(LogLevel.HIGH, "Received a UDPMessage from " + sender.getAddress().toString() + " that could not be recognised as either a heartbeat, a heartbeat broadcast or a query answer." + this.getUDPMessageString(" Message: ", message));
+                }
+            }
         }
+
     }
 
     public void shutdown() {
@@ -263,11 +288,14 @@ public class PowerServer {
 
     public void addServer(GameBase game, InetAddress address, int port) {
         if(game != null && this.supportedGames.contains(game)) {
-            ServerList serverList = game.getServerList();
             InetSocketAddress serverAddress = new InetSocketAddress(address, port);
-            if(serverList.addServer(serverAddress)) {
-                serverList.queryServer(serverAddress, this.udpManager.getUDPSender(), false);
-            }
+
+            HashMap<String, String> map = new HashMap<String, String>();
+            map.put(GeneralDataKeysEnum.HEARTBEAT.getKeyString(), String.valueOf(port));
+            map.put(GeneralDataKeysEnum.GAMENAME.getKeyString(), game.getGameName());
+            map.put(GeneralDataKeysEnum.STATECHANGED.getKeyString(), String.valueOf(1));
+            MessageData data = new MessageData(map);
+            this.handleIncomingMessage(serverAddress, serverAddress, data, null);
         } else {
             String gamename = (game == null ? "null" : game.getGameName());
             Logger.logStatic(LogLevel.LOW, "Error while trying to add the server to the list: The passed game \"" + gamename + "\" is not supported.");
