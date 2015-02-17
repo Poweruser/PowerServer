@@ -295,6 +295,11 @@ public class QueryConnection {
         return null;
     }
 
+    public String getEncTypeToString() {
+        if(this.encType != null) { return this.encType.toString(); }
+        return "UNKNOWN";
+    }
+
     private void clearBufferUpToKey(GeneralDataKeysEnum key) {
         String content = new String(this.receiveBuffer, 0, this.receivePos);
         String str = "\\" + key.getKeyString();
