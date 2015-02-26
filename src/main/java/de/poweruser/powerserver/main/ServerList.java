@@ -1,5 +1,6 @@
 package de.poweruser.powerserver.main;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,26 +10,27 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import de.poweruser.powerserver.exceptions.TooManyServersPerHostException;
 import de.poweruser.powerserver.games.GameBase;
-import de.poweruser.powerserver.games.GameServerBase;
 import de.poweruser.powerserver.games.GameServerInterface;
 import de.poweruser.powerserver.games.GeneralDataKeysEnum;
 import de.poweruser.powerserver.logger.LogLevel;
 import de.poweruser.powerserver.logger.Logger;
+import de.poweruser.powerserver.main.security.BanManager;
 import de.poweruser.powerserver.network.UDPSender;
 import de.poweruser.powerserver.settings.Settings;
 
 public class ServerList {
 
     private GameBase game;
-    private Map<InetSocketAddress, GameServerInterface> servers;
+    private Map<InetAddress, ServerHost> servers;
 
     public ServerList(GameBase game) {
         this.game = game;
-        this.servers = new HashMap<InetSocketAddress, GameServerInterface>();
+        this.servers = new HashMap<InetAddress, ServerHost>();
     }
 
-    public boolean incomingHeartBeat(InetSocketAddress serverAddress, MessageData data, boolean manuallyAdded) {
+    public boolean incomingHeartBeat(InetSocketAddress serverAddress, MessageData data, boolean manuallyAdded) throws TooManyServersPerHostException {
         if(serverAddress != null) {
             GameServerInterface server = this.getOrCreateServer(serverAddress);
             String serverName = server.getServerName();
@@ -42,7 +44,7 @@ public class ServerList {
         return false;
     }
 
-    public boolean incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) {
+    public boolean incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) throws TooManyServersPerHostException {
         if(data.containsKey(GeneralDataKeysEnum.HEARTBEATBROADCAST) && data.containsKey(GeneralDataKeysEnum.HOST)) {
             GameServerInterface server = this.getOrCreateServer(serverAddress);
             if(server.isBroadcastedServer()) {
@@ -67,11 +69,11 @@ public class ServerList {
     }
 
     public boolean hasServer(InetSocketAddress server) {
-        return this.servers.containsKey(server);
+        return this.getServer(server) != null;
     }
 
     private GameServerInterface getServer(InetSocketAddress server) {
-        if(this.servers.containsKey(server)) { return this.servers.get(server); }
+        if(this.servers.containsKey(server.getAddress())) { return this.servers.get(server.getAddress()).getServerOnPort(server.getPort()); }
         return null;
     }
 
@@ -81,40 +83,38 @@ public class ServerList {
         return false;
     }
 
-    private GameServerInterface getOrCreateServer(InetSocketAddress server) {
-        GameServerInterface gameServer;
-        if(!this.servers.containsKey(server)) {
-            gameServer = this.game.createNewServer(server);
-            this.servers.put(server, gameServer);
+    private GameServerInterface getOrCreateServer(InetSocketAddress server) throws TooManyServersPerHostException {
+        if(this.hasServer(server)) {
+            return this.getServer(server);
         } else {
-            gameServer = this.servers.get(server);
+            ServerHost host = null;
+            InetAddress hostAddress = server.getAddress();
+            if(this.servers.containsKey(hostAddress)) {
+                host = this.servers.get(hostAddress);
+                if(host.getServerCount() >= this.game.getSettings().getMaximumServersPerHost()) { throw new TooManyServersPerHostException(hostAddress); }
+            } else {
+                host = new ServerHost(hostAddress, this.game);
+                this.servers.put(hostAddress, host);
+            }
+            return host.getOrCreateServer(server.getPort());
         }
-        return gameServer;
     }
 
     public List<InetSocketAddress> checkForServersToQueryAndOutdatedServers(Settings settings) {
         List<InetSocketAddress> serversToQuery = null;
-        Iterator<Entry<InetSocketAddress, GameServerInterface>> iter = this.servers.entrySet().iterator();
+        Iterator<Entry<InetAddress, ServerHost>> iter = this.servers.entrySet().iterator();
         while(iter.hasNext()) {
-            Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
-            GameServerInterface gsi = entry.getValue();
-            if(!gsi.checkLastHeartbeat(settings.getAllowedHeartbeatTimeout(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
-                if(!gsi.checkLastMessage(settings.getMaximumServerTimeout(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
-                    iter.remove();
-                    Logger.logStatic(LogLevel.NORMAL, "Removed server " + entry.getKey().toString() + " (" + entry.getValue().getServerName() + ") of game " + ((GameServerBase) gsi).getDisplayName() + ". Timeout reached.");
-                } else if(!gsi.checkLastQueryRequest(settings.getEmergencyQueryInterval(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
-                    if(serversToQuery == null) {
-                        serversToQuery = new ArrayList<InetSocketAddress>();
-                    }
-                    serversToQuery.add(entry.getKey());
-                    String logMessage = "The server " + entry.getKey().toString();
-                    String serverName = gsi.getServerName();
-                    if(serverName != null) {
-                        logMessage += " (" + serverName + ")";
-                    }
-                    logMessage += " does not send heartbeats anymore, or they dont reach this server. Sending back a query instead.";
-                    Logger.logStatic(LogLevel.VERY_HIGH, logMessage);
+            Entry<InetAddress, ServerHost> entry = iter.next();
+            ServerHost host = entry.getValue();
+            List<InetSocketAddress> list = host.checkForServersToQueryAndOutdatedServers(settings);
+            if(list != null) {
+                if(serversToQuery != null) {
+                    serversToQuery.addAll(list);
+                } else {
+                    serversToQuery = list;
                 }
+            } else if(host.getServerCount() == 0) {
+                iter.remove();
             }
         }
         return serversToQuery;
@@ -122,14 +122,13 @@ public class ServerList {
 
     public List<InetSocketAddress> getActiveServers(Settings settings) {
         List<InetSocketAddress> list = new ArrayList<InetSocketAddress>();
-        Iterator<Entry<InetSocketAddress, GameServerInterface>> iter = this.servers.entrySet().iterator();
+        Iterator<Entry<InetAddress, ServerHost>> iter = this.servers.entrySet().iterator();
         while(iter.hasNext()) {
-            Entry<InetSocketAddress, GameServerInterface> entry = iter.next();
-            GameServerInterface gsi = entry.getValue();
-            if(gsi.checkLastMessage(settings.getMaximumServerTimeout(TimeUnit.MINUTES), TimeUnit.MINUTES)) {
-                if(gsi.hasAnsweredToQuery()) {
-                    list.add(entry.getKey());
-                }
+            Entry<InetAddress, ServerHost> entry = iter.next();
+            ServerHost host = entry.getValue();
+            List<InetSocketAddress> hostList = host.getActiveServers(settings);
+            if(hostList != null) {
+                list.addAll(hostList);
             }
         }
         return list;
@@ -141,6 +140,14 @@ public class ServerList {
             gsi.markQueryRequestAsSentWithCurrentTime();
             udpSender.queueQuery(server, this.game.createStatusQuery(queryPlayers));
         }
+    }
 
+    public void blockHost(InetAddress host, BanManager<InetAddress> banManager, TimeUnit timeUnit, long tempBanDuration) {
+        if(banManager.addTempBanByDuration(host, tempBanDuration, timeUnit)) {
+            Logger.logStatic(LogLevel.NORMAL, "Temporary ban of " + String.valueOf(tempBanDuration) + " " + timeUnit.toString().toLowerCase() + " for " + host.toString() + ". This host exceeds the 'servers per host' limit");
+        }
+        if(this.servers.containsKey(host)) {
+            this.servers.remove(host);
+        }
     }
 }

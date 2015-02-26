@@ -31,6 +31,7 @@ public class Settings {
     private int allowedMinimumSendInterval;
     private int tempBanDuration;
     private int connectionLimitPerClient;
+    private int maximumServersPerHost;
 
     private static final int MINIMAL_SERVERTIMEOUT = 20;
     private static final int ALLOWED_HEARTBEATTIMEOUT = 15;
@@ -42,6 +43,7 @@ public class Settings {
         this.queryServersOnHeartbeat = true;
         this.maximumServerTimeout = 60;
         this.calcEmergencyQueryInterval();
+        this.maximumServersPerHost = 10;
         this.maximumSendViolations = 50;
         this.allowedMinimumSendInterval = 250;
         this.tempBanDuration = 15;
@@ -272,5 +274,13 @@ public class Settings {
 
     protected void setConnectionLimitPerClient(int limit) {
         this.connectionLimitPerClient = limit;
+    }
+
+    public int getMaximumServersPerHost() {
+        return this.maximumServersPerHost;
+    }
+
+    public void setMaximumServersPerHost(int max) {
+        this.maximumServersPerHost = max;
     }
 }

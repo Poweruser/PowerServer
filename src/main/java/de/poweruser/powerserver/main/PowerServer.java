@@ -20,6 +20,7 @@ import de.poweruser.powerserver.commands.ExitCommand;
 import de.poweruser.powerserver.commands.HelpCommand;
 import de.poweruser.powerserver.commands.LogLevelCommand;
 import de.poweruser.powerserver.commands.ReloadSettingsCommand;
+import de.poweruser.powerserver.exceptions.TooManyServersPerHostException;
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GamesEnum;
 import de.poweruser.powerserver.games.GeneralDataKeysEnum;
@@ -225,41 +226,44 @@ public class PowerServer {
                 }
             }
             if(server != null && list != null) {
-                UDPSender udpSender = this.udpManager.getUDPSender();
-                if(data.isHeartBeat()) {
-                    boolean firstHeartBeat = list.incomingHeartBeat(server, data, manuallyAdded);
-                    if(this.settings.isPublicMode()) {
-                        udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
-                    }
-                    if(firstHeartBeat || (data.hasStateChanged() && this.settings.getQueryServersOnHeartbeat())) {
-                        list.queryServer(server, udpSender, false);
-                    }
-                } else if(data.isHeartBeatBroadcast()) {
-                    if(this.settings.isPublicMode()) {
-                        if(!this.masterServers.contains(sender.getAddress())) {
-                            if(this.isLastMasterServerLookupDue(false, 5L, TimeUnit.MINUTES)) {
-                                this.lookUpAndGetMasterServerList(false);
+                try {
+                    UDPSender udpSender = this.udpManager.getUDPSender();
+                    if(data.isHeartBeat()) {
+                        boolean firstHeartBeat = list.incomingHeartBeat(server, data, manuallyAdded);
+                        if(this.settings.isPublicMode()) {
+                            udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
+                        }
+                        if(firstHeartBeat || (data.hasStateChanged() && this.settings.getQueryServersOnHeartbeat())) {
+                            list.queryServer(server, udpSender, false);
+                        }
+                    } else if(data.isHeartBeatBroadcast()) {
+                        if(this.settings.isPublicMode()) {
+                            if(!this.masterServers.contains(sender.getAddress())) {
+                                if(this.isLastMasterServerLookupDue(false, 5L, TimeUnit.MINUTES)) {
+                                    this.lookUpAndGetMasterServerList(false);
+                                }
+                            }
+                            if(this.masterServers.contains(sender.getAddress())) {
+                                boolean firstHeartBeat = list.incomingHeartBeatBroadcast(server, data);
+                                if((firstHeartBeat || (data.hasStateChanged() && this.settings.getQueryServersOnHeartbeat())) && list.isBroadcastedServer(server)) {
+                                    list.queryServer(server, udpSender, false);
+                                }
+                            } else {
+                                Logger.logStatic(LogLevel.NORMAL, "Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server!" + this.getUDPMessageString(" Message: ", message));
                             }
                         }
-                        if(this.masterServers.contains(sender.getAddress())) {
-                            boolean firstHeartBeat = list.incomingHeartBeatBroadcast(server, data);
-                            if((firstHeartBeat || (data.hasStateChanged() && this.settings.getQueryServersOnHeartbeat())) && list.isBroadcastedServer(server)) {
-                                list.queryServer(server, udpSender, false);
-                            }
-                        } else {
-                            Logger.logStatic(LogLevel.NORMAL, "Got a heartbeat broadcast from " + sender.toString() + " which is not listed as a master server!" + this.getUDPMessageString(" Message: ", message));
+                    } else if(data.isQueryAnswer()) {
+                        if(list.incomingQueryAnswer(server, data) && this.settings.isPublicMode()) {
+                            udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
                         }
+                    } else {
+                        Logger.logStatic(LogLevel.HIGH, "Received a UDPMessage from " + sender.getAddress().toString() + " that could not be recognised as either a heartbeat, a heartbeat broadcast or a query answer." + this.getUDPMessageString(" Message: ", message));
                     }
-                } else if(data.isQueryAnswer()) {
-                    if(list.incomingQueryAnswer(server, data) && this.settings.isPublicMode()) {
-                        udpSender.queueHeartBeatBroadcast(masterServers, game.createHeartbeatBroadcast(server, data));
-                    }
-                } else {
-                    Logger.logStatic(LogLevel.HIGH, "Received a UDPMessage from " + sender.getAddress().toString() + " that could not be recognised as either a heartbeat, a heartbeat broadcast or a query answer." + this.getUDPMessageString(" Message: ", message));
+                } catch(TooManyServersPerHostException exception) {
+                    list.blockHost(exception.getHostAddress(), this.banManager, TimeUnit.MINUTES, this.settings.getTempBanDuration(TimeUnit.MINUTES));
                 }
             }
         }
-
     }
 
     public void shutdown() {

@@ -221,4 +221,9 @@ public abstract class GameServerBase implements GameServerInterface {
             this.infos.clear();
         }
     }
+
+    @Override
+    public InetSocketAddress getSocketAddress() {
+        return this.serverAddress;
+    }
 }

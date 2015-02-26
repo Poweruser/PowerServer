@@ -43,6 +43,10 @@ public abstract class GameBase implements GameInterface {
         this.settings = settings;
     }
 
+    public Settings getSettings() {
+        return this.settings;
+    }
+
     @Override
     public String getGameName() {
         return this.gamename;
