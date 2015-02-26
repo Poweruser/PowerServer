@@ -2,7 +2,6 @@ package de.poweruser.powerserver.main;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -121,14 +120,18 @@ public class ServerList {
     }
 
     public List<InetSocketAddress> getActiveServers(Settings settings) {
-        List<InetSocketAddress> list = new ArrayList<InetSocketAddress>();
+        List<InetSocketAddress> list = null;
         Iterator<Entry<InetAddress, ServerHost>> iter = this.servers.entrySet().iterator();
         while(iter.hasNext()) {
             Entry<InetAddress, ServerHost> entry = iter.next();
             ServerHost host = entry.getValue();
             List<InetSocketAddress> hostList = host.getActiveServers(settings);
             if(hostList != null) {
-                list.addAll(hostList);
+                if(list == null) {
+                    list = hostList;
+                } else {
+                    list.addAll(hostList);
+                }
             }
         }
         return list;

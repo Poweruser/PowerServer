@@ -32,16 +32,18 @@ public class OFPMonitorEncoder implements EncoderInterface {
         DataOutputStream stream = new DataOutputStream(byteArray);
         List<InetSocketAddress> ipv4 = new ArrayList<InetSocketAddress>();
         List<InetSocketAddress> ipv6 = new ArrayList<InetSocketAddress>();
-        Iterator<InetSocketAddress> iter = servers.iterator();
-        while(iter.hasNext()) {
-            InetSocketAddress i = iter.next();
-            InetAddress address = i.getAddress();
-            if(address instanceof Inet4Address) {
-                ipv4.add(i);
-            } else if(address instanceof Inet6Address) {
-                ipv6.add(i);
+        if(servers != null) {
+            Iterator<InetSocketAddress> iter = servers.iterator();
+            while(iter.hasNext()) {
+                InetSocketAddress i = iter.next();
+                InetAddress address = i.getAddress();
+                if(address instanceof Inet4Address) {
+                    ipv4.add(i);
+                } else if(address instanceof Inet6Address) {
+                    ipv6.add(i);
+                }
+                iter.remove();
             }
-            iter.remove();
         }
         int ipv4Len = ipv4.size() * 6;
         int ipv6Len = ipv6.size() * 18;

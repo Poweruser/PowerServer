@@ -24,19 +24,21 @@ public class EncType2Encoder implements EncoderInterface {
         ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
         DataOutputStream stream = new DataOutputStream(byteArray);
 
-        List<InetSocketAddress> ipv4 = new ArrayList<InetSocketAddress>();
-        Iterator<InetSocketAddress> iter = servers.iterator();
-        while(iter.hasNext()) {
-            InetSocketAddress i = iter.next();
-            InetAddress address = i.getAddress();
-            if(address instanceof Inet4Address) {
-                ipv4.add(i);
+        if(servers != null) {
+            List<InetSocketAddress> ipv4 = new ArrayList<InetSocketAddress>();
+            Iterator<InetSocketAddress> iter = servers.iterator();
+            while(iter.hasNext()) {
+                InetSocketAddress i = iter.next();
+                InetAddress address = i.getAddress();
+                if(address instanceof Inet4Address) {
+                    ipv4.add(i);
+                }
+                iter.remove();
             }
-            iter.remove();
-        }
 
-        for(InetSocketAddress i: ipv4) {
-            this.writeAddress(stream, i);
+            for(InetSocketAddress i: ipv4) {
+                this.writeAddress(stream, i);
+            }
         }
         stream.writeBytes("\\final\\");
 

@@ -149,8 +149,9 @@ public class QueryConnection {
         if(this.requestedGame != null && this.encType != null) {
             EncoderInterface encoder = this.encType.getEncoder();
             if(encoder != null) {
+
                 List<InetSocketAddress> serverList = this.requestedGame.getActiveServers();
-                int serverCount = serverList.size();
+                int serverCount = serverList != null ? serverList.size() : 0;
                 byte[] data = null;
                 try {
                     data = encoder.encode(this.requestedGame.getGamespyKey(), this.validation.getValidationString(), serverList);
