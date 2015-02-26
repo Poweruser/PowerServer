@@ -70,7 +70,7 @@ public class PowerServer {
         this.commandReg.register(new CommandsCommand("commands"));
         this.commandReg.register(new ReloadSettingsCommand("reload", this));
         this.commandReg.register(new AddServerCommand("addserver", this));
-        this.commandReg.register(new BanIPCommand("ban", this));
+        this.commandReg.register(new BanIPCommand("banip", this));
         String[] exitAliases = new String[] { "exit", "stop", "quit", "shutdown", "end" };
         for(String str: exitAliases) {
             this.commandReg.register(new ExitCommand(str, this));
