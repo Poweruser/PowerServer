@@ -1,29 +1,24 @@
 package de.poweruser.powerserver.network;
 
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import de.poweruser.powerserver.settings.Settings;
 
 public class PacketFilter {
 
-    private HashMap<InetAddress, FilterInfo> filterMap;
-    private LinkedList<InetAddress> cleanUpQueue;
+    private LinkedFilterInfoHashMap<InetAddress> filterMap;
     private Settings settings;
 
     public PacketFilter(Settings settings) {
         this.settings = settings;
-        this.filterMap = new HashMap<InetAddress, FilterInfo>();
-        this.cleanUpQueue = new LinkedList<InetAddress>();
+        this.filterMap = new LinkedFilterInfoHashMap<InetAddress>(16, 0.75f, true);
     }
 
     public boolean newIncoming(InetAddress address, long time) {
         FilterInfo filterInfo = this.getOrCreateEntry(address, time);
-        this.cleanUpQueue.remove(address);
-        this.cleanUpQueue.addLast(address);
         if(!filterInfo.incomingAndCheckViolations(time)) {
             this.filterMap.remove(address);
             return false;
@@ -40,20 +35,6 @@ public class PacketFilter {
             this.filterMap.put(address, filterInfo);
         }
         return filterInfo;
-    }
-
-    public void cleanup() {
-        Iterator<InetAddress> iter = this.cleanUpQueue.iterator();
-        while(iter.hasNext()) {
-            FilterInfo filterInfo = this.filterMap.get(iter.next());
-            if(filterInfo != null) {
-                if(filterInfo.checkLastIncoming(10L, TimeUnit.MINUTES)) {
-                    iter.remove();
-                } else {
-                    break;
-                }
-            }
-        }
     }
 
     private class FilterInfo {
@@ -84,6 +65,20 @@ public class PacketFilter {
 
         public boolean checkLastIncoming(long duration, TimeUnit unit) {
             return this.lastIncoming < (System.currentTimeMillis() - TimeUnit.MILLISECONDS.convert(duration, unit));
+        }
+    }
+
+    private class LinkedFilterInfoHashMap<K> extends LinkedHashMap<K, FilterInfo> {
+
+        private static final long serialVersionUID = 1357559109479352534L;
+
+        public LinkedFilterInfoHashMap(int initialCapacity, float loadFactor, boolean accessOrder) {
+            super(initialCapacity, loadFactor, accessOrder);
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<K, FilterInfo> eldest) {
+            return eldest.getValue().checkLastIncoming(10L, TimeUnit.MINUTES);
         }
     }
 }

@@ -56,7 +56,7 @@ public class UDPReceiverThread extends Observable implements Runnable {
             } catch(SecurityException e) {
                 Logger.logStackTraceStatic(LogLevel.VERY_LOW, "SecurityException while receiving a UDP packet.", e);
             } catch(SocketTimeoutException e) {
-                this.packetFilter.cleanup();
+
             } catch(IOException e) {
                 if(this.running) {
                     Logger.logStackTraceStatic(LogLevel.VERY_LOW, "An error occured in the UDPReceiverThread while listening for incoming packets", e);
