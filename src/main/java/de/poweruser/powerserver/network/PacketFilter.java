@@ -37,6 +37,12 @@ public class PacketFilter {
         return filterInfo;
     }
 
+    private enum FilterCheckResult {
+        VIOLATION,
+        INTERVAL_OK,
+        INTERVAL_LONG;
+    }
+
     private class FilterInfo {
 
         private long lastIncoming;
@@ -48,19 +54,31 @@ public class PacketFilter {
         }
 
         public boolean incomingAndCheckViolations(long time) {
-            boolean intervalOk = this.checkInterval(time, settings.getAllowedMinimumSendInterval());
+            FilterCheckResult result = this.checkInterval(time, settings.getAllowedMinimumSendInterval(), settings.getAllowedMinimumSendInterval() * 100);
             this.lastIncoming = time;
-            if(!intervalOk) {
-                this.violations++;
-                if(this.violations > settings.getMaximumSendViolations()) { return false; }
-            } else if(this.violations > 0) {
-                this.violations--;
+            switch(result) {
+                case VIOLATION:
+                    if(++this.violations > settings.getMaximumSendViolations()) { return false; }
+                    break;
+                case INTERVAL_OK:
+                    --this.violations;
+                    break;
+                case INTERVAL_LONG:
+                    this.violations -= 10;
+                default:
+                    break;
+            }
+            if(this.violations < 0) {
+                this.violations = 0;
             }
             return true;
         }
 
-        private boolean checkInterval(long time, long allowedMinimumInterval) {
-            return this.lastIncoming <= (time - allowedMinimumInterval);
+        private FilterCheckResult checkInterval(long time, long allowedMinimumInterval, long timeoutDuration) {
+            if(this.lastIncoming > (time - allowedMinimumInterval)) {
+                return FilterCheckResult.VIOLATION;
+            } else if(this.lastIncoming < time - timeoutDuration) { return FilterCheckResult.INTERVAL_LONG; }
+            return FilterCheckResult.INTERVAL_OK;
         }
 
         public boolean checkLastIncoming(long duration, TimeUnit unit) {
