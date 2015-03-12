@@ -24,7 +24,11 @@ public class PacketFilter {
         FilterInfo filterInfo = this.getOrCreateEntry(address, time);
         this.cleanUpQueue.remove(address);
         this.cleanUpQueue.addLast(address);
-        return filterInfo.incomingAndCheckViolations(time);
+        if(!filterInfo.incomingAndCheckViolations(time)) {
+            this.filterMap.remove(address);
+            return false;
+        }
+        return true;
     }
 
     private FilterInfo getOrCreateEntry(InetAddress address, long time) {
