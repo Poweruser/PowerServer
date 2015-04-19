@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import de.poweruser.powerserver.exceptions.LocalServerHostException;
 import de.poweruser.powerserver.exceptions.TooManyServersPerHostException;
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GameServerInterface;
@@ -29,7 +30,7 @@ public class ServerList {
         this.servers = new HashMap<InetAddress, ServerHost>();
     }
 
-    public boolean incomingHeartBeat(InetSocketAddress serverAddress, MessageData data, boolean manuallyAdded) throws TooManyServersPerHostException {
+    public boolean incomingHeartBeat(InetSocketAddress serverAddress, MessageData data, boolean manuallyAdded) throws TooManyServersPerHostException, LocalServerHostException {
         if(serverAddress != null) {
             GameServerInterface server = this.getOrCreateServer(serverAddress);
             String serverName = server.getServerName();
@@ -43,7 +44,7 @@ public class ServerList {
         return false;
     }
 
-    public boolean incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) throws TooManyServersPerHostException {
+    public boolean incomingHeartBeatBroadcast(InetSocketAddress serverAddress, MessageData data) throws TooManyServersPerHostException, LocalServerHostException {
         if(data.containsKey(GeneralDataKeysEnum.HEARTBEATBROADCAST) && data.containsKey(GeneralDataKeysEnum.HOST)) {
             GameServerInterface server = this.getOrCreateServer(serverAddress);
             if(server.isBroadcastedServer()) {
@@ -82,7 +83,7 @@ public class ServerList {
         return false;
     }
 
-    private GameServerInterface getOrCreateServer(InetSocketAddress server) throws TooManyServersPerHostException {
+    private GameServerInterface getOrCreateServer(InetSocketAddress server) throws TooManyServersPerHostException, LocalServerHostException {
         if(this.hasServer(server)) {
             return this.getServer(server);
         } else {

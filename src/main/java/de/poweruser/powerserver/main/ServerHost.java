@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import de.poweruser.powerserver.exceptions.LocalServerHostException;
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GameServerBase;
 import de.poweruser.powerserver.games.GameServerInterface;
@@ -23,8 +24,9 @@ public class ServerHost {
     private Map<Integer, GameServerInterface> serverList;
     private GameBase gameBase;
 
-    public ServerHost(InetAddress hostAddress, GameBase gameBase) {
+    public ServerHost(InetAddress hostAddress, GameBase gameBase) throws LocalServerHostException {
         this.hostAddress = hostAddress;
+        if(hostAddress.isLoopbackAddress() || hostAddress.isSiteLocalAddress() || hostAddress.isAnyLocalAddress() || hostAddress.isLinkLocalAddress()) { throw new LocalServerHostException("Local addresses are not permitted for servers."); }
         this.gameBase = gameBase;
         this.serverList = new HashMap<Integer, GameServerInterface>();
     }

@@ -20,6 +20,7 @@ import de.poweruser.powerserver.commands.ExitCommand;
 import de.poweruser.powerserver.commands.HelpCommand;
 import de.poweruser.powerserver.commands.LogLevelCommand;
 import de.poweruser.powerserver.commands.ReloadSettingsCommand;
+import de.poweruser.powerserver.exceptions.LocalServerHostException;
 import de.poweruser.powerserver.exceptions.TooManyServersPerHostException;
 import de.poweruser.powerserver.games.GameBase;
 import de.poweruser.powerserver.games.GamesEnum;
@@ -261,7 +262,7 @@ public class PowerServer {
                     }
                 } catch(TooManyServersPerHostException exception) {
                     list.blockHost(exception.getHostAddress(), this.banManager, TimeUnit.MINUTES, this.settings.getTempBanDuration(TimeUnit.MINUTES));
-                }
+                } catch(LocalServerHostException e) {}
             }
         }
     }
